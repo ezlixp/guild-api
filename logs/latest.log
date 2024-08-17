@@ -1,0 +1,22 @@
+[20:39:02] [main/INFO]: Loading Minecraft 1.21 with Fabric Loader 0.15.11
+[20:39:02] [main/INFO]: Fabric is preparing JARs on first launch, this may take a few seconds...
+[20:39:02] [main/INFO]: Loading 4 mods:
+	- fabricloader 0.15.11
+	   \-- mixinextras 0.3.5
+	- java 21
+	- minecraft 1.21
+[20:39:02] [main/INFO]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=file:/C:/Users/henry/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.13.3+mixin.0.8.5/9527e6b0d2449408958fd1302594dc65ec5ade9c/sponge-mixin-0.13.3+mixin.0.8.5.jar Service=Knot/Fabric Env=CLIENT
+[20:39:11] [Datafixer Bootstrap/INFO]: 226 Datafixer optimizations took 3107 milliseconds
+[20:39:12] [main/WARN]: Failed to get system info for GL Caps
+java.lang.IllegalStateException: Rendersystem called from wrong thread
+	at com.mojang.blaze3d.systems.RenderSystem.constructThreadException(RenderSystem.java:140) ~[client-intermediary.jar:?]
+	at com.mojang.blaze3d.systems.RenderSystem.assertOnRenderThread(RenderSystem.java:135) ~[client-intermediary.jar:?]
+	at com.mojang.blaze3d.systems.RenderSystem.getCapsString(RenderSystem.java:527) ~[client-intermediary.jar:?]
+	at net.minecraft.util.SystemDetails.addSection(SystemDetails.java:70) [client-intermediary.jar:?]
+	at net.minecraft.client.MinecraftClient.addSystemDetailsToCrashReport(MinecraftClient.java:2547) [client-intermediary.jar:?]
+	at net.minecraft.client.MinecraftClient.addSystemDetailsToCrashReport(MinecraftClient.java:2517) [client-intermediary.jar:?]
+	at net.minecraft.client.main.Main.main(Main.java:210) [client-intermediary.jar:?]
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:470) [fabric-loader-0.15.11.jar:?]
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:74) [fabric-loader-0.15.11.jar:?]
+	at net.fabricmc.loader.impl.launch.knot.KnotClient.main(KnotClient.java:23) [fabric-loader-0.15.11.jar:?]
+	at net.fabricmc.devlaunchinjector.Main.main(Main.java:86) [dev-launch-injector-0.2.1+build.8.jar:?]
