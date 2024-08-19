@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Toggle extends Option {
     private boolean value = false;
-    private ArrayList<Option> children; // render if toggled on
+    private ArrayList<Option> children;
 
     public Toggle(String name) {
         super(name, "Toggle");

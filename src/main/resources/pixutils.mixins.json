@@ -1,10 +1,14 @@
 {
-    "required": true,
-    "package": "pixlze.mod.mixin",
-    "compatibilityLevel": "JAVA_21",
-    "mixins": ["ChatMixin", "ChatHudMixin"],
-    "injectors": {
-        "defaultRequire": 0
-    }
+  "required": true,
+  "package": "pixlze.mod.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ChatHudMixin",
+    "ChatMixin",
+    "ClickableWidgetMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }
 

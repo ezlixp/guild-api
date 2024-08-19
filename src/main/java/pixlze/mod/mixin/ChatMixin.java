@@ -1,5 +1,6 @@
 package pixlze.mod.mixin;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -12,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pixlze.mod.PixUtils;
 import pixlze.mod.features.copy_chat.CopyChat;
-import pixlze.utils.ClipboardUtils;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -82,7 +82,7 @@ public abstract class ChatMixin extends Screen {
                     if (line >= scrollOffset) {
                         if (mouseX <= chatWidth && mouseY <= chatBottom - lineHeight * (line - scrollOffset) && mouseY >= chatBottom - lineHeight * (line + lines - scrollOffset)) {
                             if (CopyChat.config.getState()) {
-                                ClipboardUtils.copyToClipboard(message.content().getString());
+                                MinecraftClient.getInstance().keyboard.setClipboard(message.content().getString());
                             }
                         }
                     }

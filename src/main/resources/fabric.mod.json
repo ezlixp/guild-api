@@ -1,32 +1,41 @@
 {
-    "schemaVersion": 1,
-    "id": "pixutils",
-    "version": "${version}",
-    "name": "Pix Utils",
-    "description": "This is an example description! Tell everyone what your mod is about!",
-    "authors": ["pixlze"],
-    "contact": {
-        "homepage": "https://fabricmc.net/",
-        "sources": "https://github.com/FabricMC/fabric-example-mod"
-    },
-    "license": "CC0-1.0",
-    "icon": "assets/pixutils/icon.png",
-    "environment": "*",
-    "entrypoints": {
-        "main": ["pixlze.mod.PixUtils"],
-        "modmenu": ["pixlze.mod.config.PixUtilsModMenuIntegration"],
-        "fabric-datagen": ["pixlze.mod.PixUtilsDataGenerator"]
-    },
-    "mixins": ["pixutils.mixins.json"],
-    "depends": {
-        "fabricloader": ">=0.15.11",
-        "minecraft": "~1.21",
-        "java": ">=21",
-        "fabric-api": "*",
-        "modmenu": "*"
-    },
-    "suggests": {
-        "another-mod": "*"
-    }
+  "schemaVersion": 1,
+  "id": "pixutils",
+  "version": "${version}",
+  "name": "Pix Utils",
+  "description": "This is an example description! Tell everyone what your mod is about!",
+  "authors": [
+    "pixlze"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/pixutils/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "pixlze.mod.PixUtils"
+    ],
+    "modmenu": [
+      "pixlze.mod.config.PixUtilsModMenuIntegration"
+    ],
+    "fabric-datagen": [
+      "pixlze.mod.PixUtilsDataGenerator"
+    ]
+  },
+  "mixins": [
+    "pixutils.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.11",
+    "minecraft": "~1.21",
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
 }
 
