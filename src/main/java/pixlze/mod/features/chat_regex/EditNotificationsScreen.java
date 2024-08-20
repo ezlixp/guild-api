@@ -36,6 +36,7 @@ public class EditNotificationsScreen extends SubConfigScreen {
     }
 
     private void removeNotification(ButtonWidget b) {
+        System.out.println("removei");
         int index = removeButtons.indexOf(b);
         inputContainer.queueRemove(notifications.get(index).getA());
         inputContainer.queueRemove(notifications.get(index).getB());

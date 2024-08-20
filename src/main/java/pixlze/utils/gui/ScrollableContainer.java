@@ -58,12 +58,11 @@ public class ScrollableContainer extends ScrollableWidget {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (mouseX >= this.getX() && mouseX <= this.getRight() && mouseY >= this.getY() && mouseY <= this.getBottom() && button == 0) {
             for (ClickableWidget clickable : clickables) {
+                clickable.setFocused(false);
                 if (widgetClicked(clickable, mouseX, mouseY)) {
                     clickable.playDownSound(MinecraftClient.getInstance().getSoundManager());
                     clickable.setFocused(true);
                     clickable.onClick(mouseX, mouseY);
-                } else {
-                    clickable.setFocused(false);
                 }
             }
         }
@@ -82,7 +81,8 @@ public class ScrollableContainer extends ScrollableWidget {
     @Override
     public boolean charTyped(char chr, int modifiers) {
         for (ClickableWidget clickable : clickables) {
-            clickable.charTyped(chr, modifiers);
+            if (clickable.isFocused())
+                clickable.charTyped(chr, modifiers);
         }
         return super.charTyped(chr, modifiers);
     }
@@ -90,7 +90,8 @@ public class ScrollableContainer extends ScrollableWidget {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         for (ClickableWidget clickable : clickables) {
-            clickable.keyPressed(keyCode, scanCode, modifiers);
+            if (clickable.isFocused())
+                clickable.keyPressed(keyCode, scanCode, modifiers);
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
