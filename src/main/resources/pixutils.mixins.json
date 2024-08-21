@@ -3,9 +3,9 @@
   "package": "pixlze.mod.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ChatHudMixin",
     "ChatMixin",
-    "ClickableWidgetMixin"
+    "accessors.ChatHudAccessor",
+    "accessors.ClickableWidgetAccessorInvoker"
   ],
   "injectors": {
     "defaultRequire": 1
