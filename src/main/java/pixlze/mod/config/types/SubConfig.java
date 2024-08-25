@@ -1,12 +1,21 @@
 package pixlze.mod.config.types;
 
+import com.google.gson.JsonArray;
+import com.google.gson.TypeAdapter;
+import com.google.gson.annotations.JsonAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import pixlze.mod.PixUtils;
+import pixlze.mod.config.PixUtilsConfig;
 import pixlze.mod.features.chat_regex.EditNotificationsScreen;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 
+@JsonAdapter(SubConfig.SubConfigAdapter.class)
 public class SubConfig<T> extends Option {
     public final String buttonText;
     private final ArrayList<T> value;
@@ -26,5 +35,22 @@ public class SubConfig<T> extends Option {
 
     public ArrayList<T> getValue() {
         return value;
+    }
+
+    static class SubConfigAdapter<T> extends TypeAdapter<SubConfig<T>> {
+
+        @Override
+        public void write(JsonWriter out, SubConfig<T> value) throws IOException {
+            JsonArray config = new JsonArray();
+            for (T item : value.value) {
+                config.add(PixUtils.gson.toJsonTree(item));
+            }
+            PixUtilsConfig.configObject.add(value.name, config);
+        }
+
+        @Override
+        public SubConfig<T> read(JsonReader in) throws IOException {
+            return null;
+        }
     }
 }

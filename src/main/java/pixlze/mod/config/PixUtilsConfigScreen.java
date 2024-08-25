@@ -13,10 +13,12 @@ import pixlze.mod.config.types.Option;
 import pixlze.mod.config.types.SubConfig;
 import pixlze.mod.config.types.Toggle;
 
+import java.io.IOException;
+
 public class PixUtilsConfigScreen extends Screen {
 
     static final private Identifier buttonTexture = Identifier.of(PixUtils.MOD_ID, "funni");
-    static final private Identifier buttonTexture2 = Identifier.of(PixUtils.MOD_ID, "ahmeskeyoo.jpg");
+    static final private Identifier buttonTexture2 = Identifier.of(PixUtils.MOD_ID, "null");
     private final Screen parent;
 
     public PixUtilsConfigScreen(Screen parent) {
@@ -26,16 +28,25 @@ public class PixUtilsConfigScreen extends Screen {
 
     private static @NotNull ToggleButtonWidget getToggleButtonWidget(Toggle option, int x, int y, int width, int height) {
         ButtonTextures textures = new ButtonTextures(buttonTexture, buttonTexture2, buttonTexture, buttonTexture2);
-        ToggleButtonWidget button = new ToggleButtonWidget(x, y, width, height, option.getState()) {
+        ToggleButtonWidget button = new ToggleButtonWidget(x, y, width, height, option.getValue()) {
             @Override
             public void onClick(double mouseX, double mouseY) {
                 super.setToggled(!super.toggled);
-                option.setState(super.toggled);
-                System.out.println("togglers");
+                option.setValue(super.toggled);
             }
         };
         button.setTextures(textures);
         return button;
+    }
+
+    @Override
+    public void close() {
+        try {
+            PixUtilsConfig.save();
+        } catch (IOException e) {
+            PixUtils.LOGGER.error(e.getMessage());
+        }
+        super.close();
     }
 
     @Override
@@ -55,6 +66,11 @@ public class PixUtilsConfigScreen extends Screen {
             }
         }
         Builder doneButtonBuilder = new Builder(Text.of("Done"), b -> {
+            try {
+                PixUtilsConfig.save();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             MinecraftClient.getInstance().setScreen(parent);
         });
         doneButtonBuilder.dimensions(this.width / 2 - 100, this.height - 50, 200, 20);

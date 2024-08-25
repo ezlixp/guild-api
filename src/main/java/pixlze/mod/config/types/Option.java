@@ -1,11 +1,14 @@
 package pixlze.mod.config.types;
 
-public class Option {
+public abstract class Option {
     public String type;
-    protected String name;
+    public String name;
 
-    Option(String name, String type) {
+
+    public Option(String name, String type) {
         this.name = name;
         this.type = type;
     }
+
+
 }

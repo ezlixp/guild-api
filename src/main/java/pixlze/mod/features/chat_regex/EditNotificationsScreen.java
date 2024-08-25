@@ -4,8 +4,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
+import net.minecraft.util.Pair;
 import org.jetbrains.annotations.Nullable;
-import oshi.util.tuples.Pair;
 import pixlze.mod.config.types.SubConfigScreen;
 import pixlze.utils.gui.ButtonWidgetFactory;
 import pixlze.utils.gui.ClickableChild;
@@ -31,23 +31,23 @@ public class EditNotificationsScreen extends SubConfigScreen {
     private void saveConfig() {
         ChatNotifications.config.getValue().clear();
         for (Pair<ClickableChild<TextFieldWidget>, ClickableChild<TextFieldWidget>> notif : notifications) {
-            if (!notif.getA().getChild().getText().isEmpty() && !notif.getB().getChild().getText().isEmpty()) {
-                ChatNotifications.config.getValue().add(new Pair<>(Pattern.compile(notif.getA().getChild().getText()), notif.getB().getChild().getText()));
+            if (!notif.getLeft().getChild().getText().isEmpty() && !notif.getRight().getChild().getText().isEmpty()) {
+                ChatNotifications.config.getValue().add(new Pair<>(Pattern.compile(notif.getLeft().getChild().getText()), notif.getRight().getChild().getText()));
             }
         }
     }
 
     private void removeNotification(ButtonWidget b, ClickableChild<ButtonWidget> asChild) {
         int index = removeButtons.indexOf(asChild);
-        inputContainer.queueRemove(notifications.get(index).getA());
-        inputContainer.queueRemove(notifications.get(index).getB());
+        inputContainer.queueRemove(notifications.get(index).getLeft());
+        inputContainer.queueRemove(notifications.get(index).getRight());
         inputContainer.queueRemove(removeButtons.removeLast());
 
         notifications.remove(index);
 
         for (int i = index; i < notifications.size(); ++i) {
-            notifications.get(i).getA().getChild().setY(notifications.get(i).getA().getY() - 30);
-            notifications.get(i).getB().getChild().setY(notifications.get(i).getB().getY() - 30);
+            notifications.get(i).getLeft().getChild().setY(notifications.get(i).getLeft().getY() - 30);
+            notifications.get(i).getRight().getChild().setY(notifications.get(i).getRight().getY() - 30);
         }
         rowY -= 30;
     }
@@ -56,14 +56,14 @@ public class EditNotificationsScreen extends SubConfigScreen {
         TextFieldWidget regexInput = new TextFieldWidget(this.textRenderer, this.width / 3 + 10, rowY, 100, 20, Text.of("Input Regex"));
         regexInput.setEditable(true);
         regexInput.setPlaceholder(Text.of("Input Regex"));
-        if (notification != null) regexInput.write(notification.getA().toString());
+        if (notification != null) regexInput.write(notification.getLeft().toString());
         ClickableChild<TextFieldWidget> regexInputClickable = new ClickableChild<>(regexInput);
         inputContainer.addClickableChild(regexInputClickable);
 
         TextFieldWidget notificationInput = new TextFieldWidget(this.textRenderer, this.width / 3 + 120, rowY, 100, 20, Text.of("Input Notification"));
         notificationInput.setEditable(true);
         notificationInput.setPlaceholder(Text.of("Input Notification"));
-        if (notification != null) notificationInput.write(notification.getB());
+        if (notification != null) notificationInput.write(notification.getRight());
         ClickableChild<TextFieldWidget> notificationInputClickable = new ClickableChild<>(notificationInput);
         inputContainer.addClickableChild(notificationInputClickable);
 
