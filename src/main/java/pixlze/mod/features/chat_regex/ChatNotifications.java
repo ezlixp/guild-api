@@ -7,15 +7,21 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
 import pixlze.mod.PixUtils;
 import pixlze.mod.config.PixUtilsConfig;
 import pixlze.mod.config.types.SubConfig;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static pixlze.mod.PixUtils.currentVisit;
+import static pixlze.mod.PixUtils.httpClient;
 
 public class ChatNotifications {
     static final String FEATURE_ID = "chat_notifications";
@@ -41,8 +47,6 @@ public class ChatNotifications {
             currentVisit = "";
             Optional<String> visited = message1.visit(PixUtils.wynnVisitor, message1.getStyle());
             if (visited.isPresent()) return;
-            PixUtils.LOGGER.info("{} chat parsed {}", PixUtils.MOD_ID, currentVisit);
-            if (message1.getString() == null) return;
             for (Pair<Pattern, String> c : config.getValue()) {
                 if (c.getLeft().matcher(currentVisit).matches()) {
                     ChatNotifications.message = Text.of(c.getRight());
@@ -52,11 +56,10 @@ public class ChatNotifications {
             }
         }));
         ClientReceiveMessageEvents.GAME.register(((message1, overlay) -> {
+            if (overlay) return;
             currentVisit = "";
             Optional<String> visited = message1.visit(PixUtils.wynnVisitor, message1.getStyle());
             if (visited.isPresent()) return;
-            PixUtils.LOGGER.info("{} game parsed {}", PixUtils.MOD_ID, currentVisit);
-            if (message1.getString() == null) return;
             for (Pair<Pattern, String> c : config.getValue()) {
                 if (c.getLeft().matcher(currentVisit).matches()) {
                     ChatNotifications.message = Text.of(c.getRight());
@@ -64,17 +67,33 @@ public class ChatNotifications {
                     showMessage = true;
                 }
             }
-            if (Pattern.matches(".*?&e(.*?)&b.*?&e(.*?).*?&e(.*?)&b.*?&e(.*?)&b.*?&3(.*?)&b.*", currentVisit)) {
+            Matcher raidMatcher = Pattern.compile("&e(.*?)&b.*?&e(.*?)&b.*?&e(.*?)&b.*?&e(.*?)&b.*?&3(.*?)&b").matcher(currentVisit);
+            if (raidMatcher.find() && !currentVisit.contains(":")) {
                 ChatNotifications.message = Text.of("guild raid finished");
                 messageTimer = 40;
                 showMessage = true;
+                new Thread(() -> {
+                    HttpPost post = new HttpPost("https://ico-server.onrender.com/addraid");
+                    try {
+                        StringEntity body = new StringEntity(PixUtils.gson.toJson(new CompletedRaid(new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(4)}, raidMatcher.group(5), System.currentTimeMillis())));
+                        post.setEntity(body);
+                        post.setHeader("Content-type", "application/json");
+                        HttpResponse response = httpClient.execute(post);
+                        PixUtils.LOGGER.info("{} guild raid response", EntityUtils.toString(response.getEntity()));
+                    } catch (Exception e) {
+                        PixUtils.LOGGER.error("error: {}", e.getMessage());
+                    }
+                }).start();
             }
         }));
-//
         ArrayList<Pair<Pattern, String>> prev = new ArrayList<>();
         if (PixUtilsConfig.configObject != null) {
             for (JsonElement item : PixUtilsConfig.configObject.get(FEATURE_ID).getAsJsonArray()) {
-                prev.add(new Pair<>(Pattern.compile(item.getAsJsonObject().get("left").getAsString()), item.getAsJsonObject().get("right").getAsString()));
+                try {
+                    prev.add(new Pair<>(Pattern.compile(item.getAsJsonObject().get("left").getAsString()), item.getAsJsonObject().get("right").getAsString()));
+                } catch (Exception e) {
+                    PixUtils.LOGGER.error(e.getMessage());
+                }
             }
         }
         EditNotificationsScreen editNotificationsScreen = new EditNotificationsScreen();

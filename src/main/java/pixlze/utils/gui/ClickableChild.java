@@ -70,7 +70,7 @@ public record ClickableChild<T extends ClickableWidget>(T child) implements Elem
             return;
         }
         ((ClickableWidgetAccessorInvoker) child).setHovered(mouseX >= child.getX() && mouseY >= child.getY() && mouseX < child.getX() + child.getWidth() && mouseY < child.getY() + child.getHeight());
-        ((ClickableWidgetAccessorInvoker) child).renderWidget(context, mouseX, mouseY, delta);
+        ((ClickableWidgetAccessorInvoker) child).invokeRenderWidget(context, mouseX, mouseY, delta);
         ((ClickableWidgetAccessorInvoker) child).getTooltipState().render(child.isMouseOver(mouseX, mouseY), child.isFocused(), child.getNavigationFocus());
     }
 

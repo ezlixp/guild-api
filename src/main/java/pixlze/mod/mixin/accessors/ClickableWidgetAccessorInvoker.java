@@ -17,7 +17,7 @@ public interface ClickableWidgetAccessorInvoker {
     TooltipState getTooltipState();
 
     @Invoker("renderWidget")
-    void renderWidget(DrawContext context, int mouseX, int mouseY, float delta);
+    void invokeRenderWidget(DrawContext context, int mouseX, int mouseY, float delta);
 
 
 }

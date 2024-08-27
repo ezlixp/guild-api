@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pixlze.mod.PixUtils;
 import pixlze.mod.features.copy_chat.CopyChat;
-import pixlze.mod.mixin.accessors.ChatHudAccessor;
+import pixlze.mod.mixin.accessors.ChatHudAccessorInvoker;
 
 import java.util.List;
 
@@ -45,17 +45,21 @@ public abstract class ChatMixin extends Screen {
     private void onMouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<boolean[]> info) {
         assert client != null;
         assert client.currentScreen != null;
-        int chatBottom = client.currentScreen.height - 40; // height adjust
-        int chatWidth = 330; // chat width adjust
-        int lineHeight = textRenderer.fontHeight; // chat spacing
         ChatHud chatHud = client.inGameHud.getChatHud();
-        double scrollOffset = ((ChatHudAccessor) client.inGameHud.getChatHud()).getScrolledLines();
+        ChatHudAccessorInvoker chatHudAccessorInvoker = (ChatHudAccessorInvoker) chatHud;
+
+        int chatBottom = client.currentScreen.height - 40; // height adjust
+        int chatWidth = chatHudAccessorInvoker.invokeGetWidth();
+        double lineHeight = chatHudAccessorInvoker.invokeGetLineHeight() * MinecraftClient.getInstance().options.getChatScale().getValue(); // chat spacing
+
+
+        double scrollOffset = chatHudAccessorInvoker.getScrolledLines();
         if (Screen.hasControlDown() || Screen.hasAltDown()) {
-            List<ChatHudLine> messages = ((ChatHudAccessor) chatHud).getMessages();
+            List<ChatHudLine> messages = chatHudAccessorInvoker.getMessages();
             int line = 0;
             for (ChatHudLine message : messages) {
                 if (line > chatHud.getVisibleLineCount() + scrollOffset) break;
-                int lines = textRenderer.getTextHandler().wrapLines(message.content(), chatWidth, message.content().getStyle()).size();
+                int lines = textRenderer.getTextHandler().wrapLines(message.content(), (int) chatWidth, message.content().getStyle()).size();
                 if (line >= scrollOffset) {
                     if (mouseX <= chatWidth && mouseY <= chatBottom - lineHeight * (line - scrollOffset) && mouseY >= chatBottom - lineHeight * (line + lines - scrollOffset)) {
                         if (CopyChat.config.getValue()) {
@@ -72,6 +76,10 @@ public abstract class ChatMixin extends Screen {
                 line += lines;
             }
             info.cancel();
+        }
+        if (Screen.hasShiftDown()) {
+            PixUtils.LOGGER.info("{}, {}", mouseX, mouseY);
+            PixUtils.LOGGER.info("chatwidth: {}, scrollOffset: {}, lineHeight: {}, scale: {}", chatWidth, scrollOffset, lineHeight, MinecraftClient.getInstance().options.getChatScale().getValue());
         }
     }
 }

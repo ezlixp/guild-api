@@ -12,6 +12,8 @@ import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +38,7 @@ public class PixUtils implements ModInitializer {
             return Optional.empty();
         }
     };
+    public static final HttpClient httpClient = HttpClientBuilder.create().build();
     public static Gson gson;
     public static KeyBinding openConfigKeybind;
     public static String currentVisit;
@@ -78,7 +81,6 @@ public class PixUtils implements ModInitializer {
     @Override
     public void onInitialize() {
         System.setProperty("java.awt.headless", "false");
-        System.out.println("testattach");
 
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(Pattern.class, new PatternAdapter().nullSafe());
