@@ -1,6 +1,6 @@
 plugins {
-    id 'fabric-loom' version '1.7-SNAPSHOT'
-    id 'maven-publish'
+    id "fabric-loom" version "1.7-SNAPSHOT"
+    id "maven-publish"
 }
 
 version = project.mod_version
@@ -37,7 +37,6 @@ dependencies {
 
     // Other dependencies
     modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
-
 }
 
 processResources {

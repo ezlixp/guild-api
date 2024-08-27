@@ -1,4 +1,4 @@
-package pixlze.mod.features.chat_regex;
+package pixlze.mod.features.chat_notifications;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ButtonWidget;

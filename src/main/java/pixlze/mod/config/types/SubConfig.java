@@ -9,7 +9,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import pixlze.mod.PixUtils;
 import pixlze.mod.config.PixUtilsConfig;
-import pixlze.mod.features.chat_regex.EditNotificationsScreen;
+import pixlze.mod.features.chat_notifications.EditNotificationsScreen;
 
 import java.io.IOException;
 import java.util.ArrayList;

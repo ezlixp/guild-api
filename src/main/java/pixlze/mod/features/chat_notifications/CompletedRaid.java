@@ -1,4 +1,4 @@
-package pixlze.mod.features.chat_regex;
+package pixlze.mod.features.chat_notifications;
 
 public class CompletedRaid {
     private String[] igns;

@@ -1,4 +1,4 @@
-package pixlze.mod.features.chat_regex;
+package pixlze.mod.features.chat_notifications;
 
 import com.google.gson.JsonElement;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -72,18 +72,19 @@ public class ChatNotifications {
                 ChatNotifications.message = Text.of("guild raid finished");
                 messageTimer = 40;
                 showMessage = true;
-                new Thread(() -> {
-                    HttpPost post = new HttpPost("https://ico-server.onrender.com/addraid");
-                    try {
-                        StringEntity body = new StringEntity(PixUtils.gson.toJson(new CompletedRaid(new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(4)}, raidMatcher.group(5), System.currentTimeMillis())));
-                        post.setEntity(body);
-                        post.setHeader("Content-type", "application/json");
-                        HttpResponse response = httpClient.execute(post);
-                        PixUtils.LOGGER.info("{} guild raid response", EntityUtils.toString(response.getEntity()));
-                    } catch (Exception e) {
-                        PixUtils.LOGGER.error("error: {}", e.getMessage());
-                    }
-                }).start();
+                if (PixUtils.wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString().equals("ICo"))
+                    new Thread(() -> {
+                        HttpPost post = new HttpPost("https://ico-server.onrender.com/addraid");
+                        try {
+                            StringEntity body = new StringEntity(PixUtils.gson.toJson(new CompletedRaid(new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(4)}, raidMatcher.group(5), System.currentTimeMillis())));
+                            post.setEntity(body);
+                            post.setHeader("Content-type", "application/json");
+                            HttpResponse response = httpClient.execute(post);
+                            PixUtils.LOGGER.info("{} guild raid response", EntityUtils.toString(response.getEntity()));
+                        } catch (Exception e) {
+                            PixUtils.LOGGER.error("error: {}", e.getMessage());
+                        }
+                    }).start();
             }
         }));
         ArrayList<Pair<Pattern, String>> prev = new ArrayList<>();

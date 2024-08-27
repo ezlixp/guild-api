@@ -2,9 +2,11 @@ package pixlze.mod;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
@@ -12,14 +14,17 @@ import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pixlze.mod.config.PixUtilsConfig;
 import pixlze.mod.config.PixUtilsConfigScreen;
-import pixlze.mod.features.chat_regex.ChatNotifications;
+import pixlze.mod.features.chat_notifications.ChatNotifications;
 import pixlze.mod.features.copy_chat.CopyChat;
 import pixlze.mod.type_adapters.PairAdapter;
 import pixlze.mod.type_adapters.PatternAdapter;
@@ -27,6 +32,7 @@ import pixlze.mod.type_adapters.PatternAdapter;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
+
 
 public class PixUtils implements ModInitializer {
     public static final String MOD_ID = "pixutils";
@@ -77,6 +83,7 @@ public class PixUtils implements ModInitializer {
             return Optional.empty();
         }
     };
+    public static JsonObject wynnPlayerInfo;
 
     @Override
     public void onInitialize() {
@@ -98,6 +105,24 @@ public class PixUtils implements ModInitializer {
             if (openConfigKeybind.wasPressed()) {
                 MinecraftClient.getInstance().setScreen(new PixUtilsConfigScreen(MinecraftClient.getInstance().currentScreen));
             }
+        });
+
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            if (client.getCurrentServerEntry() != null) {
+                PixUtils.LOGGER.info(client.getCurrentServerEntry().address);
+                if (client.getCurrentServerEntry().address.equals("play.wynncraft.com")) {
+                    new Thread(() -> {
+                        assert client.player != null;
+                        HttpGet get = new HttpGet("https://api.wynncraft.com/v3/player/" + client.player.getUuidAsString());
+                        try {
+                            HttpResponse response = httpClient.execute(get);
+                            wynnPlayerInfo = gson.fromJson(EntityUtils.toString(response.getEntity()), JsonObject.class);
+                        } catch (Exception e) {
+                            PixUtils.LOGGER.error("error: {}", e.getMessage());
+                        }
+                    }).start();
+                }
+            } else PixUtils.LOGGER.info("null server");
         });
 
         PixUtilsConfig.init();
