@@ -14,14 +14,14 @@ import org.apache.http.util.EntityUtils;
 import pixlze.mod.PixUtils;
 import pixlze.mod.config.PixUtilsConfig;
 import pixlze.mod.config.types.SubConfig;
+import pixlze.utils.requests.CompletedRaidPojo;
 
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static pixlze.mod.PixUtils.currentVisit;
-import static pixlze.mod.PixUtils.httpClient;
+import static pixlze.mod.PixUtils.*;
 
 public class ChatNotifications {
     static final String FEATURE_ID = "chat_notifications";
@@ -74,11 +74,12 @@ public class ChatNotifications {
                 showMessage = true;
                 if (PixUtils.wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString().equals("ICo"))
                     new Thread(() -> {
-                        HttpPost post = new HttpPost("https://ico-server.onrender.com/addraid");
+                        HttpPost post = new HttpPost(PixUtils.secrets.get("guild_raid_urls").getAsJsonObject().get(wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString()).getAsString() + "addRaid");
                         try {
-                            StringEntity body = new StringEntity(PixUtils.gson.toJson(new CompletedRaid(new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(4)}, raidMatcher.group(5), System.currentTimeMillis())));
+                            StringEntity body = new StringEntity(PixUtils.gson.toJson(new CompletedRaidPojo(new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(4)}, raidMatcher.group(5), System.currentTimeMillis())));
                             post.setEntity(body);
                             post.setHeader("Content-type", "application/json");
+                            post.setHeader("Authorization", guildRaidServerToken);
                             HttpResponse response = httpClient.execute(post);
                             PixUtils.LOGGER.info("{} guild raid response", EntityUtils.toString(response.getEntity()));
                         } catch (Exception e) {

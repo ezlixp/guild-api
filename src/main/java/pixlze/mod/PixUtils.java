@@ -3,6 +3,7 @@ package pixlze.mod;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -17,6 +18,8 @@ import net.minecraft.util.Pair;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.lwjgl.glfw.GLFW;
@@ -28,7 +31,10 @@ import pixlze.mod.features.chat_notifications.ChatNotifications;
 import pixlze.mod.features.copy_chat.CopyChat;
 import pixlze.mod.type_adapters.PairAdapter;
 import pixlze.mod.type_adapters.PatternAdapter;
+import pixlze.utils.requests.GetTokenPojo;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -83,7 +89,9 @@ public class PixUtils implements ModInitializer {
             return Optional.empty();
         }
     };
+    public static String guildRaidServerToken;
     public static JsonObject wynnPlayerInfo;
+    public static JsonObject secrets;
 
     @Override
     public void onInitialize() {
@@ -94,6 +102,14 @@ public class PixUtils implements ModInitializer {
         builder.registerTypeAdapter(Pair.class, new PairAdapter().nullSafe());
         gson = builder.create();
 
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("secrets.json");
+        if (inputStream == null) {
+            PixUtils.LOGGER.error("secret variables could not be loaded");
+        } else {
+            secrets = JsonParser.parseReader(new InputStreamReader(inputStream)).getAsJsonObject();
+        }
+
+
         openConfigKeybind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "Open Config",
                 InputUtil.Type.KEYSYM,
@@ -103,26 +119,39 @@ public class PixUtils implements ModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (openConfigKeybind.wasPressed()) {
-                MinecraftClient.getInstance().setScreen(new PixUtilsConfigScreen(MinecraftClient.getInstance().currentScreen));
+                client.setScreen(new PixUtilsConfigScreen(MinecraftClient.getInstance().currentScreen));
             }
         });
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            if (client.getCurrentServerEntry() != null) {
-                PixUtils.LOGGER.info(client.getCurrentServerEntry().address);
-                if (client.getCurrentServerEntry().address.equals("play.wynncraft.com")) {
-                    new Thread(() -> {
-                        assert client.player != null;
-                        HttpGet get = new HttpGet("https://api.wynncraft.com/v3/player/" + client.player.getUuidAsString());
-                        try {
-                            HttpResponse response = httpClient.execute(get);
-                            wynnPlayerInfo = gson.fromJson(EntityUtils.toString(response.getEntity()), JsonObject.class);
-                        } catch (Exception e) {
-                            PixUtils.LOGGER.error("error: {}", e.getMessage());
-                        }
-                    }).start();
+            if (client.player != null && wynnPlayerInfo == null) {
+                HttpGet get = new HttpGet("https://api.wynncraft.com/v3/player/" + client.player.getUuidAsString());
+                try {
+                    HttpResponse response = httpClient.execute(get);
+                    wynnPlayerInfo = gson.fromJson(EntityUtils.toString(response.getEntity()), JsonObject.class);
+                } catch (Exception e) {
+                    PixUtils.LOGGER.error("wynn player load error: {}", e.getMessage());
                 }
-            } else PixUtils.LOGGER.info("null server");
+            } else {
+                PixUtils.LOGGER.info("null player");
+            }
+            if (wynnPlayerInfo != null && PixUtils.guildRaidServerToken == null) {
+                HttpPost post = new HttpPost(PixUtils.secrets.get("guild_raid_urls").getAsJsonObject().get(wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString()).getAsString() + "auth/getToken");
+                try {
+                    StringEntity body = new StringEntity(PixUtils.gson.toJson(new GetTokenPojo(secrets.get("validation_key").getAsString())));
+                    post.setEntity(body);
+                    post.setHeader("Content-type", "application/json");
+                    JsonObject response = gson.fromJson(EntityUtils.toString(httpClient.execute(post).getEntity()), JsonObject.class);
+                    if (response.get("status").getAsBoolean()) {
+                        guildRaidServerToken = response.get("token").getAsString();
+
+                    } else {
+                        PixUtils.LOGGER.error("Couldn't generate token with error: {}", response.get("error"));
+                    }
+                } catch (Exception e) {
+                    PixUtils.LOGGER.error("get token error: {}", e.getMessage());
+                }
+            }
         });
 
         PixUtilsConfig.init();
