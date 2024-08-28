@@ -42,3 +42,4 @@ replay_*.log
 #other
 
 src/main/resources/secrets.json
+logs
