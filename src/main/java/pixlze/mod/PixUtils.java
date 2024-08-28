@@ -124,37 +124,39 @@ public class PixUtils implements ModInitializer {
         });
 
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            if (client.player != null && wynnPlayerInfo == null) {
-                HttpGet get = new HttpGet("https://api.wynncraft.com/v3/player/" + client.player.getUuidAsString());
-                try {
-                    HttpResponse response = httpClient.execute(get);
-                    wynnPlayerInfo = gson.fromJson(EntityUtils.toString(response.getEntity()), JsonObject.class);
-                    PixUtils.LOGGER.info("successfully loaded wynn player info");
-                } catch (Exception e) {
-                    PixUtils.LOGGER.error("wynn player load error: {}", e.getMessage());
-                }
-            } else {
-                PixUtils.LOGGER.warn("null player or already initialized wynn player info");
-            }
-            if (wynnPlayerInfo != null && PixUtils.guildRaidServerToken == null) {
-                HttpPost post = new HttpPost(PixUtils.secrets.get("guild_raid_urls").getAsJsonObject().get(wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString()).getAsString() + "auth/getToken");
-                try {
-                    StringEntity body = new StringEntity(PixUtils.gson.toJson(new GetTokenPojo(secrets.get("validation_key").getAsString())));
-                    post.setEntity(body);
-                    post.setHeader("Content-type", "application/json");
-                    JsonObject response = gson.fromJson(EntityUtils.toString(httpClient.execute(post).getEntity()), JsonObject.class);
-                    if (response.get("status").getAsBoolean()) {
-                        guildRaidServerToken = response.get("token").getAsString();
-                        PixUtils.LOGGER.info("successfully loaded guild raid server token");
-                    } else {
-                        PixUtils.LOGGER.error("Couldn't generate token with error: {}", response.get("error"));
+            new Thread(() -> {
+                if (client.player != null && wynnPlayerInfo == null) {
+                    HttpGet get = new HttpGet("https://api.wynncraft.com/v3/player/" + client.player.getUuidAsString());
+                    try {
+                        HttpResponse response = httpClient.execute(get);
+                        wynnPlayerInfo = gson.fromJson(EntityUtils.toString(response.getEntity()), JsonObject.class);
+                        PixUtils.LOGGER.info("successfully loaded wynn player info");
+                    } catch (Exception e) {
+                        PixUtils.LOGGER.error("wynn player load error: {}", e.getMessage());
                     }
-                } catch (Exception e) {
-                    PixUtils.LOGGER.error("get token error: {}", e.getMessage());
+                } else {
+                    PixUtils.LOGGER.warn("null player or already initialized wynn player info");
                 }
-            } else {
-                PixUtils.LOGGER.warn("wynn player info not initialized or guild raid server token already initialized");
-            }
+                if (wynnPlayerInfo != null && PixUtils.guildRaidServerToken == null) {
+                    HttpPost post = new HttpPost(PixUtils.secrets.get("guild_raid_urls").getAsJsonObject().get(wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString()).getAsString() + "auth/getToken");
+                    try {
+                        StringEntity body = new StringEntity(PixUtils.gson.toJson(new GetTokenPojo(secrets.get("validation_key").getAsString())));
+                        post.setEntity(body);
+                        post.setHeader("Content-type", "application/json");
+                        JsonObject response = gson.fromJson(EntityUtils.toString(httpClient.execute(post).getEntity()), JsonObject.class);
+                        if (response.get("status").getAsBoolean()) {
+                            guildRaidServerToken = response.get("token").getAsString();
+                            PixUtils.LOGGER.info("successfully loaded guild raid server token");
+                        } else {
+                            PixUtils.LOGGER.error("Couldn't generate token with error: {}", response.get("error"));
+                        }
+                    } catch (Exception e) {
+                        PixUtils.LOGGER.error("get token error: {}", e.getMessage());
+                    }
+                } else {
+                    PixUtils.LOGGER.warn("wynn player info not initialized or guild raid server token already initialized");
+                }
+            }).start();
         });
 
         PixUtilsConfig.init();
