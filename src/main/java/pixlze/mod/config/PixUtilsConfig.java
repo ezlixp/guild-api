@@ -47,7 +47,7 @@ public class PixUtilsConfig {
     }
 
     public static <T> SubConfig<T> registerSubConfig(String name, String buttonText, Screen subConfigScreen, ArrayList<T> value) {
-        SubConfig<T> registeredSubConfig = new SubConfig<T>(name, buttonText, subConfigScreen, value);
+        SubConfig<T> registeredSubConfig = new SubConfig<>(name, buttonText, subConfigScreen, value);
         options.add(registeredSubConfig);
         return registeredSubConfig;
     }
