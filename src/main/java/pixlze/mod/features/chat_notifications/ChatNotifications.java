@@ -45,7 +45,7 @@ public class ChatNotifications {
         });
         ClientReceiveMessageEvents.CHAT.register(((message1, signedMessage, sender, params, receptionTimestamp) -> {
             currentVisit = "";
-            Optional<String> visited = message1.visit(PixUtils.wynnVisitor, message1.getStyle());
+            Optional<String> visited = message1.visit(PixUtils.STYLED_VISITOR, message1.getStyle());
             if (visited.isPresent()) return;
             for (Pair<Pattern, String> c : config.getValue()) {
                 if (c.getLeft().matcher(currentVisit).matches()) {
@@ -58,7 +58,7 @@ public class ChatNotifications {
         ClientReceiveMessageEvents.GAME.register(((message1, overlay) -> {
             if (overlay) return;
             currentVisit = "";
-            Optional<String> visited = message1.visit(PixUtils.wynnVisitor, message1.getStyle());
+            Optional<String> visited = message1.visit(PixUtils.STYLED_VISITOR, message1.getStyle());
             if (visited.isPresent()) return;
             for (Pair<Pattern, String> c : config.getValue()) {
                 if (c.getLeft().matcher(currentVisit).matches()) {

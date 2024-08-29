@@ -5,6 +5,7 @@ import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -16,6 +17,7 @@ import pixlze.mod.PixUtils;
 import pixlze.mod.features.copy_chat.CopyChat;
 import pixlze.mod.mixin.accessors.ChatHudAccessorInvoker;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -54,21 +56,72 @@ public abstract class ChatMixin extends Screen {
 
 
         double scrollOffset = chatHudAccessorInvoker.getScrolledLines();
-        if (Screen.hasControlDown() || Screen.hasAltDown()) {
+        if (Screen.hasControlDown() || Screen.hasAltDown() || Screen.hasShiftDown()) {
             List<ChatHudLine> messages = chatHudAccessorInvoker.getMessages();
             int line = 0;
             for (ChatHudLine message : messages) {
                 if (line > chatHud.getVisibleLineCount() + scrollOffset) break;
-                int lines = textRenderer.getTextHandler().wrapLines(message.content(), (int) chatWidth, message.content().getStyle()).size();
+
+                int lines = 0;
+                List<Text> messageParts = message.content().getWithStyle(message.content().getStyle());
+                List<StringVisitable> pieces = new ArrayList<>();
+                List<Text> currentVisitable = new ArrayList<>();
+
+                for (Text part : messageParts) {
+                    String literal = part.getLiteralString();
+                    String string = part.getString();
+                    String content = null;
+                    if (literal != null) {
+                        content = literal;
+                    } else if (string != null) {
+                        content = string;
+                    }
+
+                    if (content != null) {
+                        int index = 0;
+                        int occ = content.indexOf("\n", index);
+                        while (occ != -1) {
+                            String piece = content.substring(index, occ);
+
+                            currentVisitable.add(Text.literal(piece).setStyle(part.getStyle()));
+
+                            pieces.add(StringVisitable.concat(currentVisitable));
+                            currentVisitable = new ArrayList<>();
+
+                            index = occ + 1;
+                            occ = content.indexOf("\n", index);
+                        }
+                        if (index < content.length()) {
+                            currentVisitable.add(Text.literal(content.substring(index)).setStyle(part.getStyle()));
+                        } else if (index == content.length()) {
+                            currentVisitable.add(Text.literal("\u200B").setStyle(part.getStyle()));
+                        }
+                    } else
+                        PixUtils.LOGGER.warn("{} does not have content", part);
+
+                }
+                if (!currentVisitable.isEmpty()) {
+                    pieces.add(StringVisitable.concat(currentVisitable));
+                }
+                for (StringVisitable piece : pieces) {
+                    lines += textRenderer.getTextHandler().wrapLines(piece, chatWidth, message.content().getStyle()).size();
+                }
+
                 if (line >= scrollOffset) {
                     if (mouseX <= chatWidth && mouseY <= chatBottom - lineHeight * (line - scrollOffset) && mouseY >= chatBottom - lineHeight * (line + lines - scrollOffset)) {
                         if (CopyChat.config.getValue()) {
-                            if (Screen.hasControlDown())
-                                MinecraftClient.getInstance().keyboard.setClipboard(message.content().getString());
+                            if (Screen.hasControlDown()) {
+                                PixUtils.currentVisit = "";
+                                message.content().visit(PixUtils.PLAIN_VISITOR);
+                                MinecraftClient.getInstance().keyboard.setClipboard(PixUtils.currentVisit);
+                            }
                             if (Screen.hasAltDown()) {
                                 PixUtils.currentVisit = "";
-                                message.content().visit(PixUtils.wynnVisitor, message.content().getStyle());
+                                message.content().visit(PixUtils.STYLED_VISITOR, message.content().getStyle());
                                 MinecraftClient.getInstance().keyboard.setClipboard(PixUtils.currentVisit);
+                            }
+                            if (Screen.hasShiftDown()) {
+                                PixUtils.LOGGER.info("{} has {} lines", message.content(), lines);
                             }
                         }
                     }
@@ -77,9 +130,12 @@ public abstract class ChatMixin extends Screen {
             }
             info.cancel();
         }
-        if (Screen.hasShiftDown()) {
-            PixUtils.LOGGER.info("{}, {}", mouseX, mouseY);
-            PixUtils.LOGGER.info("chatwidth: {}, scrollOffset: {}, lineHeight: {}, scale: {}", chatWidth, scrollOffset, lineHeight, MinecraftClient.getInstance().options.getChatScale().getValue());
-        }
+//        if (Screen.hasShiftDown()) {
+//            PixUtils.LOGGER.info("{}, {}", mouseX, mouseY);
+//            PixUtils.LOGGER.info("chatwidth: {}, scrollOffset: {}, lineHeight: {}, scale: {}", chatWidth, scrollOffset, lineHeight, MinecraftClient.getInstance().options.getChatScale().getValue());
+//            for (ChatHudLine message : chatHudAccessorInvoker.getMessages()) {
+//                PixUtils.LOGGER.info("{}", message.content().getWithStyle(message.content().getStyle()));
+//            }
+//        }
     }
 }

@@ -43,18 +43,18 @@ import java.util.regex.Pattern;
 public class PixUtils implements ModInitializer {
     public static final String MOD_ID = "pixutils";
     public static final Logger LOGGER = LoggerFactory.getLogger("pixutils");
-    public static final StringVisitable.Visitor<String> plainVisitor = new StringVisitable.Visitor<String>() {
-        @Override
-        public Optional<String> accept(String asString) {
-            LOGGER.info("{} visiting {}", MOD_ID, asString);
-            return Optional.empty();
-        }
-    };
     public static final HttpClient httpClient = HttpClientBuilder.create().build();
     public static Gson gson;
     public static KeyBinding openConfigKeybind;
     public static String currentVisit;
-    public static final StringVisitable.StyledVisitor<String> wynnVisitor = new StringVisitable.StyledVisitor<>() {
+    public static final StringVisitable.Visitor<String> PLAIN_VISITOR = new StringVisitable.Visitor<>() {
+        @Override
+        public Optional<String> accept(String asString) {
+            currentVisit += asString;
+            return Optional.empty();
+        }
+    };
+    public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = new StringVisitable.StyledVisitor<>() {
         @Override
         public Optional<String> accept(Style style, String asString) {
             if (style.getFont().getPath().startsWith("hud")) {
@@ -123,41 +123,45 @@ public class PixUtils implements ModInitializer {
             }
         });
 
-        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            new Thread(() -> {
-                if (client.player != null && wynnPlayerInfo == null) {
-                    HttpGet get = new HttpGet("https://api.wynncraft.com/v3/player/" + client.player.getUuidAsString());
-                    try {
-                        HttpResponse response = httpClient.execute(get);
-                        wynnPlayerInfo = gson.fromJson(EntityUtils.toString(response.getEntity()), JsonObject.class);
-                        PixUtils.LOGGER.info("successfully loaded wynn player info");
-                    } catch (Exception e) {
-                        PixUtils.LOGGER.error("wynn player load error: {}", e.getMessage());
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> new Thread(() -> {
+            if (client.player != null && wynnPlayerInfo == null) {
+                HttpGet get = new HttpGet("https://api.wynncraft.com/v3/player/" + client.player.getUuidAsString());
+                try {
+                    HttpResponse response = httpClient.execute(get);
+                    wynnPlayerInfo = gson.fromJson(EntityUtils.toString(response.getEntity()), JsonObject.class);
+                    if (wynnPlayerInfo.get("Error") != null) {
+                        String message = wynnPlayerInfo.get("Error").getAsString();
+                        wynnPlayerInfo = null;
+                        throw new Exception(message);
                     }
-                } else {
-                    PixUtils.LOGGER.warn("null player or already initialized wynn player info");
+                    PixUtils.LOGGER.info("successfully loaded wynn player info");
+                    PixUtils.LOGGER.info(wynnPlayerInfo.toString());
+                } catch (Exception e) {
+                    PixUtils.LOGGER.error("wynn player load error: {}", e.getMessage());
                 }
-                if (wynnPlayerInfo != null && PixUtils.guildRaidServerToken == null) {
-                    HttpPost post = new HttpPost(PixUtils.secrets.get("guild_raid_urls").getAsJsonObject().get(wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString()).getAsString() + "auth/getToken");
-                    try {
-                        StringEntity body = new StringEntity(PixUtils.gson.toJson(new GetTokenPojo(secrets.get("validation_key").getAsString())));
-                        post.setEntity(body);
-                        post.setHeader("Content-type", "application/json");
-                        JsonObject response = gson.fromJson(EntityUtils.toString(httpClient.execute(post).getEntity()), JsonObject.class);
-                        if (response.get("status").getAsBoolean()) {
-                            guildRaidServerToken = response.get("token").getAsString();
-                            PixUtils.LOGGER.info("successfully loaded guild raid server token");
-                        } else {
-                            PixUtils.LOGGER.error("Couldn't generate token with error: {}", response.get("error"));
-                        }
-                    } catch (Exception e) {
-                        PixUtils.LOGGER.error("get token error: {}", e.getMessage());
+            } else {
+                PixUtils.LOGGER.warn("null player or already initialized wynn player info");
+            }
+            if (wynnPlayerInfo != null && PixUtils.guildRaidServerToken == null) {
+                HttpPost post = new HttpPost(PixUtils.secrets.get("guild_raid_urls").getAsJsonObject().get(wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString()).getAsString() + "auth/getToken");
+                try {
+                    StringEntity body = new StringEntity(PixUtils.gson.toJson(new GetTokenPojo(secrets.get("validation_key").getAsString())));
+                    post.setEntity(body);
+                    post.setHeader("Content-type", "application/json");
+                    JsonObject response = gson.fromJson(EntityUtils.toString(httpClient.execute(post).getEntity()), JsonObject.class);
+                    if (response.get("status").getAsBoolean()) {
+                        guildRaidServerToken = response.get("token").getAsString();
+                        PixUtils.LOGGER.info("successfully loaded guild raid server token");
+                    } else {
+                        PixUtils.LOGGER.error("Couldn't generate token with error: {}", response.get("error"));
                     }
-                } else {
-                    PixUtils.LOGGER.warn("wynn player info not initialized or guild raid server token already initialized");
+                } catch (Exception e) {
+                    PixUtils.LOGGER.error("get token error: {}", e.getMessage());
                 }
-            }).start();
-        });
+            } else {
+                PixUtils.LOGGER.warn("wynn player info not initialized or guild raid server token already initialized");
+            }
+        }).start());
 
         PixUtilsConfig.init();
         CopyChat.initialize();
