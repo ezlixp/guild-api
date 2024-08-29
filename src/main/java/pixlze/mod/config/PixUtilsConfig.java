@@ -21,7 +21,7 @@ public class PixUtilsConfig {
     private static final ArrayList<Option> options = new ArrayList<>();
     public static JsonObject configObject;
 
-    public static void init() {
+    public static void initialize() {
         try (FileReader reader = new FileReader(new File(PixUtils.MOD_ID + "/config", "config.json"))) {
             JsonElement jsonElement = JsonParser.parseReader(reader);
             if (jsonElement.isJsonObject()) {
