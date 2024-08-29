@@ -11,9 +11,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.StringVisitable;
-import net.minecraft.text.Style;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -35,8 +32,6 @@ import pixlze.utils.requests.GetTokenPojo;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 
@@ -47,48 +42,6 @@ public class PixUtils implements ModInitializer {
     public static Gson gson;
     public static KeyBinding openConfigKeybind;
     public static String currentVisit;
-    public static final StringVisitable.Visitor<String> PLAIN_VISITOR = new StringVisitable.Visitor<>() {
-        @Override
-        public Optional<String> accept(String asString) {
-            currentVisit += asString;
-            return Optional.empty();
-        }
-    };
-    public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = new StringVisitable.StyledVisitor<>() {
-        @Override
-        public Optional<String> accept(Style style, String asString) {
-            if (style.getFont().getPath().startsWith("hud")) {
-                return "break".describeConstable();
-            }
-            if (style.getColor() != null) {
-                int colorIndex = 0;
-                for (Formatting format : Formatting.values()) {
-                    if (format.getColorValue() != null && format.getColorValue().equals(style.getColor().getRgb())) {
-                        colorIndex = format.getColorIndex();
-                        break;
-                    }
-                }
-                currentVisit += "&" + Objects.requireNonNull(Formatting.byColorIndex(colorIndex)).getCode();
-            }
-            if (style.isBold()) {
-                currentVisit += "&" + Formatting.BOLD.getCode();
-            }
-            if (style.isItalic()) {
-                currentVisit += "&" + Formatting.ITALIC.getCode();
-            }
-            if (style.isUnderlined()) {
-                currentVisit += "&" + Formatting.UNDERLINE.getCode();
-            }
-            if (style.isStrikethrough()) {
-                currentVisit += "&" + Formatting.STRIKETHROUGH.getCode();
-            }
-            if (style.isObfuscated()) {
-                currentVisit += "&" + Formatting.OBFUSCATED.getCode();
-            }
-            currentVisit += asString.replaceAll("\\n", "\\\\n");
-            return Optional.empty();
-        }
-    };
     public static String guildRaidServerToken;
     public static JsonObject wynnPlayerInfo;
     public static JsonObject secrets;

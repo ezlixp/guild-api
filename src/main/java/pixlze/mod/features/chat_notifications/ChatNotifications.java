@@ -14,6 +14,7 @@ import org.apache.http.util.EntityUtils;
 import pixlze.mod.PixUtils;
 import pixlze.mod.config.PixUtilsConfig;
 import pixlze.mod.config.types.SubConfig;
+import pixlze.utils.Visitors;
 import pixlze.utils.requests.CompletedRaidPojo;
 
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ public class ChatNotifications {
         });
         ClientReceiveMessageEvents.CHAT.register(((message1, signedMessage, sender, params, receptionTimestamp) -> {
             currentVisit = "";
-            Optional<String> visited = message1.visit(PixUtils.STYLED_VISITOR, message1.getStyle());
+            Optional<String> visited = message1.visit(Visitors.STYLED_VISITOR, message1.getStyle());
             if (visited.isPresent()) return;
             for (Pair<Pattern, String> c : config.getValue()) {
                 if (c.getLeft().matcher(currentVisit).matches()) {
@@ -58,7 +59,7 @@ public class ChatNotifications {
         ClientReceiveMessageEvents.GAME.register(((message1, overlay) -> {
             if (overlay) return;
             currentVisit = "";
-            Optional<String> visited = message1.visit(PixUtils.STYLED_VISITOR, message1.getStyle());
+            Optional<String> visited = message1.visit(Visitors.STYLED_VISITOR, message1.getStyle());
             if (visited.isPresent()) return;
             for (Pair<Pattern, String> c : config.getValue()) {
                 if (c.getLeft().matcher(currentVisit).matches()) {

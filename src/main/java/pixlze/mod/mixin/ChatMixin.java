@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pixlze.mod.PixUtils;
 import pixlze.mod.features.copy_chat.CopyChat;
 import pixlze.mod.mixin.accessors.ChatHudAccessorInvoker;
+import pixlze.utils.Visitors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,12 +113,12 @@ public abstract class ChatMixin extends Screen {
                         if (CopyChat.config.getValue()) {
                             if (Screen.hasControlDown()) {
                                 PixUtils.currentVisit = "";
-                                message.content().visit(PixUtils.PLAIN_VISITOR);
+                                message.content().visit(Visitors.PLAIN_VISITOR);
                                 MinecraftClient.getInstance().keyboard.setClipboard(PixUtils.currentVisit);
                             }
                             if (Screen.hasAltDown()) {
                                 PixUtils.currentVisit = "";
-                                message.content().visit(PixUtils.STYLED_VISITOR, message.content().getStyle());
+                                message.content().visit(Visitors.STYLED_VISITOR, message.content().getStyle());
                                 MinecraftClient.getInstance().keyboard.setClipboard(PixUtils.currentVisit);
                             }
                             if (Screen.hasShiftDown()) {
