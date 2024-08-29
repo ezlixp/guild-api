@@ -132,12 +132,5 @@ public abstract class ChatMixin extends Screen {
             }
             info.cancel();
         }
-//        if (Screen.hasShiftDown()) {
-//            PixUtils.LOGGER.info("{}, {}", mouseX, mouseY);
-//            PixUtils.LOGGER.info("chatwidth: {}, scrollOffset: {}, lineHeight: {}, scale: {}", chatWidth, scrollOffset, lineHeight, MinecraftClient.getInstance().options.getChatScale().getValue());
-//            for (ChatHudLine message : chatHudAccessorInvoker.getMessages()) {
-//                PixUtils.LOGGER.info("{}", message.content().getWithStyle(message.content().getStyle()));
-//            }
-//        }
     }
 }
