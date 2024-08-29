@@ -83,6 +83,7 @@ public abstract class ChatMixin extends Screen {
                         int occ = content.indexOf("\n", index);
                         while (occ != -1) {
                             String piece = content.substring(index, occ);
+                            if (piece.isEmpty()) piece = "\u200B";
 
                             currentVisitable.add(Text.literal(piece).setStyle(part.getStyle()));
 
@@ -112,14 +113,14 @@ public abstract class ChatMixin extends Screen {
                     if (mouseX <= chatWidth && mouseY <= chatBottom - lineHeight * (line - scrollOffset) && mouseY >= chatBottom - lineHeight * (line + lines - scrollOffset)) {
                         if (CopyChat.config.getValue()) {
                             if (Screen.hasControlDown()) {
-                                PixUtils.currentVisit = "";
+                                Visitors.currentVisit = "";
                                 message.content().visit(Visitors.PLAIN_VISITOR);
-                                MinecraftClient.getInstance().keyboard.setClipboard(PixUtils.currentVisit);
+                                MinecraftClient.getInstance().keyboard.setClipboard(Visitors.currentVisit);
                             }
                             if (Screen.hasAltDown()) {
-                                PixUtils.currentVisit = "";
+                                Visitors.currentVisit = "";
                                 message.content().visit(Visitors.STYLED_VISITOR, message.content().getStyle());
-                                MinecraftClient.getInstance().keyboard.setClipboard(PixUtils.currentVisit);
+                                MinecraftClient.getInstance().keyboard.setClipboard(Visitors.currentVisit);
                             }
                             if (Screen.hasShiftDown()) {
                                 PixUtils.LOGGER.info("{} has {} lines", message.content(), lines);

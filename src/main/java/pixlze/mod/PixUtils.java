@@ -41,7 +41,6 @@ public class PixUtils implements ModInitializer {
     public static final HttpClient httpClient = HttpClientBuilder.create().build();
     public static Gson gson;
     public static KeyBinding openConfigKeybind;
-    public static String currentVisit;
     public static String guildRaidServerToken;
     public static JsonObject wynnPlayerInfo;
     public static JsonObject secrets;

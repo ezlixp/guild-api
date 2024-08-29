@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static pixlze.mod.PixUtils.*;
 
 public class ChatNotifications {
     static final String FEATURE_ID = "chat_notifications";
@@ -45,11 +44,11 @@ public class ChatNotifications {
 
         });
         ClientReceiveMessageEvents.CHAT.register(((message1, signedMessage, sender, params, receptionTimestamp) -> {
-            currentVisit = "";
+            Visitors.currentVisit = "";
             Optional<String> visited = message1.visit(Visitors.STYLED_VISITOR, message1.getStyle());
             if (visited.isPresent()) return;
             for (Pair<Pattern, String> c : config.getValue()) {
-                if (c.getLeft().matcher(currentVisit).matches()) {
+                if (c.getLeft().matcher(Visitors.currentVisit).matches()) {
                     ChatNotifications.message = Text.of(c.getRight());
                     messageTimer = 40;
                     showMessage = true;
@@ -58,30 +57,30 @@ public class ChatNotifications {
         }));
         ClientReceiveMessageEvents.GAME.register(((message1, overlay) -> {
             if (overlay) return;
-            currentVisit = "";
+            Visitors.currentVisit = "";
             Optional<String> visited = message1.visit(Visitors.STYLED_VISITOR, message1.getStyle());
             if (visited.isPresent()) return;
             for (Pair<Pattern, String> c : config.getValue()) {
-                if (c.getLeft().matcher(currentVisit).matches()) {
+                if (c.getLeft().matcher(Visitors.currentVisit).find()) {
                     ChatNotifications.message = Text.of(c.getRight());
                     messageTimer = 40;
                     showMessage = true;
                 }
             }
-            Matcher raidMatcher = Pattern.compile("&e(.*?)&b.*?&e(.*?)&b.*?&e(.*?)&b.*?&e(.*?)&b.*?&3(.*?)&b").matcher(currentVisit);
-            if (raidMatcher.find() && !currentVisit.contains(":")) {
+            Matcher raidMatcher = Pattern.compile("&e(.*?)&b.*?&e(.*?)&b.*?&e(.*?)&b.*?&e(.*?)&b.*?&3(.*?)&b").matcher(Visitors.currentVisit);
+            if (raidMatcher.find() && !Visitors.currentVisit.contains(":")) {
                 ChatNotifications.message = Text.of("guild raid finished");
                 messageTimer = 40;
                 showMessage = true;
                 if (PixUtils.wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString().equals("ICo"))
                     new Thread(() -> {
-                        HttpPost post = new HttpPost(PixUtils.secrets.get("guild_raid_urls").getAsJsonObject().get(wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString()).getAsString() + "addRaid");
+                        HttpPost post = new HttpPost(PixUtils.secrets.get("guild_raid_urls").getAsJsonObject().get(PixUtils.wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString()).getAsString() + "addRaid");
                         try {
                             StringEntity body = new StringEntity(PixUtils.gson.toJson(new CompletedRaidPojo(new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(4)}, raidMatcher.group(5), System.currentTimeMillis())));
                             post.setEntity(body);
                             post.setHeader("Content-type", "application/json");
-                            post.setHeader("Authorization", guildRaidServerToken);
-                            HttpResponse response = httpClient.execute(post);
+                            post.setHeader("Authorization", PixUtils.guildRaidServerToken);
+                            HttpResponse response = PixUtils.httpClient.execute(post);
                             PixUtils.LOGGER.info("{} guild raid response", EntityUtils.toString(response.getEntity()));
                         } catch (Exception e) {
                             PixUtils.LOGGER.error("error: {}", e.getMessage());
