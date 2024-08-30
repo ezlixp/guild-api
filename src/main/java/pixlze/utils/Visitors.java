@@ -22,7 +22,7 @@ public class Visitors {
             if (style.getHoverEvent() != null) {
                 try {
                     List<Text> onHover = null;
-                    if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) != null) {
+                    if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text) {
                         onHover = ((Text) Objects.requireNonNull(style.getHoverEvent().getValue(style.getHoverEvent().getAction()))).getSiblings();
                     } else {
                         PixUtils.LOGGER.info("null hover event: {} in message {}", style, asString);
