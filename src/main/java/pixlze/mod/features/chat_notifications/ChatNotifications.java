@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 
 
 public class ChatNotifications {
+    static final String FEATURE_NAME = "Chat notifications";
     static final String FEATURE_ID = "chat_notifications";
     public static Text message = Text.of("placeholder");
     static public SubConfig<Pair<Pattern, String>> config;
@@ -45,7 +46,7 @@ public class ChatNotifications {
 
         });
         ClientReceiveMessageEvents.CHAT.register(((message1, signedMessage, sender, params, receptionTimestamp) -> {
-            Visitors.currentVisit = "";
+            Visitors.currentVisit = new StringBuilder();
             Optional<String> visited = message1.visit(Visitors.STYLED_VISITOR, message1.getStyle());
             if (visited.isPresent()) return;
             for (Pair<Pattern, String> c : config.getValue()) {
@@ -58,7 +59,7 @@ public class ChatNotifications {
         }));
         ClientReceiveMessageEvents.GAME.register(((message1, overlay) -> {
             if (overlay) return;
-            Visitors.currentVisit = "";
+            Visitors.currentVisit = new StringBuilder();
             Optional<String> visited = message1.visit(Visitors.STYLED_VISITOR, message1.getStyle());
             if (visited.isPresent()) return;
             for (Pair<Pattern, String> c : config.getValue()) {
@@ -68,8 +69,10 @@ public class ChatNotifications {
                     showMessage = true;
                 }
             }
+            Visitors.currentVisit = new StringBuilder();
+            message1.visit(Visitors.RAID_VISITOR, message1.getStyle());
             Matcher raidMatcher = Pattern.compile("&e(.*?)&b.*?&e(.*?)&b.*?&e(.*?)&b.*?&e(.*?)&b.*?&3(.*?)&b").matcher(Visitors.currentVisit);
-            if (raidMatcher.find() && !Visitors.currentVisit.contains(":")) {
+            if (raidMatcher.find() && !Visitors.currentVisit.toString().contains(":")) {
                 ChatNotifications.message = Text.of("guild raid finished");
                 messageTimer = 40;
                 showMessage = true;
@@ -100,6 +103,6 @@ public class ChatNotifications {
             }
         }
         EditNotificationsScreen editNotificationsScreen = new EditNotificationsScreen();
-        config = PixUtilsConfig.registerSubConfig(FEATURE_ID, "Edit Notifications", editNotificationsScreen, prev);
+        config = PixUtilsConfig.registerSubConfig(FEATURE_NAME, FEATURE_ID, "Edit", editNotificationsScreen, prev);
     }
 }

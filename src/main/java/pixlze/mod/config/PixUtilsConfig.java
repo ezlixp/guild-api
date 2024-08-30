@@ -34,20 +34,20 @@ public class PixUtilsConfig {
         }
     }
 
-    public static Toggle registerToggle(String name, boolean value) {
-        Toggle registeredToggle = new Toggle(name, value);
+    public static Toggle registerToggle(String name, String id, boolean value) {
+        Toggle registeredToggle = new Toggle(name, id, value);
         options.add(registeredToggle);
         return registeredToggle;
     }
 
-    public static Toggle registerToggle(String name, boolean value, ArrayList<Option> children) {
-        Toggle registeredToggle = new Toggle(name, value, children);
+    public static Toggle registerToggle(String name, String id, boolean value, ArrayList<Option> children) {
+        Toggle registeredToggle = new Toggle(name, id, value, children);
         options.add(registeredToggle);
         return registeredToggle;
     }
 
-    public static <T> SubConfig<T> registerSubConfig(String name, String buttonText, Screen subConfigScreen, ArrayList<T> value) {
-        SubConfig<T> registeredSubConfig = new SubConfig<>(name, buttonText, subConfigScreen, value);
+    public static <T> SubConfig<T> registerSubConfig(String name, String id, String buttonText, Screen subConfigScreen, ArrayList<T> value) {
+        SubConfig<T> registeredSubConfig = new SubConfig<>(name, id, buttonText, subConfigScreen, value);
         options.add(registeredSubConfig);
         return registeredSubConfig;
     }

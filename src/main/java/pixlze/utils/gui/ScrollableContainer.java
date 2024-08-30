@@ -24,9 +24,9 @@ public class ScrollableContainer extends ScrollableWidget {
         this.boxAlpha = boxAlpha;
     }
 
-    public ScrollableContainer(int x, int y, int width, int height, Text message, int[] boxDimensions, float boxAlpha) {
+    public ScrollableContainer(int x, int y, int width, int height, Text message, float boxAlpha, int scrollBarX) {
         super(x, y, width, height, message);
-        this.boxDimensions = boxDimensions;
+        this.boxDimensions = new int[]{this.getX(), this.getY(), this.getWidth(), this.getHeight()};
         this.boxAlpha = boxAlpha;
     }
 

@@ -6,6 +6,7 @@ import pixlze.mod.config.types.Toggle;
 
 public class CopyChat {
     static final String FEATURE_ID = "copy_chat";
+    static final String FEATURE_NAME = "Ctrl-click to copy chat";
     static public Toggle config;
 
     // issue with new messages coming in while screen open.
@@ -18,6 +19,6 @@ public class CopyChat {
                 PixUtils.LOGGER.error(e.getMessage());
             }
         }
-        config = PixUtilsConfig.registerToggle(FEATURE_ID, prev);
+        config = PixUtilsConfig.registerToggle(FEATURE_NAME, FEATURE_ID, prev);
     }
 }

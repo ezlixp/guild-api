@@ -6,6 +6,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.Nullable;
+import pixlze.mod.PixUtils;
 import pixlze.mod.config.types.SubConfigScreen;
 import pixlze.utils.gui.ButtonWidgetFactory;
 import pixlze.utils.gui.ClickableChild;
@@ -18,7 +19,7 @@ import java.util.regex.Pattern;
 public class EditNotificationsScreen extends SubConfigScreen {
     protected final ArrayList<Pair<ClickableChild<TextFieldWidget>, ClickableChild<TextFieldWidget>>> notifications;
     protected final ArrayList<ClickableChild<ButtonWidget>> removeButtons;
-    protected int rowY = 60;
+    protected int rowY = 40;
     private ScrollableContainer inputContainer;
 
 
@@ -37,7 +38,7 @@ public class EditNotificationsScreen extends SubConfigScreen {
         }
     }
 
-    private void removeNotification(ButtonWidget b, ClickableChild<ButtonWidget> asChild) {
+    private void removeNotification(ClickableChild<ButtonWidget> asChild) {
         int index = removeButtons.indexOf(asChild);
         inputContainer.queueRemove(notifications.get(index).getLeft());
         inputContainer.queueRemove(notifications.get(index).getRight());
@@ -69,7 +70,7 @@ public class EditNotificationsScreen extends SubConfigScreen {
 
         notifications.add(new Pair<>(regexInputClickable, notificationInputClickable));
 
-        ButtonWidget removeButton = ButtonWidgetFactory.build(Text.of("Remove"), b -> removeNotification(b, new ClickableChild<>(b)), 2 * this.width / 3 - 60, rowY, 50, 20);
+        ButtonWidget removeButton = ButtonWidgetFactory.build(Text.of("Remove"), b -> removeNotification(new ClickableChild<>(b)), 2 * this.width / 3 - 60, rowY, 50, 20);
         ClickableChild<ButtonWidget> removeButtonClickable = new ClickableChild<>(removeButton);
         inputContainer.addClickableChild(removeButtonClickable);
 
@@ -81,10 +82,10 @@ public class EditNotificationsScreen extends SubConfigScreen {
 
     @Override
     protected void init() {
-        inputContainer = new ScrollableContainer(0, 50, this.width, this.height - 80, Text.of("Notifications on Regex Input"), 0.5F);
+        inputContainer = new ScrollableContainer(0, 30, this.width, this.height - 60, Text.of("Notifications on Regex Input"), 0.5F);
         this.addDrawableChild(inputContainer);
 
-        rowY = 60;
+        rowY = 40;
         notifications.clear();
         removeButtons.clear();
         inputContainer.clearChildren();
@@ -104,6 +105,7 @@ public class EditNotificationsScreen extends SubConfigScreen {
     @Override
     public void close() {
         saveConfig();
-        super.close();
+        PixUtils.LOGGER.info("chat notifications saved");
+        parent.close();
     }
 }

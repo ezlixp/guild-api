@@ -14,13 +14,13 @@ public class Toggle extends Option {
     private boolean value = false;
     private ArrayList<Option> children;
 
-    public Toggle(String name, boolean value) {
-        super(name, "Toggle");
+    public Toggle(String name, String id, boolean value) {
+        super(name, id, "Toggle");
         this.value = value;
     }
 
-    public Toggle(String name, boolean value, ArrayList<Option> children) {
-        super(name, "Toggle");
+    public Toggle(String name, String id, boolean value, ArrayList<Option> children) {
+        super(name, id, "Toggle");
         this.value = value;
         this.children = children;
     }
@@ -42,7 +42,7 @@ public class Toggle extends Option {
 
         @Override
         public void write(JsonWriter out, Toggle value) throws IOException {
-            PixUtilsConfig.configObject.addProperty(value.name, value.value);
+            PixUtilsConfig.configObject.addProperty(value.id, value.value);
         }
 
         @Override

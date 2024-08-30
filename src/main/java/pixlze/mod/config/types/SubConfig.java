@@ -21,8 +21,8 @@ public class SubConfig<T> extends Option {
     private final ArrayList<T> value;
     private final Screen open;
 
-    public SubConfig(String name, String buttonText, Screen open, ArrayList<T> value) {
-        super(name, "SubConfig");
+    public SubConfig(String name, String id, String buttonText, Screen open, ArrayList<T> value) {
+        super(name, id, "SubConfig");
         this.name = name;
         this.buttonText = buttonText;
         this.open = open;
@@ -45,7 +45,7 @@ public class SubConfig<T> extends Option {
             for (T item : value.value) {
                 config.add(PixUtils.gson.toJsonTree(item));
             }
-            PixUtilsConfig.configObject.add(value.name, config);
+            PixUtilsConfig.configObject.add(value.id, config);
         }
 
         @Override

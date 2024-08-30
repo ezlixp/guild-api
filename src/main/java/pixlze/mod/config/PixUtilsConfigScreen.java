@@ -3,7 +3,9 @@ package pixlze.mod.config;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ButtonWidget.Builder;
+import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.gui.widget.ToggleButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -12,23 +14,27 @@ import pixlze.mod.PixUtils;
 import pixlze.mod.config.types.Option;
 import pixlze.mod.config.types.SubConfig;
 import pixlze.mod.config.types.Toggle;
+import pixlze.utils.gui.ClickableChild;
+import pixlze.utils.gui.ScrollableContainer;
 
 import java.io.IOException;
 
 public class PixUtilsConfigScreen extends Screen {
 
-    static final private Identifier buttonTexture = Identifier.of(PixUtils.MOD_ID, "funni");
-    static final private Identifier buttonTexture2 = Identifier.of(PixUtils.MOD_ID, "null");
+    private static final Identifier buttonTexture = Identifier.of(PixUtils.MOD_ID, "funni");
+    private static final Identifier buttonTexture2 = Identifier.of(PixUtils.MOD_ID, "null");
     private final Screen parent;
+    private ScrollableContainer optionsContainer;
+    private int rowY = 40;
 
     public PixUtilsConfigScreen(Screen parent) {
         super(Text.of("My Mod Config"));
         this.parent = parent;
     }
 
-    private static @NotNull ToggleButtonWidget getToggleButtonWidget(Toggle option, int x, int y, int width, int height) {
+    private static @NotNull ToggleButtonWidget getToggleButtonWidget(Toggle option, int x, int y) {
         ButtonTextures textures = new ButtonTextures(buttonTexture, buttonTexture2, buttonTexture, buttonTexture2);
-        ToggleButtonWidget button = new ToggleButtonWidget(x, y, width, height, option.getValue()) {
+        ToggleButtonWidget button = new ToggleButtonWidget(x, y, 30, 20, option.getValue()) {
             @Override
             public void onClick(double mouseX, double mouseY) {
                 super.setToggled(!super.toggled);
@@ -39,6 +45,23 @@ public class PixUtilsConfigScreen extends Screen {
         return button;
     }
 
+    private void addOption(Option option) {
+        TextWidget label = new TextWidget(50, rowY + 6, textRenderer.getWidth(option.name), textRenderer.fontHeight, Text.of(option.name), textRenderer);
+        optionsContainer.addClickableChild(new ClickableChild<>(label));
+        switch (option.type) {
+            case "Toggle":
+                ToggleButtonWidget toggle = getToggleButtonWidget((Toggle) option, width - 80, rowY);
+                optionsContainer.addClickableChild(new ClickableChild<>(toggle));
+                break;
+            case "SubConfig":
+                Builder openSubConfigBuilder = new Builder(Text.of(((SubConfig<?>) option).buttonText), b -> ((SubConfig<?>) option).click());
+                openSubConfigBuilder.dimensions(width - 80, rowY, 30, 20);
+                optionsContainer.addClickableChild(new ClickableChild<>(openSubConfigBuilder.build()));
+                break;
+        }
+        rowY += 30;
+    }
+
     @Override
     public void close() {
         try {
@@ -46,25 +69,19 @@ public class PixUtilsConfigScreen extends Screen {
         } catch (IOException e) {
             PixUtils.LOGGER.error(e.getMessage());
         }
+        PixUtils.LOGGER.info("config saved");
         super.close();
     }
 
     @Override
     protected void init() {
-        for (Option option : PixUtilsConfig.getOptions()) {
-            switch (option.type) {
-                case "Toggle":
-                    ToggleButtonWidget button = getToggleButtonWidget((Toggle) option, 200, 200, 64, 64);
-                    this.addDrawableChild(button);
-                    break;
-                case "SubConfig":
-                    Builder openSubConfigBuilder = new Builder(Text.of(((SubConfig<?>) option).buttonText), b -> {
-                        ((SubConfig<?>) option).click();
-                    });
-                    openSubConfigBuilder.dimensions(this.width / 2 - 100, 20, 200, 20);
-                    this.addDrawableChild(openSubConfigBuilder.build());
-            }
-        }
+        Text message = Text.of("PixUtils Config");
+        PixUtils.LOGGER.info("{}", textRenderer.getWidth(message));
+
+        TextWidget configScreenLabel = new TextWidget(0, 12, width, textRenderer.fontHeight, message, textRenderer);
+
+        optionsContainer = new ScrollableContainer(0, 30, width, height - 60, Text.of("mod options container"), 0.5F);
+
         Builder doneButtonBuilder = new Builder(Text.of("Done"), b -> {
             try {
                 PixUtilsConfig.save();
@@ -73,7 +90,15 @@ public class PixUtilsConfigScreen extends Screen {
             }
             MinecraftClient.getInstance().setScreen(parent);
         });
-        doneButtonBuilder.dimensions(this.width / 2 - 100, this.height - 50, 200, 20);
-        this.addDrawableChild(doneButtonBuilder.build());
+        doneButtonBuilder.dimensions(this.width / 2 - 100, this.height - 25, 200, 20);
+        ButtonWidget doneButton = doneButtonBuilder.build();
+
+        for (Option option : PixUtilsConfig.getOptions()) {
+            addOption(option);
+        }
+
+        this.addDrawableChild(configScreenLabel);
+        this.addDrawableChild(optionsContainer);
+        this.addDrawableChild(doneButton);
     }
 }
