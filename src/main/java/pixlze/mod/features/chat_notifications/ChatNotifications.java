@@ -76,22 +76,25 @@ public class ChatNotifications {
                 ChatNotifications.message = Text.of("guild raid finished");
                 messageTimer = 40;
                 showMessage = true;
-                if (ApiInfo.wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString().equals("ICo"))
-                    new Thread(() -> {
+                new Thread(() -> {
+                    try {
                         HttpPost post = new HttpPost(PixUtils.secrets.get("guild_raid_urls").getAsJsonObject().get(ApiInfo.wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString()).getAsString() + "addRaid");
-                        try {
-                            StringEntity body = new StringEntity(PixUtils.gson.toJson(new CompletedRaidPojo(new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(4)}, raidMatcher.group(5), System.currentTimeMillis())));
-                            post.setEntity(body);
-                            post.setHeader("Content-type", "application/json");
-                            post.setHeader("Authorization", "Bearer " + ApiInfo.guildRaidServerToken);
-                            HttpResponse response = PixUtils.httpClient.execute(post);
-                            PixUtils.LOGGER.info("{} guild raid response", EntityUtils.toString(response.getEntity()));
-                        } catch (Exception e) {
-                            PixUtils.LOGGER.error("error: {}", e.getMessage());
-                        }
-                    }).start();
+                        StringEntity body = new StringEntity(PixUtils.gson.toJson(new CompletedRaidPojo(new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(4)}, raidMatcher.group(5), System.currentTimeMillis())));
+                        post.setEntity(body);
+                        post.setHeader("Content-type", "application/json");
+                        post.setHeader("Authorization", "Bearer " + ApiInfo.guildRaidServerToken);
+                        HttpResponse response = PixUtils.httpClient.execute(post);
+                        PixUtils.LOGGER.info("{} guild raid response", EntityUtils.toString(response.getEntity()));
+                    } catch (Exception e) {
+                        PixUtils.LOGGER.error("guild raid post error: {} {}", e, e.getMessage());
+                    }
+                }).start();
             }
         }));
+
+        ClientReceiveMessageEvents.GAME_CANCELED.register((message, overlay) -> {
+            PixUtils.LOGGER.info("{} {} game cancelled", message, overlay);
+        });
         ArrayList<Pair<Pattern, String>> prev = new ArrayList<>();
         if (PixUtilsConfig.configObject != null) {
             for (JsonElement item : PixUtilsConfig.configObject.get(FEATURE_ID).getAsJsonArray()) {

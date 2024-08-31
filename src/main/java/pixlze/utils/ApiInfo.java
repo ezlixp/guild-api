@@ -17,6 +17,7 @@ public class ApiInfo {
     public static void initialize() {
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> new Thread(() -> {
             if (client.player != null && wynnPlayerInfo == null) {
+//                HttpGet get = new HttpGet("https://api.wynncraft.com/v3/player/" + client.player.getUuidAsString());
                 HttpGet get = new HttpGet("https://api.wynncraft.com/v3/player/" + "pixlze");
                 try {
                     HttpResponse response = PixUtils.httpClient.execute(get);

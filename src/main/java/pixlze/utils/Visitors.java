@@ -39,13 +39,13 @@ public class Visitors {
                                     currentVisit.append("&e").append(onHover.getFirst().getSiblings().getFirst().getString()).append("&b");
                                 }
                             } else {
-                                currentVisit.append(asString.replaceAll("\\n", "\\\\n").replaceAll("§", "&"));
+                                currentVisit.append(asString.replaceAll("\\n", "").replaceAll("§", "&"));
                             }
                         } else {
-                            currentVisit.append(asString.replaceAll("\\n", "\\\\n").replaceAll("§", "&"));
+                            currentVisit.append(asString.replaceAll("\\n", "").replaceAll("§", "&"));
                         }
                     } else if (onHover == null || onHover.size() < 2 || onHover.get(1).getString() == null || !Objects.requireNonNull(onHover.get(1).getString()).contains("'s nickname is ")) {
-                        currentVisit.append(asString.replaceAll("\\n", "\\\\n").replaceAll("§", "&"));
+                        currentVisit.append(asString.replaceAll("\\n", "").replaceAll("§", "&"));
                     }
                 } catch (Exception e) {
                     PixUtils.LOGGER.error("raid visitor hover error: {} {} {} with astring {}", e.getMessage(), e, asString, onHover);
@@ -76,7 +76,7 @@ public class Visitors {
                 if (style.isObfuscated()) {
                     currentVisit.append("&").append(Formatting.OBFUSCATED.getCode());
                 }
-                currentVisit.append(asString.replaceAll("\\n", "\\\\n").replaceAll("§", "&"));
+                currentVisit.append(asString.replaceAll("\\n", "").replaceAll("§", "&"));
             }
             return Optional.empty();
         }

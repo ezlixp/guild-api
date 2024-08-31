@@ -75,9 +75,9 @@ public class PixUtilsConfigScreen extends Screen {
 
     @Override
     protected void init() {
-        Text message = Text.of("PixUtils Config");
-        PixUtils.LOGGER.info("{}", textRenderer.getWidth(message));
+        rowY = 40;
 
+        Text message = Text.of("PixUtils Config");
         TextWidget configScreenLabel = new TextWidget(0, 12, width, textRenderer.fontHeight, message, textRenderer);
 
         optionsContainer = new ScrollableContainer(0, 30, width, height - 60, Text.of("mod options container"), 0.5F);
