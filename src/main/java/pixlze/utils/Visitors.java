@@ -25,11 +25,11 @@ public class Visitors {
                     if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text) {
                         onHover = ((Text) Objects.requireNonNull(style.getHoverEvent().getValue(style.getHoverEvent().getAction()))).getSiblings();
                     } else {
-                        PixUtils.LOGGER.info("null hover event: {} in message {}", style, asString);
+                        PixUtils.LOGGER.info("non text event: {} in message {}", style, asString);
                     }
                     if (asString.indexOf('/') == -1) {
                         if (onHover != null && onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(onHover.get(1).getString()).contains("'s nickname is ")) {
-                            currentVisit.append(onHover.getFirst().getString());
+                            currentVisit.append("&e").append(onHover.getFirst().getString()).append("&b");
                         } else {
                             currentVisit.append(asString.replaceAll("\\n", "\\\\n").replaceAll("§", "&"));
                         }
@@ -73,9 +73,7 @@ public class Visitors {
     public static final StringVisitable.StyledVisitor<String> PLAIN_VISITOR = new StringVisitable.StyledVisitor<>() {
         @Override
         public Optional<String> accept(Style style, String asString) {
-            PixUtils.LOGGER.info("{} {}", style.getFont(), Identifier.of("default"));
             if (style.getFont().equals(Identifier.of("default"))) {
-                PixUtils.LOGGER.info("here");
                 currentVisit.append(asString.replaceAll("§.", ""));
             }
             return Optional.empty();

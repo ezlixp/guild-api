@@ -71,7 +71,7 @@ public class ChatNotifications {
             }
             Visitors.currentVisit = new StringBuilder();
             message1.visit(Visitors.RAID_VISITOR, message1.getStyle());
-            Matcher raidMatcher = Pattern.compile("&e(.*?)&b.*?&e(.*?)&b.*?&e(.*?)&b.*?&e(.*?)&b.*?&3(.*?)&b").matcher(Visitors.currentVisit);
+            Matcher raidMatcher = Pattern.compile(".*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*?&3(.*?)&b").matcher(Visitors.currentVisit);
             if (raidMatcher.find() && !Visitors.currentVisit.toString().contains(":")) {
                 ChatNotifications.message = Text.of("guild raid finished");
                 messageTimer = 40;

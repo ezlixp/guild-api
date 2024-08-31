@@ -67,7 +67,6 @@ public abstract class ChatMixin extends Screen {
                 List<Text> messageParts = message.content().getWithStyle(message.content().getStyle());
                 List<StringVisitable> pieces = new ArrayList<>();
                 List<Text> currentVisitable = new ArrayList<>();
-
                 for (Text part : messageParts) {
                     String literal = part.getLiteralString();
                     String string = part.getString();
@@ -77,7 +76,6 @@ public abstract class ChatMixin extends Screen {
                     } else if (string != null) {
                         content = string;
                     }
-
                     if (content != null) {
                         int index = 0;
                         int occ = content.indexOf("\n", index);
@@ -110,7 +108,7 @@ public abstract class ChatMixin extends Screen {
                 for (StringVisitable piece : pieces) {
                     lines += textRenderer.getTextHandler().wrapLines(piece, chatWidth, message.content().getStyle()).size();
                 }
-
+                lines = Math.max(lines, 1);
                 if (line >= scrollOffset) {
                     if (mouseX <= chatWidth && mouseY <= chatBottom - lineHeight * (line - scrollOffset) && mouseY >= chatBottom - lineHeight * (line + lines - scrollOffset)) {
                         if (CopyChat.config.getValue()) {
@@ -129,6 +127,8 @@ public abstract class ChatMixin extends Screen {
                                 Visitors.currentVisit = new StringBuilder();
                                 message.content().visit(Visitors.RAID_VISITOR, message.content().getStyle());
                                 PixUtils.LOGGER.info("{} with raid visitor. the message has {} lines", Visitors.currentVisit, lines);
+                                PixUtils.LOGGER.info("{} parts (getwithstyle)", messageParts);
+                                PixUtils.LOGGER.info("{} wraplines, lineparts {}", textRenderer.getWrappedLinesHeight(message.content(), chatWidth) / 9, textRenderer.wrapLines(message.content(), chatWidth));
                             }
                         }
                     }
