@@ -26,6 +26,7 @@ import pixlze.utils.ApiInfo;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 
@@ -61,13 +62,18 @@ public class PixUtils implements ModInitializer {
                 "Pix Utils"
         ));
 
+        ApiInfo.initialize();
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (openConfigKeybind.wasPressed()) {
                 client.setScreen(new PixUtilsConfigScreen(MinecraftClient.getInstance().currentScreen));
             }
+            if (ApiInfo.guildRaidTokenCreatedOn != null && new Date().getTime() - ApiInfo.guildRaidTokenCreatedOn.getTime() >= 72000000) {
+                PixUtils.LOGGER.info("refreshing token");
+                ApiInfo.refreshGuildRaidServerToken();
+            }
         });
 
-        ApiInfo.initialize();
 
         PixUtilsConfig.initialize();
         CopyChat.initialize();
