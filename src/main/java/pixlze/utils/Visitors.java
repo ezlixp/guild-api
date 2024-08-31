@@ -20,16 +20,27 @@ public class Visitors {
                 return "break".describeConstable();
             }
             if (style.getHoverEvent() != null) {
+                List<Text> onHover = null;
+                if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text) {
+                    onHover = ((Text) Objects.requireNonNull(style.getHoverEvent().getValue(style.getHoverEvent().getAction()))).getSiblings();
+                } else {
+                    PixUtils.LOGGER.info("non text event: {} in message {}", style, asString);
+                }
                 try {
-                    List<Text> onHover = null;
-                    if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text) {
-                        onHover = ((Text) Objects.requireNonNull(style.getHoverEvent().getValue(style.getHoverEvent().getAction()))).getSiblings();
-                    } else {
-                        PixUtils.LOGGER.info("non text event: {} in message {}", style, asString);
-                    }
                     if (asString.indexOf('/') == -1) {
-                        if (onHover != null && onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(onHover.get(1).getString()).contains("'s nickname is ")) {
-                            currentVisit.append("&e").append(onHover.getFirst().getString()).append("&b");
+                        if (onHover != null) {
+                            if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(onHover.get(1).getString()).contains("nickname is"))
+                                currentVisit.append("&e").append(onHover.getFirst().getString()).append("&b");
+                            else if (!onHover.isEmpty() && onHover.getFirst().getString() != null && onHover.getFirst().getString().contains("real username is")) {
+                                PixUtils.LOGGER.info("adding {}", onHover);
+                                if (onHover.size() > 1) {
+                                    currentVisit.append("&e").append(onHover.get(1).getString()).append("&b");
+                                } else {
+                                    currentVisit.append("&e").append(onHover.getFirst().getSiblings().getFirst().getString()).append("&b");
+                                }
+                            } else {
+                                currentVisit.append(asString.replaceAll("\\n", "\\\\n").replaceAll("§", "&"));
+                            }
                         } else {
                             currentVisit.append(asString.replaceAll("\\n", "\\\\n").replaceAll("§", "&"));
                         }
@@ -37,7 +48,7 @@ public class Visitors {
                         currentVisit.append(asString.replaceAll("\\n", "\\\\n").replaceAll("§", "&"));
                     }
                 } catch (Exception e) {
-                    PixUtils.LOGGER.error("raid visitor hover error: {}", e.getMessage());
+                    PixUtils.LOGGER.error("raid visitor hover error: {} {} {} with astring {}", e.getMessage(), e, asString, onHover);
                 }
             } else {
                 if (style.getColor() != null) {
