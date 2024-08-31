@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public class Visitors {
     public static StringBuilder currentVisit;
-    public static final StringVisitable.StyledVisitor<String> RAID_VISITOR = new StringVisitable.StyledVisitor<String>() {
+    public static final StringVisitable.StyledVisitor<String> RAID_VISITOR = new StringVisitable.StyledVisitor<>() {
         @Override
         public Optional<String> accept(Style style, String asString) {
             if (style.getFont().getPath().startsWith("hud")) {
