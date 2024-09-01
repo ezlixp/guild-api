@@ -5,13 +5,13 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import pixlze.pixutils.PixUtils;
+import pixlze.pixutils.core.PixUtils;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class VisitorUtils {
+public class ChatUtils {
     public static StringBuilder currentVisit;
     public static final StringVisitable.StyledVisitor<String> RAID_VISITOR = new StringVisitable.StyledVisitor<>() {
         @Override

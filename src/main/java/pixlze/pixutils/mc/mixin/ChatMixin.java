@@ -1,4 +1,4 @@
-package pixlze.pixutils.mixin;
+package pixlze.pixutils.mc.mixin;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
@@ -13,10 +13,10 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import pixlze.pixutils.PixUtils;
+import pixlze.pixutils.core.PixUtils;
 import pixlze.pixutils.features.copy_chat.CopyChat;
-import pixlze.pixutils.mixin.accessors.ChatHudAccessorInvoker;
-import pixlze.pixutils.utils.VisitorUtils;
+import pixlze.pixutils.mc.mixin.accessors.ChatHudAccessorInvoker;
+import pixlze.pixutils.utils.ChatUtils;
 
 import java.util.List;
 
@@ -67,20 +67,20 @@ public abstract class ChatMixin extends Screen {
                     if (mouseX <= chatWidth && mouseY <= chatBottom - lineHeight * (line - scrollOffset) && mouseY >= chatBottom - lineHeight * (line + lines - scrollOffset)) {
                         if (CopyChat.config.getValue()) {
                             if (Screen.hasControlDown()) {
-                                VisitorUtils.currentVisit = new StringBuilder();
-                                message.content().visit(VisitorUtils.PLAIN_VISITOR, message.content().getStyle());
-                                MinecraftClient.getInstance().keyboard.setClipboard(VisitorUtils.currentVisit.toString());
+                                ChatUtils.currentVisit = new StringBuilder();
+                                message.content().visit(ChatUtils.PLAIN_VISITOR, message.content().getStyle());
+                                MinecraftClient.getInstance().keyboard.setClipboard(ChatUtils.currentVisit.toString());
                             }
                             if (Screen.hasAltDown()) {
-                                VisitorUtils.currentVisit = new StringBuilder();
-                                message.content().visit(VisitorUtils.STYLED_VISITOR, message.content().getStyle());
-                                MinecraftClient.getInstance().keyboard.setClipboard(VisitorUtils.currentVisit.toString());
+                                ChatUtils.currentVisit = new StringBuilder();
+                                message.content().visit(ChatUtils.STYLED_VISITOR, message.content().getStyle());
+                                MinecraftClient.getInstance().keyboard.setClipboard(ChatUtils.currentVisit.toString());
                             }
                             if (Screen.hasShiftDown()) {
                                 MinecraftClient.getInstance().keyboard.setClipboard(message.content().toString());
-                                VisitorUtils.currentVisit = new StringBuilder();
-                                message.content().visit(VisitorUtils.RAID_VISITOR, message.content().getStyle());
-                                PixUtils.LOGGER.info("{} with raid visitor. the message has {} lines", VisitorUtils.currentVisit, lines);
+                                ChatUtils.currentVisit = new StringBuilder();
+                                message.content().visit(ChatUtils.RAID_VISITOR, message.content().getStyle());
+                                PixUtils.LOGGER.info("{} with raid visitor. the message has {} lines", ChatUtils.currentVisit, lines);
                             }
                         }
                     }

@@ -1,4 +1,4 @@
-package pixlze.pixutils;
+package pixlze.pixutils.core;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -17,12 +17,12 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pixlze.pixutils.config.PixUtilsConfig;
-import pixlze.pixutils.config.PixUtilsConfigScreen;
+import pixlze.pixutils.core.net.ApiManager;
+import pixlze.pixutils.core.type_adapters.PairAdapter;
+import pixlze.pixutils.core.type_adapters.PatternAdapter;
 import pixlze.pixutils.features.chat_notifications.ChatNotifications;
 import pixlze.pixutils.features.copy_chat.CopyChat;
-import pixlze.pixutils.net.ApiManager;
-import pixlze.pixutils.type_adapters.PairAdapter;
-import pixlze.pixutils.type_adapters.PatternAdapter;
+import pixlze.pixutils.screens.config.PixUtilsConfigScreen;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;

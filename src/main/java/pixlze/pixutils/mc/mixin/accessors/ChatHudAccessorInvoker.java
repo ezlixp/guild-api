@@ -1,4 +1,4 @@
-package pixlze.pixutils.mixin.accessors;
+package pixlze.pixutils.mc.mixin.accessors;
 
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;

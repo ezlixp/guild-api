@@ -1,4 +1,4 @@
-package pixlze.pixutils.gui;
+package pixlze.pixutils.screens.config.widgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;

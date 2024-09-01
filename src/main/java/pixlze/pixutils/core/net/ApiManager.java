@@ -1,4 +1,4 @@
-package pixlze.pixutils.net;
+package pixlze.pixutils.core.net;
 
 import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -7,8 +7,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import pixlze.pixutils.PixUtils;
-import pixlze.pixutils.net.models.GetTokenModel;
+import pixlze.pixutils.core.PixUtils;
+import pixlze.pixutils.core.net.models.GetTokenModel;
 
 import java.util.Date;
 

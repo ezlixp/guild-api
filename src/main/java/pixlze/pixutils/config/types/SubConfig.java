@@ -7,8 +7,8 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import pixlze.pixutils.PixUtils;
 import pixlze.pixutils.config.PixUtilsConfig;
+import pixlze.pixutils.core.PixUtils;
 import pixlze.pixutils.features.chat_notifications.EditNotificationsScreen;
 
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package pixlze.pixutils.net.models;
+package pixlze.pixutils.core.net.models;
 
 public class GetTokenModel {
     private final String validationKey;

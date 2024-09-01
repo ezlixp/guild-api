@@ -1,4 +1,4 @@
-package pixlze.pixutils.config.types;
+package pixlze.pixutils.screens.config;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;

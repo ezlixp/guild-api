@@ -1,8 +1,8 @@
 package pixlze.pixutils.features.copy_chat;
 
-import pixlze.pixutils.PixUtils;
 import pixlze.pixutils.config.PixUtilsConfig;
 import pixlze.pixutils.config.types.Toggle;
+import pixlze.pixutils.core.PixUtils;
 
 public class CopyChat {
     static final String FEATURE_ID = "copy_chat";

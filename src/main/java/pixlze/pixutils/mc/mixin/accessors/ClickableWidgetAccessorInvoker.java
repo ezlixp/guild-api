@@ -1,4 +1,4 @@
-package pixlze.pixutils.mixin.accessors;
+package pixlze.pixutils.mc.mixin.accessors;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipState;

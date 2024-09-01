@@ -11,12 +11,12 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import pixlze.pixutils.PixUtils;
 import pixlze.pixutils.config.PixUtilsConfig;
 import pixlze.pixutils.config.types.SubConfig;
-import pixlze.pixutils.net.ApiManager;
-import pixlze.pixutils.net.models.CompletedRaidModel;
-import pixlze.pixutils.utils.VisitorUtils;
+import pixlze.pixutils.core.PixUtils;
+import pixlze.pixutils.core.net.ApiManager;
+import pixlze.pixutils.core.net.models.CompletedRaidModel;
+import pixlze.pixutils.utils.ChatUtils;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -46,33 +46,32 @@ public class ChatNotifications {
 
         });
         ClientReceiveMessageEvents.CHAT.register(((message1, signedMessage, sender, params, receptionTimestamp) -> {
-            VisitorUtils.currentVisit = new StringBuilder();
-            Optional<String> visited = message1.visit(VisitorUtils.STYLED_VISITOR, message1.getStyle());
+            ChatUtils.currentVisit = new StringBuilder();
+            Optional<String> visited = message1.visit(ChatUtils.STYLED_VISITOR, message1.getStyle());
             if (visited.isPresent()) return;
             for (Pair<Pattern, String> c : config.getValue()) {
-                if (c.getLeft().matcher(VisitorUtils.currentVisit).matches()) {
+                if (c.getLeft().matcher(ChatUtils.currentVisit).matches()) {
                     ChatNotifications.message = Text.of(c.getRight());
                     messageTimer = 40;
                     showMessage = true;
                 }
             }
         }));
-        ClientReceiveMessageEvents.GAME.register(((message1, overlay) -> {
-            if (overlay) return;
-            VisitorUtils.currentVisit = new StringBuilder();
-            Optional<String> visited = message1.visit(VisitorUtils.STYLED_VISITOR, message1.getStyle());
-            if (visited.isPresent()) return;
+        ClientReceiveMessageEvents.ALLOW_GAME.register(((message1, overlay) -> {
+            if (overlay) return true;
+            ChatUtils.currentVisit = new StringBuilder();
+            message1.visit(ChatUtils.STYLED_VISITOR, message1.getStyle());
             for (Pair<Pattern, String> c : config.getValue()) {
-                if (c.getLeft().matcher(VisitorUtils.currentVisit).find()) {
+                if (c.getLeft().matcher(ChatUtils.currentVisit).find()) {
                     ChatNotifications.message = Text.of(c.getRight());
                     messageTimer = 40;
                     showMessage = true;
                 }
             }
-            VisitorUtils.currentVisit = new StringBuilder();
-            message1.visit(VisitorUtils.RAID_VISITOR, message1.getStyle());
-            Matcher raidMatcher = Pattern.compile(".*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*?&3(.*?)&b").matcher(VisitorUtils.currentVisit);
-            if (raidMatcher.find() && !VisitorUtils.currentVisit.toString().contains(":")) {
+            ChatUtils.currentVisit = new StringBuilder();
+            message1.visit(ChatUtils.RAID_VISITOR, message1.getStyle());
+            Matcher raidMatcher = Pattern.compile(".*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*?&3(.*?)&b").matcher(ChatUtils.currentVisit);
+            if (raidMatcher.find() && !ChatUtils.currentVisit.toString().contains(":")) {
                 ChatNotifications.message = Text.of("guild raid finished");
                 messageTimer = 40;
                 showMessage = true;
@@ -90,11 +89,8 @@ public class ChatNotifications {
                     }
                 }).start();
             }
+            return true;
         }));
-
-        ClientReceiveMessageEvents.GAME_CANCELED.register((message, overlay) -> {
-            PixUtils.LOGGER.info("{} {} game cancelled", message, overlay);
-        });
 
         ArrayList<Pair<Pattern, String>> prev = new ArrayList<>();
         if (PixUtilsConfig.configObject != null) {

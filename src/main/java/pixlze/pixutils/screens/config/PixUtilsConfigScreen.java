@@ -1,4 +1,4 @@
-package pixlze.pixutils.config;
+package pixlze.pixutils.screens.config;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ButtonTextures;
@@ -10,12 +10,13 @@ import net.minecraft.client.gui.widget.ToggleButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
-import pixlze.pixutils.PixUtils;
+import pixlze.pixutils.config.PixUtilsConfig;
 import pixlze.pixutils.config.types.Option;
 import pixlze.pixutils.config.types.SubConfig;
 import pixlze.pixutils.config.types.Toggle;
-import pixlze.pixutils.gui.ClickableChild;
-import pixlze.pixutils.gui.ScrollableContainer;
+import pixlze.pixutils.core.PixUtils;
+import pixlze.pixutils.screens.config.widgets.ClickableChild;
+import pixlze.pixutils.screens.config.widgets.ScrollableContainer;
 
 import java.io.IOException;
 

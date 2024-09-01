@@ -5,10 +5,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonWriter;
 import net.minecraft.client.gui.screen.Screen;
-import pixlze.pixutils.PixUtils;
 import pixlze.pixutils.config.types.Option;
 import pixlze.pixutils.config.types.SubConfig;
 import pixlze.pixutils.config.types.Toggle;
+import pixlze.pixutils.core.PixUtils;
 
 import java.io.File;
 import java.io.FileReader;

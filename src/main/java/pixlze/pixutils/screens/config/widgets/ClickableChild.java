@@ -1,10 +1,10 @@
-package pixlze.pixutils.gui;
+package pixlze.pixutils.screens.config.widgets;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.sound.SoundManager;
-import pixlze.pixutils.mixin.accessors.ClickableWidgetAccessorInvoker;
+import pixlze.pixutils.mc.mixin.accessors.ClickableWidgetAccessorInvoker;
 
 public record ClickableChild<T extends ClickableWidget>(T child) implements Element {
 

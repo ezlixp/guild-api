@@ -6,10 +6,10 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import org.jetbrains.annotations.Nullable;
-import pixlze.pixutils.PixUtils;
-import pixlze.pixutils.config.types.SubConfigScreen;
-import pixlze.pixutils.gui.ClickableChild;
-import pixlze.pixutils.gui.ScrollableContainer;
+import pixlze.pixutils.core.PixUtils;
+import pixlze.pixutils.screens.config.SubConfigScreen;
+import pixlze.pixutils.screens.config.widgets.ClickableChild;
+import pixlze.pixutils.screens.config.widgets.ScrollableContainer;
 import pixlze.pixutils.utils.ButtonWidgetUtils;
 
 import java.util.ArrayList;
