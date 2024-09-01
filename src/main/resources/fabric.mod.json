@@ -15,14 +15,11 @@
   "icon": "assets/pixutils/icon.png",
   "environment": "*",
   "entrypoints": {
-    "main": [
-      "pixlze.mod.PixUtils"
+    "client": [
+      "pixlze.pixutils.PixUtils"
     ],
     "modmenu": [
-      "pixlze.mod.config.PixUtilsModMenuIntegration"
-    ],
-    "fabric-datagen": [
-      "pixlze.mod.PixUtilsDataGenerator"
+      "pixlze.pixutils.config.PixUtilsModMenuIntegration"
     ]
   },
   "mixins": [
