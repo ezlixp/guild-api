@@ -10,11 +10,11 @@ import net.minecraft.client.gui.widget.ToggleButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
-import pixlze.pixutils.config.PixUtilsConfig;
+import pixlze.pixutils.PixUtils;
+import pixlze.pixutils.components.Managers;
 import pixlze.pixutils.config.types.Option;
 import pixlze.pixutils.config.types.SubConfig;
 import pixlze.pixutils.config.types.Toggle;
-import pixlze.pixutils.core.PixUtils;
 import pixlze.pixutils.screens.config.widgets.ClickableChild;
 import pixlze.pixutils.screens.config.widgets.ScrollableContainer;
 
@@ -29,7 +29,7 @@ public class PixUtilsConfigScreen extends Screen {
     private int rowY = 40;
 
     public PixUtilsConfigScreen(Screen parent) {
-        super(Text.of("My Mod Config"));
+        super(Text.of("pixutils.configScreen"));
         this.parent = parent;
     }
 
@@ -66,7 +66,7 @@ public class PixUtilsConfigScreen extends Screen {
     @Override
     public void close() {
         try {
-            PixUtilsConfig.save();
+            Managers.Config.save();
         } catch (IOException e) {
             PixUtils.LOGGER.error(e.getMessage());
         }
@@ -85,7 +85,7 @@ public class PixUtilsConfigScreen extends Screen {
 
         Builder doneButtonBuilder = new Builder(Text.of("Done"), b -> {
             try {
-                PixUtilsConfig.save();
+                Managers.Config.save();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -94,7 +94,7 @@ public class PixUtilsConfigScreen extends Screen {
         doneButtonBuilder.dimensions(this.width / 2 - 100, this.height - 25, 200, 20);
         ButtonWidget doneButton = doneButtonBuilder.build();
 
-        for (Option option : PixUtilsConfig.getOptions()) {
+        for (Option option : Managers.Config.getOptions()) {
             addOption(option);
         }
 

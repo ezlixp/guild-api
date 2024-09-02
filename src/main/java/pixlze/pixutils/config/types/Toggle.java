@@ -4,7 +4,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import pixlze.pixutils.config.PixUtilsConfig;
+import pixlze.pixutils.components.Managers;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class Toggle extends Option {
 
         @Override
         public void write(JsonWriter out, Toggle value) throws IOException {
-            PixUtilsConfig.configObject.addProperty(value.id, value.value);
+            Managers.Config.configObject.addProperty(value.id, value.value);
         }
 
         @Override

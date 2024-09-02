@@ -16,7 +16,7 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "pixlze.pixutils.core.PixUtils"
+      "pixlze.pixutils.PixUtils"
     ],
     "modmenu": [
       "pixlze.pixutils.config.PixUtilsModMenuIntegration"

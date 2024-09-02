@@ -1,8 +1,8 @@
 package pixlze.pixutils.features.copy_chat;
 
-import pixlze.pixutils.config.PixUtilsConfig;
+import pixlze.pixutils.PixUtils;
+import pixlze.pixutils.components.Managers;
 import pixlze.pixutils.config.types.Toggle;
-import pixlze.pixutils.core.PixUtils;
 
 public class CopyChat {
     static final String FEATURE_ID = "copy_chat";
@@ -12,13 +12,13 @@ public class CopyChat {
     // issue with new messages coming in while screen open.
     public static void initialize() {
         boolean prev = false;
-        if (PixUtilsConfig.configObject != null) {
+        if (Managers.Config.configObject != null) {
             try {
-                prev = PixUtilsConfig.configObject.get(FEATURE_ID).getAsBoolean();
+                prev = Managers.Config.configObject.get(FEATURE_ID).getAsBoolean();
             } catch (Exception e) {
                 PixUtils.LOGGER.error(e.getMessage());
             }
         }
-        config = PixUtilsConfig.registerToggle(FEATURE_NAME, FEATURE_ID, prev);
+        config = Managers.Config.registerToggle(FEATURE_NAME, FEATURE_ID, prev);
     }
 }

@@ -1,4 +1,4 @@
-package pixlze.pixutils.core.net.models;
+package pixlze.pixutils.net.models;
 
 public class CompletedRaidModel {
     private final String[] users;

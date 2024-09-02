@@ -1,18 +1,21 @@
-package pixlze.pixutils.core.net;
+package pixlze.pixutils.net;
 
 import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import pixlze.pixutils.core.PixUtils;
-import pixlze.pixutils.core.net.models.GetTokenModel;
+import pixlze.pixutils.PixUtils;
+import pixlze.pixutils.net.models.GetTokenModel;
 
 import java.util.Date;
 
 public class ApiManager {
+    public static final HttpClient httpClient = HttpClientBuilder.create().build();
     public static JsonObject wynnPlayerInfo;
     public static String guildRaidServerToken;
     public static Date guildRaidTokenCreatedOn;
@@ -25,7 +28,7 @@ public class ApiManager {
                     HttpGet get = new HttpGet("https://api.wynncraft.com/v3/player/" + client.player.getUuidAsString());
 //                    HttpGet get = new HttpGet("https://api.wynncraft.com/v3/player/" + "pixlze");
                     try {
-                        HttpResponse response = PixUtils.httpClient.execute(get);
+                        HttpResponse response = httpClient.execute(get);
                         wynnPlayerInfo = PixUtils.gson.fromJson(EntityUtils.toString(response.getEntity()), JsonObject.class);
                         if (wynnPlayerInfo.get("Error") != null) {
                             String message = wynnPlayerInfo.get("Error").getAsString();
@@ -46,7 +49,7 @@ public class ApiManager {
                         StringEntity body = new StringEntity(PixUtils.gson.toJson(new GetTokenModel(PixUtils.secrets.get("validation_key").getAsString())));
                         post.setEntity(body);
                         post.setHeader("Content-type", "application/json");
-                        JsonObject response = PixUtils.gson.fromJson(EntityUtils.toString(PixUtils.httpClient.execute(post).getEntity()), JsonObject.class);
+                        JsonObject response = PixUtils.gson.fromJson(EntityUtils.toString(httpClient.execute(post).getEntity()), JsonObject.class);
                         if (response.get("status").getAsBoolean()) {
                             guildRaidServerToken = response.get("token").getAsString();
                             PixUtils.LOGGER.info("successfully loaded guild raid server token");
@@ -72,7 +75,7 @@ public class ApiManager {
                     StringEntity body = new StringEntity(PixUtils.gson.toJson(new GetTokenModel(PixUtils.secrets.get("validation_key").getAsString())));
                     post.setEntity(body);
                     post.setHeader("Content-type", "application/json");
-                    JsonObject response = PixUtils.gson.fromJson(EntityUtils.toString(PixUtils.httpClient.execute(post).getEntity()), JsonObject.class);
+                    JsonObject response = PixUtils.gson.fromJson(EntityUtils.toString(httpClient.execute(post).getEntity()), JsonObject.class);
                     if (response.get("status").getAsBoolean()) {
                         guildRaidServerToken = response.get("token").getAsString();
                         PixUtils.LOGGER.info("successfully refreshed guild raid server token");

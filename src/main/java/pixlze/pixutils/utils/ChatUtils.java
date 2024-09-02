@@ -5,14 +5,14 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import pixlze.pixutils.core.PixUtils;
+import pixlze.pixutils.PixUtils;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 public class ChatUtils {
-    public static StringBuilder currentVisit;
+    private static StringBuilder currentVisit;
     public static final StringVisitable.StyledVisitor<String> RAID_VISITOR = new StringVisitable.StyledVisitor<>() {
         @Override
         public Optional<String> accept(Style style, String asString) {
@@ -30,22 +30,21 @@ public class ChatUtils {
                     if (asString.indexOf('/') == -1) {
                         if (onHover != null) {
                             if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(onHover.get(1).getString()).contains("nickname is"))
-                                currentVisit.append("&e").append(onHover.getFirst().getString()).append("&b");
+                                currentVisit.append("§e").append(onHover.getFirst().getString()).append("§b");
                             else if (!onHover.isEmpty() && onHover.getFirst().getString() != null && onHover.getFirst().getString().contains("real username is")) {
-                                PixUtils.LOGGER.info("adding {}", onHover);
                                 if (onHover.size() > 1) {
-                                    currentVisit.append("&e").append(onHover.get(1).getString()).append("&b");
+                                    currentVisit.append("§e").append(onHover.get(1).getString()).append("§b");
                                 } else {
-                                    currentVisit.append("&e").append(onHover.getFirst().getSiblings().getFirst().getString()).append("&b");
+                                    currentVisit.append("§e").append(onHover.getFirst().getSiblings().getFirst().getString()).append("§b");
                                 }
                             } else {
-                                currentVisit.append(asString.replaceAll("\\n", "").replaceAll("§", "&"));
+                                currentVisit.append(asString.replaceAll("\\n", ""));
                             }
                         } else {
-                            currentVisit.append(asString.replaceAll("\\n", "").replaceAll("§", "&"));
+                            currentVisit.append(asString.replaceAll("\\n", ""));
                         }
                     } else if (onHover == null || onHover.size() < 2 || onHover.get(1).getString() == null || !Objects.requireNonNull(onHover.get(1).getString()).contains("'s nickname is ")) {
-                        currentVisit.append(asString.replaceAll("\\n", "").replaceAll("§", "&"));
+                        currentVisit.append(asString.replaceAll("\\n", ""));
                     }
                 } catch (Exception e) {
                     PixUtils.LOGGER.error("raid visitor hover error: {} {} {} with astring {}", e.getMessage(), e, asString, onHover);
@@ -59,24 +58,24 @@ public class ChatUtils {
                             break;
                         }
                     }
-                    currentVisit.append("&").append(Objects.requireNonNull(Formatting.byColorIndex(colorIndex)).getCode());
+                    currentVisit.append("§").append(Objects.requireNonNull(Formatting.byColorIndex(colorIndex)).getCode());
                 }
                 if (style.isBold()) {
-                    currentVisit.append("&").append(Formatting.BOLD.getCode());
+                    currentVisit.append("§").append(Formatting.BOLD.getCode());
                 }
                 if (style.isItalic()) {
-                    currentVisit.append("&").append(Formatting.ITALIC.getCode());
+                    currentVisit.append("§").append(Formatting.ITALIC.getCode());
                 }
                 if (style.isUnderlined()) {
-                    currentVisit.append("&").append(Formatting.UNDERLINE.getCode());
+                    currentVisit.append("§").append(Formatting.UNDERLINE.getCode());
                 }
                 if (style.isStrikethrough()) {
-                    currentVisit.append("&").append(Formatting.STRIKETHROUGH.getCode());
+                    currentVisit.append("§").append(Formatting.STRIKETHROUGH.getCode());
                 }
                 if (style.isObfuscated()) {
-                    currentVisit.append("&").append(Formatting.OBFUSCATED.getCode());
+                    currentVisit.append("§").append(Formatting.OBFUSCATED.getCode());
                 }
-                currentVisit.append(asString.replaceAll("\\n", "").replaceAll("§", "&"));
+                currentVisit.append(asString.replaceAll("\\n", ""));
             }
             return Optional.empty();
         }
@@ -125,4 +124,22 @@ public class ChatUtils {
             return Optional.empty();
         }
     };
+
+    public static String parseRaid(Text text) {
+        currentVisit = new StringBuilder();
+        text.visit(RAID_VISITOR, text.getStyle());
+        return currentVisit.toString();
+    }
+
+    public static String parsePlain(Text text) {
+        currentVisit = new StringBuilder();
+        text.visit(PLAIN_VISITOR, text.getStyle());
+        return currentVisit.toString();
+    }
+
+    public static String parseStyled(Text text) {
+        currentVisit = new StringBuilder();
+        text.visit(PLAIN_VISITOR, text.getStyle());
+        return currentVisit.toString();
+    }
 }

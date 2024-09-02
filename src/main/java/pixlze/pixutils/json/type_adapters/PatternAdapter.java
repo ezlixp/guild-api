@@ -1,4 +1,4 @@
-package pixlze.pixutils.core.type_adapters;
+package pixlze.pixutils.json.type_adapters;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;

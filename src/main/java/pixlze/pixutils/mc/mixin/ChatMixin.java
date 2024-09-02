@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import pixlze.pixutils.core.PixUtils;
+import pixlze.pixutils.PixUtils;
 import pixlze.pixutils.features.copy_chat.CopyChat;
 import pixlze.pixutils.mc.mixin.accessors.ChatHudAccessorInvoker;
 import pixlze.pixutils.utils.ChatUtils;
@@ -36,7 +36,7 @@ public abstract class ChatMixin extends Screen {
     }
 
     @Inject(method = "keyPressed", at = @At("HEAD"))
-    private void onKeyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<boolean[]> info) {
+    private void onKeyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<boolean[]> ci) {
         if (keyCode != 342 && keyCode != 346 && (modifiers & 4) != 0) {
             sendMessage(String.valueOf(count), false);
             ++count;
@@ -44,7 +44,7 @@ public abstract class ChatMixin extends Screen {
     }
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    private void onMouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<boolean[]> info) {
+    private void onMouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<boolean[]> ci) {
         assert client != null;
         assert client.currentScreen != null;
         ChatHud chatHud = client.inGameHud.getChatHud();
@@ -67,27 +67,21 @@ public abstract class ChatMixin extends Screen {
                     if (mouseX <= chatWidth && mouseY <= chatBottom - lineHeight * (line - scrollOffset) && mouseY >= chatBottom - lineHeight * (line + lines - scrollOffset)) {
                         if (CopyChat.config.getValue()) {
                             if (Screen.hasControlDown()) {
-                                ChatUtils.currentVisit = new StringBuilder();
-                                message.content().visit(ChatUtils.PLAIN_VISITOR, message.content().getStyle());
-                                MinecraftClient.getInstance().keyboard.setClipboard(ChatUtils.currentVisit.toString());
+                                MinecraftClient.getInstance().keyboard.setClipboard(ChatUtils.parsePlain(message.content()));
                             }
                             if (Screen.hasAltDown()) {
-                                ChatUtils.currentVisit = new StringBuilder();
-                                message.content().visit(ChatUtils.STYLED_VISITOR, message.content().getStyle());
-                                MinecraftClient.getInstance().keyboard.setClipboard(ChatUtils.currentVisit.toString());
+                                MinecraftClient.getInstance().keyboard.setClipboard(ChatUtils.parseStyled(message.content()));
                             }
                             if (Screen.hasShiftDown()) {
                                 MinecraftClient.getInstance().keyboard.setClipboard(message.content().toString());
-                                ChatUtils.currentVisit = new StringBuilder();
-                                message.content().visit(ChatUtils.RAID_VISITOR, message.content().getStyle());
-                                PixUtils.LOGGER.info("{} with raid visitor. the message has {} lines", ChatUtils.currentVisit, lines);
+                                PixUtils.LOGGER.info("{} with raid visitor. the message has {} lines", ChatUtils.parseRaid(message.content()), lines);
                             }
                         }
                     }
                 }
                 line += lines;
             }
-            info.cancel();
+            ci.cancel();
         }
     }
 }

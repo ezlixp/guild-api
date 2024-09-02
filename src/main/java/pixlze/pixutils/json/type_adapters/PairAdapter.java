@@ -1,10 +1,10 @@
-package pixlze.pixutils.core.type_adapters;
+package pixlze.pixutils.json.type_adapters;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import net.minecraft.util.Pair;
-import pixlze.pixutils.core.PixUtils;
+import pixlze.pixutils.PixUtils;
 
 import java.io.IOException;
 

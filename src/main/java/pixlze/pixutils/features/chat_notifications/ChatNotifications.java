@@ -11,15 +11,14 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import pixlze.pixutils.config.PixUtilsConfig;
+import pixlze.pixutils.PixUtils;
+import pixlze.pixutils.components.Managers;
 import pixlze.pixutils.config.types.SubConfig;
-import pixlze.pixutils.core.PixUtils;
-import pixlze.pixutils.core.net.ApiManager;
-import pixlze.pixutils.core.net.models.CompletedRaidModel;
+import pixlze.pixutils.net.ApiManager;
+import pixlze.pixutils.net.models.CompletedRaidModel;
 import pixlze.pixutils.utils.ChatUtils;
 
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,33 +44,19 @@ public class ChatNotifications {
                 showMessage = false;
 
         });
-        ClientReceiveMessageEvents.CHAT.register(((message1, signedMessage, sender, params, receptionTimestamp) -> {
-            ChatUtils.currentVisit = new StringBuilder();
-            Optional<String> visited = message1.visit(ChatUtils.STYLED_VISITOR, message1.getStyle());
-            if (visited.isPresent()) return;
+        ClientReceiveMessageEvents.GAME.register((message1, overlay) -> {
+            if (overlay) return;
+            String styledMessage = ChatUtils.parseStyled(message1);
             for (Pair<Pattern, String> c : config.getValue()) {
-                if (c.getLeft().matcher(ChatUtils.currentVisit).matches()) {
+                if (c.getLeft().matcher(styledMessage).find()) {
                     ChatNotifications.message = Text.of(c.getRight());
                     messageTimer = 40;
                     showMessage = true;
                 }
             }
-        }));
-        ClientReceiveMessageEvents.ALLOW_GAME.register(((message1, overlay) -> {
-            if (overlay) return true;
-            ChatUtils.currentVisit = new StringBuilder();
-            message1.visit(ChatUtils.STYLED_VISITOR, message1.getStyle());
-            for (Pair<Pattern, String> c : config.getValue()) {
-                if (c.getLeft().matcher(ChatUtils.currentVisit).find()) {
-                    ChatNotifications.message = Text.of(c.getRight());
-                    messageTimer = 40;
-                    showMessage = true;
-                }
-            }
-            ChatUtils.currentVisit = new StringBuilder();
-            message1.visit(ChatUtils.RAID_VISITOR, message1.getStyle());
-            Matcher raidMatcher = Pattern.compile(".*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*?&3(.*?)&b").matcher(ChatUtils.currentVisit);
-            if (raidMatcher.find() && !ChatUtils.currentVisit.toString().contains(":")) {
+            String raidMessage = ChatUtils.parseRaid(message1);
+            Matcher raidMatcher = Pattern.compile(".*§e(.*?)§b.*§e(.*?)§b.*§e(.*?)§b.*§e(.*?)§b.*?§3(.*?)§b").matcher(raidMessage);
+            if (raidMatcher.find() && !raidMessage.contains(":")) {
                 ChatNotifications.message = Text.of("guild raid finished");
                 messageTimer = 40;
                 showMessage = true;
@@ -82,19 +67,18 @@ public class ChatNotifications {
                         post.setEntity(body);
                         post.setHeader("Content-type", "application/json");
                         post.setHeader("Authorization", "Bearer " + ApiManager.guildRaidServerToken);
-                        HttpResponse response = PixUtils.httpClient.execute(post);
+                        HttpResponse response = ApiManager.httpClient.execute(post);
                         PixUtils.LOGGER.info("{} guild raid response", EntityUtils.toString(response.getEntity()));
                     } catch (Exception e) {
                         PixUtils.LOGGER.error("guild raid post error: {} {}", e, e.getMessage());
                     }
                 }).start();
             }
-            return true;
-        }));
+        });
 
         ArrayList<Pair<Pattern, String>> prev = new ArrayList<>();
-        if (PixUtilsConfig.configObject != null) {
-            for (JsonElement item : PixUtilsConfig.configObject.get(FEATURE_ID).getAsJsonArray()) {
+        if (Managers.Config.configObject != null) {
+            for (JsonElement item : Managers.Config.configObject.get(FEATURE_ID).getAsJsonArray()) {
                 try {
                     prev.add(new Pair<>(Pattern.compile(item.getAsJsonObject().get("left").getAsString()), item.getAsJsonObject().get("right").getAsString()));
                 } catch (Exception e) {
@@ -103,6 +87,6 @@ public class ChatNotifications {
             }
         }
         EditNotificationsScreen editNotificationsScreen = new EditNotificationsScreen();
-        config = PixUtilsConfig.registerSubConfig(FEATURE_NAME, FEATURE_ID, "Edit", editNotificationsScreen, prev);
+        config = Managers.Config.registerSubConfig(FEATURE_NAME, FEATURE_ID, "Edit", editNotificationsScreen, prev);
     }
 }
