@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "pixutils",
+  "id": "guildapi",
   "version": "${version}",
-  "name": "Pix Utils",
+  "name": "Guild Api",
   "description": "This is an example description! Tell everyone what your mod is about!",
   "authors": [
     "pixlze"
@@ -12,27 +12,21 @@
     "sources": "https://github.com/FabricMC/fabric-example-mod"
   },
   "license": "MIT",
-  "icon": "assets/pixutils/icon.png",
+  "icon": "assets/guildapi/icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [
-      "pixlze.pixutils.PixUtils"
-    ],
-    "modmenu": [
-      "pixlze.pixutils.config.PixUtilsModMenuIntegration"
+      "pixlze.guildapi.GuildApi"
     ]
   },
   "mixins": [
-    "pixutils.mixins.json"
+    "guildapi.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.15.11",
     "minecraft": "~1.21",
     "java": ">=21",
     "fabric-api": "*"
-  },
-  "suggests": {
-    "modmenu": "*"
   }
 }
 
