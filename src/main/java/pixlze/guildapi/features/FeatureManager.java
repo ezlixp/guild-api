@@ -5,6 +5,8 @@ public class FeatureManager {
 
     public void init() {
         registerFeature(new GuildRaidFeature());
+        registerFeature(new AspectListFeature());
+        registerFeature(new TomeListFeature());
     }
 
     private void registerFeature(Feature feature) {
