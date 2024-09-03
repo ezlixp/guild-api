@@ -13,11 +13,35 @@ import java.util.Optional;
 
 public class ChatUtils {
     private static StringBuilder currentVisit;
+    public static final StringVisitable.StyledVisitor<String> PLAIN_VISITOR = new StringVisitable.StyledVisitor<>() {
+        @Override
+        public Optional<String> accept(Style style, String asString) {
+            if (style.getFont().equals(Identifier.of("default"))) {
+                currentVisit.append(asString.replaceAll("§.", ""));
+            }
+            return Optional.empty();
+        }
+    };
+    private static boolean afterNewline;
+    public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = new StringVisitable.StyledVisitor<>() {
+        @Override
+        public Optional<String> accept(Style style, String asString) {
+            if (style.getFont().getPath().startsWith("hud")) {
+                return "break".describeConstable();
+            }
+            addStyleCodes(style, asString, "&", "\\\\n");
+            return Optional.empty();
+        }
+    };
     public static final StringVisitable.StyledVisitor<String> RAID_VISITOR = new StringVisitable.StyledVisitor<>() {
         @Override
         public Optional<String> accept(Style style, String asString) {
             if (style.getFont().getPath().startsWith("hud")) {
                 return "break".describeConstable();
+            }
+            if (!style.getFont().equals(Identifier.of("default"))) {
+                afterNewline = true;
+                return Optional.empty();
             }
             if (style.getHoverEvent() != null) {
                 List<Text> onHover = null;
@@ -29,13 +53,22 @@ public class ChatUtils {
                 try {
                     if (asString.indexOf('/') == -1) {
                         if (onHover != null) {
-                            if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(onHover.get(1).getString()).contains("nickname is"))
-                                currentVisit.append("§e").append(onHover.getFirst().getString()).append("§b");
-                            else if (!onHover.isEmpty() && onHover.getFirst().getString() != null && onHover.getFirst().getString().contains("real username is")) {
+                            if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(onHover.get(1).getString()).contains("nickname is")) {
+                                if (!afterNewline) {
+                                    currentVisit.append("§e");
+                                }
+                                currentVisit.append(onHover.getFirst().getString()).append("§b");
+                            } else if (!onHover.isEmpty() && onHover.getFirst().getString() != null && onHover.getFirst().getString().contains("real username is")) {
                                 if (onHover.size() > 1) {
-                                    currentVisit.append("§e").append(onHover.get(1).getString()).append("§b");
+                                    if (!afterNewline) {
+                                        currentVisit.append("§e");
+                                    }
+                                    currentVisit.append(onHover.get(1).getString()).append("§b");
                                 } else {
-                                    currentVisit.append("§e").append(onHover.getFirst().getSiblings().getFirst().getString()).append("§b");
+                                    if (!afterNewline) {
+                                        currentVisit.append("§e");
+                                    }
+                                    currentVisit.append(onHover.getFirst().getSiblings().getFirst().getString()).append("§b");
                                 }
                             } else {
                                 currentVisit.append(asString.replaceAll("\\n", ""));
@@ -50,51 +83,15 @@ public class ChatUtils {
                     GuildApi.LOGGER.error("raid visitor hover error: {} {} {} with astring {}", e.getMessage(), e, asString, onHover);
                 }
             } else {
-                if (style.getColor() != null) {
-                    int colorIndex = 0;
-                    for (Formatting format : Formatting.values()) {
-                        if (format.getColorValue() != null && format.getColorValue().equals(style.getColor().getRgb())) {
-                            colorIndex = format.getColorIndex();
-                            break;
-                        }
-                    }
-                    currentVisit.append("§").append(Objects.requireNonNull(Formatting.byColorIndex(colorIndex)).getCode());
-                }
-                if (style.isBold()) {
-                    currentVisit.append("§").append(Formatting.BOLD.getCode());
-                }
-                if (style.isItalic()) {
-                    currentVisit.append("§").append(Formatting.ITALIC.getCode());
-                }
-                if (style.isUnderlined()) {
-                    currentVisit.append("§").append(Formatting.UNDERLINE.getCode());
-                }
-                if (style.isStrikethrough()) {
-                    currentVisit.append("§").append(Formatting.STRIKETHROUGH.getCode());
-                }
-                if (style.isObfuscated()) {
-                    currentVisit.append("§").append(Formatting.OBFUSCATED.getCode());
-                }
-                currentVisit.append(asString.replaceAll("\\n", ""));
+                addStyleCodes(style, asString, "§", "");
             }
+            afterNewline = false;
             return Optional.empty();
         }
     };
-    public static final StringVisitable.StyledVisitor<String> PLAIN_VISITOR = new StringVisitable.StyledVisitor<>() {
-        @Override
-        public Optional<String> accept(Style style, String asString) {
-            if (style.getFont().equals(Identifier.of("default"))) {
-                currentVisit.append(asString.replaceAll("§.", ""));
-            }
-            return Optional.empty();
-        }
-    };
-    public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = new StringVisitable.StyledVisitor<>() {
-        @Override
-        public Optional<String> accept(Style style, String asString) {
-            if (style.getFont().getPath().startsWith("hud")) {
-                return "break".describeConstable();
-            }
+
+    private static void addStyleCodes(Style style, String asString, String formatCode, String newline) {
+        if (!afterNewline) {
             if (style.getColor() != null) {
                 int colorIndex = 0;
                 for (Formatting format : Formatting.values()) {
@@ -103,27 +100,26 @@ public class ChatUtils {
                         break;
                     }
                 }
-                currentVisit.append("&").append(Objects.requireNonNull(Formatting.byColorIndex(colorIndex)).getCode());
+                currentVisit.append(formatCode).append(Objects.requireNonNull(Formatting.byColorIndex(colorIndex)).getCode());
             }
             if (style.isBold()) {
-                currentVisit.append("&").append(Formatting.BOLD.getCode());
+                currentVisit.append(formatCode).append(Formatting.BOLD.getCode());
             }
             if (style.isItalic()) {
-                currentVisit.append("&").append(Formatting.ITALIC.getCode());
+                currentVisit.append(formatCode).append(Formatting.ITALIC.getCode());
             }
             if (style.isUnderlined()) {
-                currentVisit.append("&").append(Formatting.UNDERLINE.getCode());
+                currentVisit.append(formatCode).append(Formatting.UNDERLINE.getCode());
             }
             if (style.isStrikethrough()) {
-                currentVisit.append("&").append(Formatting.STRIKETHROUGH.getCode());
+                currentVisit.append(formatCode).append(Formatting.STRIKETHROUGH.getCode());
             }
             if (style.isObfuscated()) {
-                currentVisit.append("&").append(Formatting.OBFUSCATED.getCode());
+                currentVisit.append(formatCode).append(Formatting.OBFUSCATED.getCode());
             }
-            currentVisit.append(asString.replaceAll("\\n", "\\\\n").replaceAll("§", "&"));
-            return Optional.empty();
         }
-    };
+        currentVisit.append(asString.replaceAll("\\n", newline).replaceAll("§", formatCode));
+    }
 
     public static String parseRaid(Text text) {
         currentVisit = new StringBuilder();

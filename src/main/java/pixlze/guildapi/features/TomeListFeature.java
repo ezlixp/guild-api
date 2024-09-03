@@ -16,7 +16,7 @@ public class TomeListFeature extends Feature {
             return;
         }
         String tomeMessage = ChatUtils.parsePlain(message);
-        Matcher tomeMatcher = Pattern.compile("^\uDAFF\uDFFC\uE001\uDB00\uDC06 (.*?) rewarded a Tome to (.*)$").matcher(tomeMessage);
+        Matcher tomeMatcher = Pattern.compile("^ (.*?) rewarded a Tome to (.*)$").matcher(tomeMessage);
         if (tomeMatcher.find()) {
             GuildApi.LOGGER.info("{} gave a tome to {}", tomeMatcher.group(1), tomeMatcher.group(2));
         }

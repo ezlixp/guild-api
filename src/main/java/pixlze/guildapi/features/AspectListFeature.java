@@ -16,7 +16,7 @@ public class AspectListFeature extends Feature {
             return;
         }
         String aspectMessage = ChatUtils.parsePlain(message);
-        Matcher aspectMatcher = Pattern.compile("^\uDAFF\uDFFC\uE001\uDB00\uDC06 (.*?) rewarded an Aspect to (.*)$").matcher(aspectMessage);
+        Matcher aspectMatcher = Pattern.compile("^ (.*?) rewarded an Aspect to (.*)$").matcher(aspectMessage);
         if (aspectMatcher.find()) {
             GuildApi.LOGGER.info("{} gave an aspect to {}", aspectMatcher.group(1), aspectMatcher.group(2));
         }
