@@ -8,8 +8,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.ChatMessages;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -22,24 +20,8 @@ import java.util.List;
 
 @Mixin(ChatScreen.class)
 public abstract class ChatScreenMixin extends Screen {
-    @Unique
-    private int count = 0;
-
-
     protected ChatScreenMixin(Text title) {
         super(title);
-    }
-
-    @Shadow
-    public void sendMessage(String chatText, boolean addToHistory) {
-    }
-
-    @Inject(method = "keyPressed", at = @At("HEAD"))
-    private void onKeyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<boolean[]> ci) {
-        if (keyCode != 342 && keyCode != 346 && (modifiers & 4) != 0) {
-            sendMessage(String.valueOf(count), false);
-            ++count;
-        }
     }
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
@@ -73,7 +55,6 @@ public abstract class ChatScreenMixin extends Screen {
                         if (Screen.hasShiftDown()) {
                             MinecraftClient.getInstance().keyboard.setClipboard(message.content().toString());
                             GuildApi.LOGGER.info("{} with raid visitor. the message has {} lines", ChatUtils.parseRaid(message.content()), lines);
-                            GuildApi.LOGGER.info("{} creationg tick", message.creationTick());
                         }
                     }
                 }

@@ -5,29 +5,31 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pixlze.guildapi.components.Handlers;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.json.type_adapters.PairAdapter;
 import pixlze.guildapi.json.type_adapters.PatternAdapter;
-import pixlze.guildapi.net.ApiManager;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Date;
 import java.util.regex.Pattern;
 
 
 public class GuildApi implements ClientModInitializer {
     public static final String MOD_ID = "guildapi";
+    public static final String MOD_STORAGE_ROOT = "guildapi";
     public static final Logger LOGGER = LoggerFactory.getLogger("guildapi");
     public static Gson gson;
     public static KeyBinding openConfigKeybind;
     public static JsonObject secrets;
+
+    public static File getModStorageDir(String dirName) {
+        return new File(MOD_STORAGE_ROOT, dirName);
+    }
 
     @Override
     public void onInitializeClient() {
@@ -46,17 +48,9 @@ public class GuildApi implements ClientModInitializer {
         }
 
 
-        ApiManager.init();
-
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (ApiManager.guildRaidTokenCreatedOn != null && new Date().getTime() - ApiManager.guildRaidTokenCreatedOn.getTime() >= 72000000) {
-                GuildApi.LOGGER.info("refreshing token");
-                ApiManager.refreshGuildRaidServerToken();
-            }
-        });
-
-
-        Handlers.Chat.init();
         Managers.Connection.init();
+        Managers.Api.init();
+        Managers.Feature.init();
+
     }
 }

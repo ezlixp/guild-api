@@ -5,8 +5,9 @@ import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.mod.event.WynncraftConnectionEvents;
 
-import java.util.Objects;
+import java.net.InetSocketAddress;
 import java.util.regex.Pattern;
 
 public class ConnectionManager {
@@ -23,18 +24,18 @@ public class ConnectionManager {
     }
 
     public void onConnected(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client) {
-        if (client.player != null) {
-            String host = Objects.requireNonNull(client.player.getServer()).toString();
-            if (WYNNCRAFT_SERVER_PATTERN.matcher(host).matches()) {
-                connect();
+        if (handler.getConnection().getAddress() instanceof InetSocketAddress address) {
+            if (!isConnected && WYNNCRAFT_SERVER_PATTERN.matcher(address.getHostName()).matches()) {
+                connect(client);
             }
         }
+
     }
 
-    private void connect() {
+    private void connect(MinecraftClient client) {
         isConnected = true;
         GuildApi.LOGGER.info("on wynn");
-        // post wynncraft connected event
+        WynncraftConnectionEvents.JOIN.invoker().interact(client);
     }
 
     private void disconnect() {
