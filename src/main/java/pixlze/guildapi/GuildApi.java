@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.api.ClientModInitializer;
-import net.minecraft.client.option.KeyBinding;
 import net.minecraft.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,6 @@ public class GuildApi implements ClientModInitializer {
     public static final String MOD_STORAGE_ROOT = "guildapi";
     public static final Logger LOGGER = LoggerFactory.getLogger("guildapi");
     public static Gson gson;
-    public static KeyBinding openConfigKeybind;
     public static JsonObject secrets;
 
     public static File getModStorageDir(String dirName) {
@@ -33,6 +31,8 @@ public class GuildApi implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        // TODO add development environment that loads default wynn player and says connected to wynn at any world
+        // TODO add test command for guild server (/ping?)
         System.setProperty("java.awt.headless", "false");
 
         GsonBuilder builder = new GsonBuilder();
