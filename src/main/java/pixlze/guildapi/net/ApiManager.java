@@ -24,8 +24,8 @@ public class ApiManager {
             new Thread(() -> {
                 try {
                     HttpRequest request = HttpRequest.newBuilder()
-                            .uri(URI.create("https://api.wynncraft.com/v3/player/" + "pixlze"))
-//                            .uri(URI.create("https://api.wynncraft.com/v3/player/" + client.player.getUuidAsString()))
+//                            .uri(URI.create("https://api.wynncraft.com/v3/player/" + "pixlze"))
+                            .uri(URI.create("https://api.wynncraft.com/v3/player/" + client.player.getUuidAsString()))
                             .build();
                     HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
                     GuildApi.LOGGER.info("wynn response: {}", response.body());
@@ -80,6 +80,7 @@ public class ApiManager {
                             .build();
                     HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
                     if (response.statusCode() / 100 == 2) {
+                        GuildApi.LOGGER.info("Api token refresh call successful: {} {}", response.body(), response.statusCode());
                         JsonObject responseObject = GuildApi.gson.fromJson(response.body(), JsonObject.class);
                         token = responseObject.get("token").getAsString();
                         return true;
