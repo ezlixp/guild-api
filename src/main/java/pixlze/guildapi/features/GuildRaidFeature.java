@@ -7,6 +7,7 @@ import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mc.event.WynnChatMessageEvents;
+import pixlze.guildapi.net.GuildApiManager;
 import pixlze.guildapi.utils.ChatUtils;
 
 import java.time.Instant;
@@ -29,7 +30,7 @@ public class GuildRaidFeature extends Feature {
             requestBody.add("users", GuildApi.gson.fromJson(Arrays.toString(new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(4)}), JsonElement.class));
             requestBody.addProperty("raid", raidMatcher.group(5));
             requestBody.addProperty("timestamp", Instant.now().toEpochMilli());
-            Managers.Api.Guild.post("addRaid", requestBody);
+            Managers.Api.getApi("guild", GuildApiManager.class).post("addRaid", requestBody);
         }
     }
 

@@ -24,19 +24,19 @@ public class ConnectionManager {
     }
 
     public void onConnected(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client) {
-//        connect(client);
+        connect();
         if (handler.getConnection().getAddress() instanceof InetSocketAddress address) {
             if (!isConnected && WYNNCRAFT_SERVER_PATTERN.matcher(address.getHostName()).matches()) {
-                connect(client);
+                connect();
             }
         }
 
     }
 
-    private void connect(MinecraftClient client) {
+    private void connect() {
         isConnected = true;
         GuildApi.LOGGER.info("on wynn");
-        WynncraftConnectionEvents.JOIN.invoker().interact(client);
+        WynncraftConnectionEvents.JOIN.invoker().interact();
     }
 
     private void disconnect() {

@@ -5,6 +5,7 @@ import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mc.event.WynnChatMessageEvents;
+import pixlze.guildapi.net.GuildApiManager;
 import pixlze.guildapi.utils.ChatUtils;
 
 import java.util.regex.Matcher;
@@ -20,7 +21,7 @@ public class TomeListFeature extends Feature {
         Matcher tomeMatcher = Pattern.compile("^ (.*?) rewarded a Tome to (.*)$").matcher(tomeMessage);
         if (tomeMatcher.find()) {
             GuildApi.LOGGER.info("{} gave a tome to {}", tomeMatcher.group(1), tomeMatcher.group(2));
-            Managers.Api.Guild.delete("tomes/" + tomeMatcher.group(2));
+            Managers.Api.getApi("guild", GuildApiManager.class).delete("tomes/" + tomeMatcher.group(2));
         }
     }
 
