@@ -73,21 +73,19 @@ public class WynnApiManager extends Api {
 
     @Override
     public void init() {
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            dispatcher.register(ClientCommandManager.literal("reloadWynnInfo").executes(context -> {
-                if (!reloading) {
-                    new Thread(() -> {
-                        reloading = true;
-                        McUtils.sendLocalMessage(Text.literal("Reloading...").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
-                        crashed = false;
-                        enabled = true;
-                        initWynnPlayerInfo(true);
-                        reloading = false;
-                    }).start();
-                }
-                return 0;
-            }));
-        });
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(ClientCommandManager.literal("reloadWynnInfo").executes(context -> {
+            if (!reloading) {
+                new Thread(() -> {
+                    reloading = true;
+                    McUtils.sendLocalMessage(Text.literal("Reloading...").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+                    crashed = false;
+                    enabled = true;
+                    initWynnPlayerInfo(true);
+                    reloading = false;
+                }).start();
+            }
+            return 0;
+        })));
         WynncraftConnectionEvents.JOIN.register(this::onWynnJoin);
         super.init();
     }

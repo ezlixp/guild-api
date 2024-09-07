@@ -101,13 +101,14 @@ public class GuildApiManager extends Api {
         if (error != null) {
             if (isError(error)) {
                 lastFailed = builder;
-                lastBodyHandler = HttpResponse.BodyHandlers.ofString();
+                lastBodyHandler = handler;
                 McUtils.sendLocalMessage(retryMessage);
             } else {
                 lastFailed = null;
                 lastBodyHandler = null;
                 GuildApi.LOGGER.warn("API non error: {}", error);
-                McUtils.sendLocalMessage(Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+                if (print)
+                    McUtils.sendLocalMessage(Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
             }
         } else {
             lastFailed = builder;
@@ -182,31 +183,29 @@ public class GuildApiManager extends Api {
 
     @Override
     public void init() {
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registry) -> {
-            dispatcher.register(ClientCommandManager.literal("retryLastFailed").executes((context) -> {
-                if (lastFailed == null) return 0;
-                if (!retrying) {
-                    new Thread(() -> {
-                        retrying = true;
-                        McUtils.sendLocalMessage(Text.literal("Retrying...").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
-                        try {
-                            HttpResponse<?> response = tryToken(lastFailed, lastBodyHandler);
-                            if (response.statusCode() / 100 == 2) {
-                                McUtils.sendLocalMessage(Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
-                                lastFailed = null;
-                                lastBodyHandler = null;
-                            } else {
-                                checkError(response, lastFailed, lastBodyHandler, true);
-                            }
-                        } catch (Exception e) {
-                            GuildApi.LOGGER.error("Retry exception: {} {}", e, e.getMessage());
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registry) -> dispatcher.register(ClientCommandManager.literal("retryLastFailed").executes((context) -> {
+            if (lastFailed == null) return 0;
+            if (!retrying) {
+                new Thread(() -> {
+                    retrying = true;
+                    McUtils.sendLocalMessage(Text.literal("Retrying...").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+                    try {
+                        HttpResponse<?> response = tryToken(lastFailed, lastBodyHandler);
+                        if (response.statusCode() / 100 == 2) {
+                            McUtils.sendLocalMessage(Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+                            lastFailed = null;
+                            lastBodyHandler = null;
+                        } else {
+                            checkError(response, lastFailed, lastBodyHandler, true);
                         }
-                        retrying = false;
-                    }).start();
-                }
-                return 0;
-            }));
-        });
+                    } catch (Exception e) {
+                        GuildApi.LOGGER.error("Retry exception: {} {}", e, e.getMessage());
+                    }
+                    retrying = false;
+                }).start();
+            }
+            return 0;
+        })));
         WynnApiEvents.SUCCESS.register(this::wynnPlayerLoaded);
     }
 }
