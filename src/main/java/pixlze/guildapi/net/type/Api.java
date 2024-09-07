@@ -16,13 +16,10 @@ public class Api {
         this.dependencies = dependencies;
     }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
     public void crash() {
         GuildApi.LOGGER.warn("{} services crashing", name);
         enabled = false;
+        crashed = true;
     }
 
     public boolean depends(Api api) {

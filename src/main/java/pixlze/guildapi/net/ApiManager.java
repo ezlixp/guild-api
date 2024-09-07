@@ -11,15 +11,14 @@ import java.util.Map;
 public class ApiManager {
     // dependency : connection manager
     public static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
+    // TODO add event for when an api is loaded so that things that depend on it can realize its loaded (right now im hardcoding dependencies, in the future have one single "all dependencies loaded function" for getting values from all dependencies)
     private final Map<String, Api> apis = new HashMap<>();
 
-    public void apiError(Text message, Api api, boolean crash) {
+    public void apiCrash(Text message, Api api) {
         McUtils.sendLocalMessage(message);
-        if (crash) {
-            for (Api a : apis.values()) {
-                if (a.depends(api) || a.equals(api)) {
-                    a.crash();
-                }
+        for (Api a : apis.values()) {
+            if (a.equals(api) || a.depends(api)) {
+                a.crash();
             }
         }
     }

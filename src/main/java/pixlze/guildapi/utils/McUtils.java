@@ -21,6 +21,7 @@ public class McUtils {
     public static void sendLocalMessage(Text message) {
         if (player() == null) {
             GuildApi.LOGGER.error("Tried to send local message but player was null.");
+            return;
         }
         player().sendMessage(message);
     }
