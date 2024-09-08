@@ -22,12 +22,16 @@ public class GuildRaidFeature extends Feature {
             return;
         }
         String raidMessage = ChatUtils.parseRaid(message);
-        Matcher raidMatcher = Pattern.compile(".*§e(.*?)§b.*§e(.*?)§b.*§e(.*?)§b.*§e(.*?)§b.*?§3(.*?)§b").matcher(raidMessage);
-//        Matcher raidMatcher = Pattern.compile(".*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*?&3(.*?)&b").matcher(raidMessage);
+        Matcher raidMatcher = Pattern.compile(".*§e(.*?)§b.*§e(.*?)§b.*§e(.*?)§b.*§e(.*?)§b.*?§3(.*?)§b")
+                                     .matcher(raidMessage);
+//        Matcher raidMatcher = Pattern.compile(".*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*?&3(.*?)&b").matcher
+//        (raidMessage);
         if (raidMatcher.find() && !raidMessage.contains(":")) {
             GuildApi.LOGGER.info("guild raid {} finished", raidMatcher.group(5));
             JsonObject requestBody = new JsonObject();
-            requestBody.add("users", GuildApi.gson.fromJson(Arrays.toString(new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(4)}), JsonElement.class));
+            requestBody.add("users", GuildApi.gson.fromJson(Arrays.toString(
+                    new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(
+                            4)}), JsonElement.class));
             requestBody.addProperty("raid", raidMatcher.group(5));
             requestBody.addProperty("timestamp", Instant.now().toEpochMilli());
             Managers.Api.getApi("guild", GuildApiManager.class).post("addRaid", requestBody, false);

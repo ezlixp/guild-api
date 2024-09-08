@@ -11,7 +11,9 @@ import java.util.Map;
 public class ApiManager {
     // dependency : connection manager
     public static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
-    // TODO add event for when an api is loaded so that things that depend on it can realize its loaded (right now im hardcoding dependencies, in the future have one single "all dependencies loaded function" for getting values from all dependencies)
+    // TODO add event for when an api is loaded so that things that depend on it can realize its loaded (right now im
+    //  hardcoding dependencies, in the future have one single "all dependencies loaded function" for getting values
+    //  from all dependencies)
     private final Map<String, Api> apis = new HashMap<>();
 
     public void apiCrash(Text message, Api api) {

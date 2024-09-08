@@ -23,15 +23,12 @@ public class ChatUtils {
         }
     };
     private static boolean afterNewline;
-    public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = new StringVisitable.StyledVisitor<>() {
-        @Override
-        public Optional<String> accept(Style style, String asString) {
-            if (style.getFont().getPath().startsWith("hud")) {
-                return "break".describeConstable();
-            }
-            addStyleCodes(style, asString, "&", "\\\\n");
-            return Optional.empty();
+    public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = (style, asString) -> {
+        if (style.getFont().getPath().startsWith("hud")) {
+            return "break".describeConstable();
         }
+        addStyleCodes(style, asString, "&", "\\\\n");
+        return Optional.empty();
     };
     public static final StringVisitable.StyledVisitor<String> RAID_VISITOR = new StringVisitable.StyledVisitor<>() {
         @Override
@@ -46,19 +43,25 @@ public class ChatUtils {
             if (style.getHoverEvent() != null) {
                 List<Text> onHover = null;
                 if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text) {
-                    onHover = ((Text) Objects.requireNonNull(style.getHoverEvent().getValue(style.getHoverEvent().getAction()))).getSiblings();
+                    onHover = ((Text) Objects.requireNonNull(
+                            style.getHoverEvent().getValue(style.getHoverEvent().getAction()))).getSiblings();
                 } else {
                     GuildApi.LOGGER.info("non text event: {} in message {}", style, asString);
                 }
                 try {
                     if (asString.indexOf('/') == -1) {
                         if (onHover != null) {
-                            if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(onHover.get(1).getString()).contains("nickname is")) {
+                            if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(
+                                    onHover.get(1).getString()).contains("nickname is")) {
                                 if (!afterNewline) {
                                     currentVisit.append("§e");
                                 }
                                 currentVisit.append(onHover.getFirst().getString()).append("§b");
-                            } else if (!onHover.isEmpty() && onHover.getFirst().getString() != null && onHover.getFirst().getString().contains("real username is")) {
+                            } else if (!onHover.isEmpty() && onHover.getFirst()
+                                                                    .getString() != null && onHover.getFirst()
+                                                                                                   .getString()
+                                                                                                   .contains(
+                                                                                                           "real username is")) {
                                 if (onHover.size() > 1) {
                                     if (!afterNewline) {
                                         currentVisit.append("§e");
@@ -68,7 +71,8 @@ public class ChatUtils {
                                     if (!afterNewline) {
                                         currentVisit.append("§e");
                                     }
-                                    currentVisit.append(onHover.getFirst().getSiblings().getFirst().getString()).append("§b");
+                                    currentVisit.append(onHover.getFirst().getSiblings().getFirst().getString())
+                                                .append("§b");
                                 }
                             } else {
                                 currentVisit.append(asString.replaceAll("\\n", ""));
@@ -76,11 +80,14 @@ public class ChatUtils {
                         } else {
                             currentVisit.append(asString.replaceAll("\\n", ""));
                         }
-                    } else if (onHover == null || onHover.size() < 2 || onHover.get(1).getString() == null || !Objects.requireNonNull(onHover.get(1).getString()).contains("'s nickname is ")) {
+                    } else if (onHover == null || onHover.size() < 2 || onHover.get(1)
+                                                                               .getString() == null || !Objects.requireNonNull(
+                            onHover.get(1).getString()).contains("'s nickname is ")) {
                         currentVisit.append(asString.replaceAll("\\n", ""));
                     }
                 } catch (Exception e) {
-                    GuildApi.LOGGER.error("raid visitor hover error: {} {} {} with astring {}", e.getMessage(), e, asString, onHover);
+                    GuildApi.LOGGER.error("raid visitor hover error: {} {} {} with astring {}", e.getMessage(), e,
+                                          asString, onHover);
                 }
             } else {
                 addStyleCodes(style, asString, "§", "");
@@ -100,7 +107,8 @@ public class ChatUtils {
                         break;
                     }
                 }
-                currentVisit.append(formatCode).append(Objects.requireNonNull(Formatting.byColorIndex(colorIndex)).getCode());
+                currentVisit.append(formatCode)
+                            .append(Objects.requireNonNull(Formatting.byColorIndex(colorIndex)).getCode());
             }
             if (style.isBold()) {
                 currentVisit.append(formatCode).append(Formatting.BOLD.getCode());

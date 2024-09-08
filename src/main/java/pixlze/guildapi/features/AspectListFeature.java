@@ -27,10 +27,12 @@ public class AspectListFeature extends Feature {
             GuildApi.LOGGER.info("{} gave an aspect to {}", aspectMatcher.group(1), aspectMatcher.group(2));
             if (McUtils.playerName().equals(aspectMatcher.group(1))) {
                 JsonObject requestBody = new JsonObject();
-                requestBody.add("users", GuildApi.gson.fromJson(Arrays.toString(new String[]{aspectMatcher.group(2)}), JsonElement.class));
+                requestBody.add("users", GuildApi.gson.fromJson(Arrays.toString(new String[]{aspectMatcher.group(2)}),
+                                                                JsonElement.class));
                 Managers.Api.getApi("guild", GuildApiManager.class).post("aspects", requestBody, false);
             } else {
-                GuildApi.LOGGER.warn("tried to decrement aspect for {} but user {} does not match giver {}", aspectMatcher.group(2), McUtils.playerName(), aspectMatcher.group(1));
+                GuildApi.LOGGER.warn("tried to decrement aspect for {} but user {} does not match giver {}",
+                                     aspectMatcher.group(2), McUtils.playerName(), aspectMatcher.group(1));
             }
         }
     }

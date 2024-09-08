@@ -33,10 +33,12 @@ public class WynnApiManager extends Api {
                 try {
                     HttpRequest request = HttpRequest.newBuilder()
 //                            .uri(URI.create("https://api.wynncraft.com/v3/player/" + "pixlze"))
-                            .uri(URI.create("https://api.wynncraft.com/v3/player/" + McUtils.mc().player.getUuidAsString()))
-                            .build();
+                                                     .uri(URI.create(
+                                                             "https://api.wynncraft.com/v3/player/" + McUtils.mc().player.getUuidAsString()))
+                                                     .build();
 
-                    HttpResponse<String> response = ApiManager.HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+                    HttpResponse<String> response = ApiManager.HTTP_CLIENT.send(request,
+                                                                                HttpResponse.BodyHandlers.ofString());
                     GuildApi.LOGGER.info("wynn response: {}", response.body());
                     wynnPlayerInfo = GuildApi.gson.fromJson(response.body(), JsonObject.class);
                     if (wynnPlayerInfo.get("Error") != null) {
@@ -46,15 +48,20 @@ public class WynnApiManager extends Api {
                     }
                     GuildApi.LOGGER.info("successfully loaded wynn player info");
                     if (print)
-                        McUtils.sendLocalMessage(Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+                        McUtils.sendLocalMessage(
+                                Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
                     WynnApiEvents.SUCCESS.invoker().interact();
                 } catch (Exception e) {
                     GuildApi.LOGGER.error("wynn player load error: {} {}", e, e.getMessage());
                     Managers.Api.apiCrash(
-                            Text.literal("Wynn api fetch for " + McUtils.playerName() + " failed. Click ").setStyle(Style.EMPTY.withColor(Formatting.RED))
-                                    .append(Text.literal("here").setStyle(Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
-                                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/reloadWynnInfo"))))
-                                    .append(Text.literal(" to retry.").setStyle(Style.EMPTY.withColor(Formatting.RED))),
+                            Text.literal("Wynn api fetch for " + McUtils.playerName() + " failed. Click ")
+                                .setStyle(Style.EMPTY.withColor(Formatting.RED))
+                                .append(Text.literal("here")
+                                            .setStyle(Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
+                                                                 .withClickEvent(
+                                                                         new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                                                                        "/reloadWynnInfo"))))
+                                .append(Text.literal(" to retry.").setStyle(Style.EMPTY.withColor(Formatting.RED))),
                             this);
                 }
             } else {
@@ -73,19 +80,21 @@ public class WynnApiManager extends Api {
 
     @Override
     public void init() {
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(ClientCommandManager.literal("reloadWynnInfo").executes(context -> {
-            if (!reloading) {
-                new Thread(() -> {
-                    reloading = true;
-                    McUtils.sendLocalMessage(Text.literal("Reloading...").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
-                    crashed = false;
-                    enabled = true;
-                    initWynnPlayerInfo(true);
-                    reloading = false;
-                }).start();
-            }
-            return 0;
-        })));
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(
+                ClientCommandManager.literal("reloadWynnInfo").executes(context -> {
+                    if (!reloading) {
+                        new Thread(() -> {
+                            reloading = true;
+                            McUtils.sendLocalMessage(
+                                    Text.literal("Reloading...").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+                            crashed = false;
+                            enabled = true;
+                            initWynnPlayerInfo(true);
+                            reloading = false;
+                        }).start();
+                    }
+                    return 0;
+                })));
         WynncraftConnectionEvents.JOIN.register(this::onWynnJoin);
         super.init();
     }

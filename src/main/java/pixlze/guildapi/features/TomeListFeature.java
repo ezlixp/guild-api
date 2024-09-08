@@ -31,11 +31,12 @@ public class TomeListFeature extends Feature {
 
     @Override
     public void init() {
-        ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> dispatcher.register(ClientCommandManager.literal("tomelist").executes((context) -> {
-            Managers.Api.getApi("guild", GuildApiManager.class).post("tomes", GuildApi.gson.fromJson("{\"username\":\"" + McUtils.playerName() + "\"}", JsonObject.class), true);
-
-            return 0;
-        }))));
+        ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> dispatcher.register(
+                ClientCommandManager.literal("tomelist").executes((context) -> {
+                    Managers.Api.getApi("guild", GuildApiManager.class).post("tomes", GuildApi.gson.fromJson(
+                            "{\"username\":\"" + McUtils.playerName() + "\"}", JsonObject.class), true);
+                    return 0;
+                }))));
         WynnChatMessageEvents.CHAT.register(this::onWynnMessage);
     }
 

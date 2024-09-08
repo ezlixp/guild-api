@@ -33,7 +33,10 @@ public abstract class ChatScreenMixin extends Screen {
 
         int chatBottom = client.currentScreen.height - 40;
         int chatWidth = chatHudAccessorInvoker.invokeGetWidth();
-        double lineHeight = chatHudAccessorInvoker.invokeGetLineHeight() * MinecraftClient.getInstance().options.getChatScale().getValue(); // chat spacing
+        double lineHeight =
+                chatHudAccessorInvoker.invokeGetLineHeight() * MinecraftClient.getInstance().options.getChatScale()
+                                                                                                    .getValue(); //
+        // chat spacing
 
 
         double scrollOffset = chatHudAccessorInvoker.getScrolledLines();
@@ -43,18 +46,22 @@ public abstract class ChatScreenMixin extends Screen {
             for (ChatHudLine message : messages) {
                 if (line > chatHud.getVisibleLineCount() + scrollOffset) break;
 
-                int lines = ChatMessages.breakRenderedChatMessageLines(message.content(), chatWidth, textRenderer).size();
+                int lines = ChatMessages.breakRenderedChatMessageLines(message.content(), chatWidth, textRenderer)
+                                        .size();
                 if (line >= scrollOffset) {
                     if (mouseX <= chatWidth && mouseY <= chatBottom - lineHeight * (line - scrollOffset) && mouseY >= chatBottom - lineHeight * (line + lines - scrollOffset)) {
                         if (Screen.hasControlDown()) {
-                            MinecraftClient.getInstance().keyboard.setClipboard(ChatUtils.parsePlain(message.content()));
+                            MinecraftClient.getInstance().keyboard.setClipboard(
+                                    ChatUtils.parsePlain(message.content()));
                         }
                         if (Screen.hasAltDown()) {
-                            MinecraftClient.getInstance().keyboard.setClipboard(ChatUtils.parseStyled(message.content()));
+                            MinecraftClient.getInstance().keyboard.setClipboard(
+                                    ChatUtils.parseStyled(message.content()));
                         }
                         if (Screen.hasShiftDown()) {
                             MinecraftClient.getInstance().keyboard.setClipboard(message.content().toString());
-                            GuildApi.LOGGER.info("{} with raid visitor. the message has {} lines", ChatUtils.parseRaid(message.content()), lines);
+                            GuildApi.LOGGER.info("{} with raid visitor. the message has {} lines",
+                                                 ChatUtils.parseRaid(message.content()), lines);
                         }
                     }
                 }
