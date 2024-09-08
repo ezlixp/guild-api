@@ -25,7 +25,9 @@ public class GuildApiManager extends Api {
             .append(Text.literal("here").setStyle(Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/retryLastFailed")))).
             append(Text.literal(" to retry.").setStyle(Style.EMPTY.withColor(Formatting.RED)));
-    private final List<String> nonErrors = List.of("User could not be found in tome list.", "duplicate raid");
+    private final Text successMessage = Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN));
+    private final List<String> nonErrors = List.of("User could not be found in tome list.", "duplicate raid", "User already in tome list.");
+    private final List<String> printNonErrors = List.of("User already in tome list.");
     private String token;
     private JsonObject wynnPlayerInfo;
     private HttpRequest.Builder lastFailed = null;
@@ -48,7 +50,7 @@ public class GuildApiManager extends Api {
                         .build();
                 HttpResponse<String> response = ApiManager.HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() / 100 == 2) {
-                    GuildApi.LOGGER.info("Api token refresh call successful: {} {}", response.body(), response.statusCode());
+                    GuildApi.LOGGER.info("Api token refresh call successful: {}", response.statusCode());
                     JsonObject responseObject = GuildApi.gson.fromJson(response.body(), JsonObject.class);
                     token = responseObject.get("token").getAsString();
                     return true;
@@ -92,8 +94,16 @@ public class GuildApiManager extends Api {
         return out;
     }
 
+    private void successMessage() {
+        McUtils.sendLocalMessage(successMessage);
+    }
+
     private boolean isError(String error) {
         return !nonErrors.contains(error);
+    }
+
+    private boolean printNonError(String error) {
+        return printNonErrors.contains(error);
     }
 
     private void checkError(HttpResponse<?> response, HttpRequest.Builder builder, HttpResponse.BodyHandler<?> handler, boolean print) {
@@ -102,13 +112,17 @@ public class GuildApiManager extends Api {
             if (isError(error)) {
                 lastFailed = builder;
                 lastBodyHandler = handler;
+                GuildApi.LOGGER.error("API error: {}", error);
                 McUtils.sendLocalMessage(retryMessage);
             } else {
                 lastFailed = null;
                 lastBodyHandler = null;
                 GuildApi.LOGGER.warn("API non error: {}", error);
-                if (print)
-                    McUtils.sendLocalMessage(Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+                if (printNonError(error))
+                    McUtils.sendLocalMessage(Text.literal(error).setStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
+                else if (print)
+                    successMessage();
+
             }
         } else {
             lastFailed = builder;
@@ -117,7 +131,7 @@ public class GuildApiManager extends Api {
         }
     }
 
-    public void post(String path, JsonObject body) {
+    public void post(String path, JsonObject body, boolean print) {
         if (!enabled) {
             GuildApi.LOGGER.warn("skipped api post because api service were crashed");
             return;
@@ -132,8 +146,9 @@ public class GuildApiManager extends Api {
                 HttpResponse<String> response = (HttpResponse<String>) tryToken(builder, HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() / 100 == 2) {
                     GuildApi.LOGGER.info("api POST successful with response {}", response.body());
+                    if (print) successMessage();
                 } else {
-                    checkError(response, builder, HttpResponse.BodyHandlers.ofString(), false);
+                    checkError(response, builder, HttpResponse.BodyHandlers.ofString(), print);
                 }
             } catch (Exception e) {
                 GuildApi.LOGGER.error("api POST exception: {} {}", e, e.getMessage());
@@ -141,7 +156,7 @@ public class GuildApiManager extends Api {
         }, "API post thread").start();
     }
 
-    public void delete(String path) {
+    public void delete(String path, boolean print) {
         if (!enabled) {
             GuildApi.LOGGER.warn("Skipped api delete because api services weren't enabled");
             return;
@@ -156,8 +171,9 @@ public class GuildApiManager extends Api {
                 HttpResponse<String> response = (HttpResponse<String>) tryToken(builder, HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() / 100 == 2) {
                     GuildApi.LOGGER.info("api delete successful");
+                    if (print) successMessage();
                 } else {
-                    checkError(response, builder, HttpResponse.BodyHandlers.ofString(), false);
+                    checkError(response, builder, HttpResponse.BodyHandlers.ofString(), print);
                 }
             } catch (Exception e) {
                 GuildApi.LOGGER.error("api delete error: {} {}", e, e.getMessage());
@@ -176,7 +192,7 @@ public class GuildApiManager extends Api {
             if (wynnPlayerInfo.get("guild").isJsonObject()) {
                 guildString = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
             }
-            Managers.Api.apiCrash(Text.literal("Couldn't fetch base url for server of guild \"" + guildString + "\".").setStyle(Style.EMPTY.withColor(Formatting.RED)), this);
+            Managers.Api.apiCrash(Text.literal("Couldn't fetch base url for server of guild \"" + guildString + "\". Talk to a chief about setting one up for your guild.").setStyle(Style.EMPTY.withColor(Formatting.RED)), this);
         }
         super.init();
     }
@@ -192,7 +208,7 @@ public class GuildApiManager extends Api {
                     try {
                         HttpResponse<?> response = tryToken(lastFailed, lastBodyHandler);
                         if (response.statusCode() / 100 == 2) {
-                            McUtils.sendLocalMessage(Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+                            McUtils.sendLocalMessage(successMessage);
                             lastFailed = null;
                             lastBodyHandler = null;
                         } else {

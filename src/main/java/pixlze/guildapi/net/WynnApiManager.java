@@ -32,8 +32,8 @@ public class WynnApiManager extends Api {
             if (McUtils.mc().player != null) {
                 try {
                     HttpRequest request = HttpRequest.newBuilder()
-                            .uri(URI.create("https://api.wynncraft.com/v3/player/" + "pixlze"))
-//                            .uri(URI.create("https://api.wynncraft.com/v3/player/" + McUtils.mc().player.getUuidAsString()))
+//                            .uri(URI.create("https://api.wynncraft.com/v3/player/" + "pixlze"))
+                            .uri(URI.create("https://api.wynncraft.com/v3/player/" + McUtils.mc().player.getUuidAsString()))
                             .build();
 
                     HttpResponse<String> response = ApiManager.HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());

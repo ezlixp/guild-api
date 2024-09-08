@@ -30,7 +30,7 @@ public class GuildRaidFeature extends Feature {
             requestBody.add("users", GuildApi.gson.fromJson(Arrays.toString(new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(4)}), JsonElement.class));
             requestBody.addProperty("raid", raidMatcher.group(5));
             requestBody.addProperty("timestamp", Instant.now().toEpochMilli());
-            Managers.Api.getApi("guild", GuildApiManager.class).post("addRaid", requestBody);
+            Managers.Api.getApi("guild", GuildApiManager.class).post("addRaid", requestBody, false);
         }
     }
 

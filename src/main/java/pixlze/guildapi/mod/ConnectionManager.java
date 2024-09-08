@@ -24,7 +24,7 @@ public class ConnectionManager {
     }
 
     public void onConnected(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client) {
-        connect();
+//        connect();
         if (handler.getConnection().getAddress() instanceof InetSocketAddress address) {
             if (!isConnected && WYNNCRAFT_SERVER_PATTERN.matcher(address.getHostName()).matches()) {
                 connect();
