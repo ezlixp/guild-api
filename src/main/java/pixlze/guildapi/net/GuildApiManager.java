@@ -1,5 +1,6 @@
 package pixlze.guildapi.net;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -22,17 +23,17 @@ import java.util.List;
 
 public class GuildApiManager extends Api {
     private final Text retryMessage = Text.literal("Could not connect to guild server. Click ")
-                                          .setStyle(Style.EMPTY.withColor(Formatting.RED))
-                                          .append(Text.literal("here").setStyle(
-                                                  Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
-                                                             .withClickEvent(
-                                                                     new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                                                                    "/retryLastFailed")))).
-                                          append(Text.literal(" to retry.")
-                                                     .setStyle(Style.EMPTY.withColor(Formatting.RED)));
+            .setStyle(Style.EMPTY.withColor(Formatting.RED))
+            .append(Text.literal("here").setStyle(
+                    Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
+                            .withClickEvent(
+                                    new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                            "/retryLastFailed")))).
+            append(Text.literal(" to retry.")
+                    .setStyle(Style.EMPTY.withColor(Formatting.RED)));
     private final Text successMessage = Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN));
     private final List<String> nonErrors = List.of("User could not be found in tome list.", "duplicate raid",
-                                                   "User already in tome list.");
+            "User already in tome list.");
     private final List<String> printNonErrors = List.of("User already in tome list.");
     private String token;
     private JsonObject wynnPlayerInfo;
@@ -50,18 +51,18 @@ public class GuildApiManager extends Api {
                 JsonObject requestBody = new JsonObject();
                 requestBody.add("validationKey", GuildApi.secrets.get("validation_key"));
                 HttpRequest request = HttpRequest.newBuilder()
-                                                 .uri(URI.create(
-                                                         GuildApi.secrets.get("guild_raid_urls").getAsJsonObject()
-                                                                         .get(wynnPlayerInfo.get("guild")
-                                                                                            .getAsJsonObject()
-                                                                                            .get("prefix")
-                                                                                            .getAsString())
-                                                                         .getAsString() + "auth/getToken"))
-                                                 .header("Content-Type", "application/json")
-                                                 .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
-                                                 .build();
+                        .uri(URI.create(
+                                GuildApi.secrets.get("guild_raid_urls").getAsJsonObject()
+                                        .get(wynnPlayerInfo.get("guild")
+                                                .getAsJsonObject()
+                                                .get("prefix")
+                                                .getAsString())
+                                        .getAsString() + "auth/getToken"))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
+                        .build();
                 HttpResponse<String> response = ApiManager.HTTP_CLIENT.send(request,
-                                                                            HttpResponse.BodyHandlers.ofString());
+                        HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() / 100 == 2) {
                     GuildApi.LOGGER.info("Api token refresh call successful: {}", response.statusCode());
                     JsonObject responseObject = GuildApi.gson.fromJson(response.body(), JsonObject.class);
@@ -120,7 +121,7 @@ public class GuildApiManager extends Api {
     }
 
     private void checkError(HttpResponse<?> response, HttpRequest.Builder builder,
-                            HttpResponse.BodyHandler<?> handler, boolean print) {
+            HttpResponse.BodyHandler<?> handler, boolean print) {
         String error = tryExtractError((String) response.body());
         if (error != null) {
             if (isError(error)) {
@@ -145,21 +146,46 @@ public class GuildApiManager extends Api {
         }
     }
 
+    public JsonElement get(String path) {
+        if (!enabled) {
+            GuildApi.LOGGER.warn("skipped api get because api service were crashed");
+            // TODO add click to reload dependencies and rerun request here
+            McUtils.sendLocalMessage(Text.literal("A request was skipped.")
+                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
+            return null;
+        }
+        HttpRequest.Builder builder = HttpRequest.newBuilder().uri(URI.create(baseURL + path)).GET();
+        JsonElement out = null;
+        try {
+            HttpResponse<String> response = ApiManager.HTTP_CLIENT.send(builder.build(),
+                    HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() / 100 == 2)
+                out = GuildApi.gson.fromJson(response.body(), JsonElement.class);
+            else checkError(response, builder, HttpResponse.BodyHandlers.ofString(), true);
+        } catch (Exception e) {
+            GuildApi.LOGGER.error("api GET exception {} {} ", e, e.getMessage());
+        }
+        return out;
+    }
+
     public void post(String path, JsonObject body, boolean print) {
         if (!enabled) {
             GuildApi.LOGGER.warn("skipped api post because api service were crashed");
+            // TODO add click to reload dependencies and rerun request here
+            McUtils.sendLocalMessage(Text.literal("A request was skipped.")
+                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
             return;
         }
         new Thread(() -> {
             HttpRequest.Builder builder = HttpRequest.newBuilder()
-                                                     .uri(URI.create(baseURL + path))
-                                                     .headers("Content-Type", "application/json", "Authorization",
-                                                              "bearer " + token)
-                                                     .POST(HttpRequest.BodyPublishers.ofString(body.toString()));
+                    .uri(URI.create(baseURL + path))
+                    .headers("Content-Type", "application/json", "Authorization",
+                            "bearer " + token)
+                    .POST(HttpRequest.BodyPublishers.ofString(body.toString()));
             try {
                 @SuppressWarnings("unchecked")
                 HttpResponse<String> response = (HttpResponse<String>) tryToken(builder,
-                                                                                HttpResponse.BodyHandlers.ofString());
+                        HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() / 100 == 2) {
                     GuildApi.LOGGER.info("api POST successful with response {}", response.body());
                     if (print) successMessage();
@@ -175,17 +201,19 @@ public class GuildApiManager extends Api {
     public void delete(String path, boolean print) {
         if (!enabled) {
             GuildApi.LOGGER.warn("Skipped api delete because api services weren't enabled");
+            McUtils.sendLocalMessage(Text.literal("A request was skipped.")
+                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
             return;
         }
         new Thread(() -> {
             HttpRequest.Builder builder = HttpRequest.newBuilder()
-                                                     .uri(URI.create(baseURL + path))
-                                                     .header("Authorization", "bearer " + token)
-                                                     .DELETE();
+                    .uri(URI.create(baseURL + path))
+                    .header("Authorization", "bearer " + token)
+                    .DELETE();
             try {
                 @SuppressWarnings("unchecked")
                 HttpResponse<String> response = (HttpResponse<String>) tryToken(builder,
-                                                                                HttpResponse.BodyHandlers.ofString());
+                        HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() / 100 == 2) {
                     GuildApi.LOGGER.info("api delete successful");
                     if (print) successMessage();
@@ -203,8 +231,8 @@ public class GuildApiManager extends Api {
         wynnPlayerInfo = Managers.Api.getApi("wynn", WynnApiManager.class).wynnPlayerInfo;
         try {
             baseURL = GuildApi.secrets.get("guild_raid_urls").getAsJsonObject()
-                                      .get(wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString())
-                                      .getAsString();
+                    .get(wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString())
+                    .getAsString();
         } catch (Exception e) {
             // TODO implement retry when actually using a server for guild base urls.
             String guildString = null;
@@ -212,9 +240,9 @@ public class GuildApiManager extends Api {
                 guildString = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
             }
             Managers.Api.apiCrash(Text.literal(
-                                              "Couldn't fetch base url for server of guild \"" + guildString + "\". " +
-                                                      "Talk to a chief about setting one up for your guild.")
-                                      .setStyle(Style.EMPTY.withColor(Formatting.RED)), this);
+                            "Couldn't fetch base url for server of guild \"" + guildString + "\". " +
+                                    "Talk to a chief about setting one up for your guild.")
+                    .setStyle(Style.EMPTY.withColor(Formatting.RED)), this);
         }
         super.init();
     }

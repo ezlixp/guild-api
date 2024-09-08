@@ -33,12 +33,11 @@ public class WynnApiManager extends Api {
                 try {
                     HttpRequest request = HttpRequest.newBuilder()
 //                            .uri(URI.create("https://api.wynncraft.com/v3/player/" + "pixlze"))
-                                                     .uri(URI.create(
-                                                             "https://api.wynncraft.com/v3/player/" + McUtils.mc().player.getUuidAsString()))
-                                                     .build();
+                            .uri(URI.create("https://api.wynncraft.com/v3/player/" + McUtils.mc().player.getUuidAsString()))
+                            .build();
 
                     HttpResponse<String> response = ApiManager.HTTP_CLIENT.send(request,
-                                                                                HttpResponse.BodyHandlers.ofString());
+                            HttpResponse.BodyHandlers.ofString());
                     GuildApi.LOGGER.info("wynn response: {}", response.body());
                     wynnPlayerInfo = GuildApi.gson.fromJson(response.body(), JsonObject.class);
                     if (wynnPlayerInfo.get("Error") != null) {
@@ -55,13 +54,13 @@ public class WynnApiManager extends Api {
                     GuildApi.LOGGER.error("wynn player load error: {} {}", e, e.getMessage());
                     Managers.Api.apiCrash(
                             Text.literal("Wynn api fetch for " + McUtils.playerName() + " failed. Click ")
-                                .setStyle(Style.EMPTY.withColor(Formatting.RED))
-                                .append(Text.literal("here")
+                                    .setStyle(Style.EMPTY.withColor(Formatting.RED))
+                                    .append(Text.literal("here")
                                             .setStyle(Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
-                                                                 .withClickEvent(
-                                                                         new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                                                                        "/reloadWynnInfo"))))
-                                .append(Text.literal(" to retry.").setStyle(Style.EMPTY.withColor(Formatting.RED))),
+                                                    .withClickEvent(
+                                                            new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                                                    "/reloadWynnInfo"))))
+                                    .append(Text.literal(" to retry.").setStyle(Style.EMPTY.withColor(Formatting.RED))),
                             this);
                 }
             } else {
