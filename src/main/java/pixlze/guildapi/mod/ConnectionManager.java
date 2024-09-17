@@ -19,18 +19,26 @@ public class ConnectionManager {
         return isConnected;
     }
 
-    private void onDisconnected(ClientPlayNetworkHandler clientPlayNetworkHandler, MinecraftClient minecraftClient) {
-        disconnect();
+    public void init() {
+        ClientPlayConnectionEvents.JOIN.register(this::onConnected);
+        ClientPlayConnectionEvents.DISCONNECT.register(this::onDisconnected);
     }
 
     public void onConnected(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client) {
-//        connect();
+        if (GuildApi.isDevelopment()) {
+            connect();
+            return;
+        }
         if (handler.getConnection().getAddress() instanceof InetSocketAddress address) {
             if (!isConnected && WYNNCRAFT_SERVER_PATTERN.matcher(address.getHostName()).matches()) {
                 connect();
             }
         }
 
+    }
+
+    private void onDisconnected(ClientPlayNetworkHandler clientPlayNetworkHandler, MinecraftClient minecraftClient) {
+        disconnect();
     }
 
     private void connect() {
@@ -43,11 +51,6 @@ public class ConnectionManager {
         isConnected = false;
         GuildApi.LOGGER.info("off wynn");
         // post wynncraft disconnected event
-    }
-
-    public void init() {
-        ClientPlayConnectionEvents.JOIN.register(this::onConnected);
-        ClientPlayConnectionEvents.DISCONNECT.register(this::onDisconnected);
     }
 
 }

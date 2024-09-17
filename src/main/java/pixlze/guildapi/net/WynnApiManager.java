@@ -27,15 +27,35 @@ public class WynnApiManager extends Api {
         super("wynn", new LinkedList<>());
     }
 
+    @Override
+    public void init() {
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(
+                ClientCommandManager.literal("reloadWynnInfo").executes(context -> {
+                    if (!reloading) {
+                        new Thread(() -> {
+                            reloading = true;
+                            McUtils.sendLocalMessage(
+                                    Text.literal("Reloading...").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+                            crashed = false;
+                            enabled = true;
+                            initWynnPlayerInfo(true);
+                            reloading = false;
+                        }).start();
+                    }
+                    return 0;
+                })));
+        WynncraftConnectionEvents.JOIN.register(this::onWynnJoin);
+        super.init();
+    }
+
     public void initWynnPlayerInfo(boolean print) {
         new Thread(() -> {
             if (McUtils.mc().player != null) {
                 try {
+                    URI uri = URI.create(GuildApi.isDevelopment() ? "https://api.wynncraft.com/v3/player/pixlze":"https://api.wynncraft.com/v3/player/" + McUtils.mc().player.getUuidAsString());
                     HttpRequest request = HttpRequest.newBuilder()
-//                            .uri(URI.create("https://api.wynncraft.com/v3/player/" + "pixlze"))
-                            .uri(URI.create("https://api.wynncraft.com/v3/player/" + McUtils.mc().player.getUuidAsString()))
+                            .uri(uri)
                             .build();
-
                     HttpResponse<String> response = ApiManager.HTTP_CLIENT.send(request,
                             HttpResponse.BodyHandlers.ofString());
                     GuildApi.LOGGER.info("wynn response: {}", response.body());
@@ -75,26 +95,5 @@ public class WynnApiManager extends Api {
         } else {
             GuildApi.LOGGER.warn("wynn player already initialized");
         }
-    }
-
-    @Override
-    public void init() {
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(
-                ClientCommandManager.literal("reloadWynnInfo").executes(context -> {
-                    if (!reloading) {
-                        new Thread(() -> {
-                            reloading = true;
-                            McUtils.sendLocalMessage(
-                                    Text.literal("Reloading...").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
-                            crashed = false;
-                            enabled = true;
-                            initWynnPlayerInfo(true);
-                            reloading = false;
-                        }).start();
-                    }
-                    return 0;
-                })));
-        WynncraftConnectionEvents.JOIN.register(this::onWynnJoin);
-        super.init();
     }
 }
