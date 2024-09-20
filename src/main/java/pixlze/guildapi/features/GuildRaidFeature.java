@@ -9,6 +9,7 @@ import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mc.event.WynnChatMessageEvents;
 import pixlze.guildapi.net.GuildApiManager;
 import pixlze.guildapi.utils.ChatUtils;
+import pixlze.guildapi.utils.McUtils;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -23,11 +24,12 @@ public class GuildRaidFeature extends Feature {
         }
         String raidMessage = ChatUtils.parseRaid(message);
         Matcher raidMatcher = Pattern.compile(".*§e(.*?)§b.*§e(.*?)§b.*§e(.*?)§b.*§e(.*?)§b.*?§3(.*?)§b")
-                                     .matcher(raidMessage);
+                .matcher(raidMessage);
 //        Matcher raidMatcher = Pattern.compile(".*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*?&3(.*?)&b").matcher
 //        (raidMessage);
         if (raidMatcher.find() && !raidMessage.contains(":")) {
             GuildApi.LOGGER.info("guild raid {} finished", raidMatcher.group(5));
+            McUtils.sendLocalMessage(Text.literal("Guild raid finished.").withColor(0x00FF00));
             JsonObject requestBody = new JsonObject();
             requestBody.add("users", GuildApi.gson.fromJson(Arrays.toString(
                     new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(
