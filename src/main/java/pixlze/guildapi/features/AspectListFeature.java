@@ -56,6 +56,9 @@ public class AspectListFeature extends Feature {
                                 .getAsString()).append(": ")
                         .append(aspects.get(i).getAsJsonObject().get("aspects").getAsString())
                         .setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+//                aspectsMessage.append(Text.literal(i + 1 + ". player" + (i + 1)).append(": ")
+//                        .append(aspects.get(i).getAsJsonObject().get("aspects").getAsString())
+//                        .setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
                 if (i != Math.min(page, aspects.size()) - 1) {
                     aspectsMessage.append(Text.literal("\n"));
                 }

@@ -60,6 +60,9 @@ public class TomeListFeature extends Feature {
                     break;
                 tomesMessage.append(Text.literal(i + 1 + ". " + tomes.get(i).getAsJsonObject().get("username")
                         .getAsString()).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+
+//                tomesMessage.append(Text.literal(i + 1 + ". player" + (i + 1))
+//                        .setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
                 if (i != Math.min(page, tomes.size()) - 1) {
                     tomesMessage.append(Text.literal("\n"));
                 }
