@@ -1,7 +1,6 @@
 package pixlze.guildapi.features;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -28,9 +27,7 @@ public class TomeListFeature extends Feature {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(ClientCommandManager.literal("tomelistAdd").executes((context) -> {
                         Managers.Api.getApi("guild", GuildApiManager.class)
-                                .post("tomes",
-                                        GuildApi.gson.fromJson("{\"username\":\"" + McUtils.playerName() + "\"}",
-                                                JsonObject.class), true);
+                                .post("tomes", Managers.Json.toJsonObject("{\"username\":\"" + McUtils.playerName() + "\"}"), true);
                         return 0;
                     })
             );

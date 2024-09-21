@@ -4,7 +4,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import net.minecraft.util.Pair;
-import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.json.JsonManager;
 
 import java.io.IOException;
 
@@ -13,9 +13,9 @@ public class PairAdapter extends TypeAdapter<Pair<?, ?>> {
     public void write(JsonWriter out, Pair<?, ?> value) throws IOException {
         out.beginObject();
         out.name("left");
-        GuildApi.gson.toJson(value.getLeft(), value.getLeft().getClass(), out);
+        JsonManager.GSON.toJson(value.getLeft(), value.getLeft().getClass(), out);
         out.name("right");
-        GuildApi.gson.toJson(value.getRight(), value.getRight().getClass(), out);
+        JsonManager.GSON.toJson(value.getRight(), value.getRight().getClass(), out);
         out.endObject();
     }
 

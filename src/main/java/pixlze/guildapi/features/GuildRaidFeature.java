@@ -1,6 +1,5 @@
 package pixlze.guildapi.features;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
@@ -17,6 +16,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class GuildRaidFeature extends Feature {
+    @Override
+    public void init() {
+        WynnChatMessageEvents.CHAT.register(this::onWynnMessage);
+    }
+
     private void onWynnMessage(Text message) {
         if (!MinecraftClient.getInstance().isOnThread()) {
             GuildApi.LOGGER.info("not render thread message");
@@ -31,17 +35,10 @@ public class GuildRaidFeature extends Feature {
             GuildApi.LOGGER.info("guild raid {} finished", raidMatcher.group(5));
             McUtils.sendLocalMessage(Text.literal("Guild raid finished.").withColor(0x00FF00));
             JsonObject requestBody = new JsonObject();
-            requestBody.add("users", GuildApi.gson.fromJson(Arrays.toString(
-                    new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(
-                            4)}), JsonElement.class));
+            requestBody.add("users", Managers.Json.toJsonElement(Arrays.toString(new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(4)})));
             requestBody.addProperty("raid", raidMatcher.group(5));
             requestBody.addProperty("timestamp", Instant.now().toEpochMilli());
             Managers.Api.getApi("guild", GuildApiManager.class).post("addRaid", requestBody, false);
         }
-    }
-
-    @Override
-    public void init() {
-        WynnChatMessageEvents.CHAT.register(this::onWynnMessage);
     }
 }
