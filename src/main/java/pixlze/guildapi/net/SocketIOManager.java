@@ -58,7 +58,6 @@ public class SocketIOManager extends Api {
         IO.Options options = IO.Options.builder()
                 .setExtraHeaders(Collections.singletonMap("authorization", Collections.singletonList("bearer " + guild.getToken())))
                 .build();
-        GuildApi.LOGGER.info(guild.getBaseURL());
         socket = IO.socket(URI.create(guild.getBaseURL() + "aspects"), options).connect();
         socket.emit("sync");
         WynncraftConnectionEvents.JOIN.register(() -> {
