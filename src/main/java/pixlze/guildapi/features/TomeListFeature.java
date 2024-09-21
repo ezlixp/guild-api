@@ -26,7 +26,7 @@ public class TomeListFeature extends Feature {
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(ClientCommandManager.literal("tomelistAdd").executes((context) -> {
-                        Managers.Api.getApi("guild", GuildApiManager.class)
+                        Managers.Net.getApi("guild", GuildApiManager.class)
                                 .post("tomes", Managers.Json.toJsonObject("{\"username\":\"" + McUtils.playerName() + "\"}"), true);
                         return 0;
                     })
@@ -47,7 +47,7 @@ public class TomeListFeature extends Feature {
 
     private void listTomes(int page) {
         new Thread(() -> {
-            JsonElement response = Managers.Api.getApi("guild", GuildApiManager.class).get("tomes");
+            JsonElement response = Managers.Net.getApi("guild", GuildApiManager.class).get("tomes");
             if (response == null) return;
             List<JsonElement> tomes = response.getAsJsonArray().asList();
             MutableText tomesMessage = Text.literal("Tome list page " + (page + 1) + ":\n")
@@ -86,7 +86,7 @@ public class TomeListFeature extends Feature {
         Matcher tomeMatcher = Pattern.compile("^ (.*?) rewarded a Guild Tome to (.*)$").matcher(tomeMessage);
         if (tomeMatcher.find()) {
             GuildApi.LOGGER.info("{} gave a tome to {}", tomeMatcher.group(1), tomeMatcher.group(2));
-            Managers.Api.getApi("guild", GuildApiManager.class).delete("tomes/" + tomeMatcher.group(2), false);
+            Managers.Net.getApi("guild", GuildApiManager.class).delete("tomes/" + tomeMatcher.group(2), false);
         }
     }
 }

@@ -10,7 +10,6 @@ import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mod.event.WynncraftConnectionEvents;
-import pixlze.guildapi.net.event.WynnApiEvents;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
 
@@ -45,7 +44,6 @@ public class WynnApiManager extends Api {
                     return 0;
                 })));
         WynncraftConnectionEvents.JOIN.register(this::onWynnJoin);
-        super.init();
     }
 
     public void initWynnPlayerInfo(boolean print) {
@@ -56,7 +54,7 @@ public class WynnApiManager extends Api {
                     HttpRequest request = HttpRequest.newBuilder()
                             .uri(uri)
                             .build();
-                    HttpResponse<String> response = ApiManager.HTTP_CLIENT.send(request,
+                    HttpResponse<String> response = NetManager.HTTP_CLIENT.send(request,
                             HttpResponse.BodyHandlers.ofString());
                     GuildApi.LOGGER.info("wynn response: {}", response.body());
                     wynnPlayerInfo = Managers.Json.toJsonObject(response.body());
@@ -69,10 +67,10 @@ public class WynnApiManager extends Api {
                     if (print)
                         McUtils.sendLocalMessage(
                                 Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
-                    WynnApiEvents.SUCCESS.invoker().interact();
+                    super.init();
                 } catch (Exception e) {
                     GuildApi.LOGGER.error("wynn player load error: {} {}", e, e.getMessage());
-                    Managers.Api.apiCrash(
+                    Managers.Net.apiCrash(
                             Text.literal("Wynn api fetch for " + McUtils.playerName() + " failed. Click ")
                                     .setStyle(Style.EMPTY.withColor(Formatting.RED))
                                     .append(Text.literal("here")

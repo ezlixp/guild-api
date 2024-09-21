@@ -38,7 +38,8 @@ public class ConnectionManager {
     }
 
     private void onDisconnected(ClientPlayNetworkHandler clientPlayNetworkHandler, MinecraftClient minecraftClient) {
-        disconnect();
+        if (isConnected)
+            disconnect();
     }
 
     private void connect() {
@@ -50,7 +51,7 @@ public class ConnectionManager {
     private void disconnect() {
         isConnected = false;
         GuildApi.LOGGER.info("off wynn");
-        // post wynncraft disconnected event
+        WynncraftConnectionEvents.LEAVE.invoker().interact();
     }
 
 }

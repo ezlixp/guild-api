@@ -44,7 +44,7 @@ public class GuildApi implements ClientModInitializer {
 
 
         Managers.Connection.init();
-        Managers.Api.init();
+        Managers.Net.init();
         Managers.Feature.init();
 
     }

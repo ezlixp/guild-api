@@ -1,7 +1,6 @@
 package pixlze.guildapi.features;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -15,10 +14,11 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mc.event.WynnChatMessageEvents;
 import pixlze.guildapi.net.GuildApiManager;
+import pixlze.guildapi.net.SocketIOManager;
 import pixlze.guildapi.utils.ChatUtils;
 import pixlze.guildapi.utils.McUtils;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,7 +42,7 @@ public class AspectListFeature extends Feature {
 
     private void listAspects(int page) {
         new Thread(() -> {
-            JsonElement response = Managers.Api.getApi("guild", GuildApiManager.class).get("aspects");
+            JsonElement response = Managers.Net.getApi("guild", GuildApiManager.class).get("aspects");
             GuildApi.LOGGER.info("{}", response);
             if (response == null) return;
             List<JsonElement> aspects = response.getAsJsonArray().asList();
@@ -85,15 +85,16 @@ public class AspectListFeature extends Feature {
         Matcher aspectMatcher = Pattern.compile("^ (.*?) rewarded an Aspect to (.*)$").matcher(aspectMessage);
         if (aspectMatcher.find()) {
             GuildApi.LOGGER.info("{} gave an aspect to {}", aspectMatcher.group(1), aspectMatcher.group(2));
-            if (McUtils.playerName().equals(aspectMatcher.group(1))) {
-                JsonObject requestBody = new JsonObject();
-                requestBody.add("users", Managers.Json.toJsonElement(Arrays.toString(new String[]{aspectMatcher.group(2)})));
-                Managers.Api.getApi("guild", GuildApiManager.class).post("aspects", requestBody, false);
-            } else {
-                GuildApi.LOGGER.warn("tried to decrement aspect for {} but user {} does not match giver {}",
-                        aspectMatcher.group(2), McUtils.playerName(), aspectMatcher.group(1));
-            }
+            Managers.Net.getApi("socket", SocketIOManager.class)
+                    .emitEvent("give_aspect", Collections.singletonMap("player", aspectMatcher.group(2)));
+//            if (McUtils.playerName().equals(aspectMatcher.group(1))) {
+//                JsonObject requestBody = new JsonObject();
+//                requestBody.add("users", Managers.Json.toJsonElement(Arrays.toString(new String[]{aspectMatcher.group(2)})));
+//                Managers.Net.getApi("guild", GuildApiManager.class).post("aspects", requestBody, false);
+//            } else {
+//                GuildApi.LOGGER.warn("tried to decrement aspect for {} but user {} does not match giver {}",
+//                        aspectMatcher.group(2), McUtils.playerName(), aspectMatcher.group(1));
+//        }
         }
     }
-
 }

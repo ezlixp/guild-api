@@ -11,7 +11,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
-import pixlze.guildapi.net.event.WynnApiEvents;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
 
@@ -42,13 +41,16 @@ public class GuildApiManager extends Api {
     private boolean retrying = false;
 
     public GuildApiManager() {
-        super("guild", List.of(Managers.Api.getApi("wynn", WynnApiManager.class)));
+        super("guild", List.of(Managers.Net.getApi("wynn", WynnApiManager.class)));
+    }
+
+    public String getToken() {
+        return token;
     }
 
     public JsonElement get(String path) {
         if (!enabled) {
             GuildApi.LOGGER.warn("skipped api get because api service were crashed");
-            // TODO add click to reload dependencies and rerun request here
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
                     .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
             return null;
@@ -56,7 +58,7 @@ public class GuildApiManager extends Api {
         HttpRequest.Builder builder = HttpRequest.newBuilder().uri(URI.create(baseURL + path)).GET();
         JsonElement out = null;
         try {
-            HttpResponse<String> response = ApiManager.HTTP_CLIENT.send(builder.build(),
+            HttpResponse<String> response = NetManager.HTTP_CLIENT.send(builder.build(),
                     HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() / 100 == 2)
                 out = Managers.Json.toJsonElement(response.body());
@@ -122,7 +124,6 @@ public class GuildApiManager extends Api {
     public void post(String path, JsonObject body, boolean print) {
         if (!enabled) {
             GuildApi.LOGGER.warn("skipped api post because api service were crashed");
-            // TODO add click to reload dependencies and rerun request here
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
                     .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
             return;
@@ -150,14 +151,14 @@ public class GuildApiManager extends Api {
     }
 
     private HttpResponse<?> tryToken(HttpRequest.Builder builder, HttpResponse.BodyHandler<?> bodyHandler) throws IOException, InterruptedException {
-        HttpResponse<?> response = ApiManager.HTTP_CLIENT.send(builder.build(), bodyHandler);
+        HttpResponse<?> response = NetManager.HTTP_CLIENT.send(builder.build(), bodyHandler);
         if (response.statusCode() == 401) {
             GuildApi.LOGGER.info("Refreshing api token");
             if (!getGuildServerToken()) {
                 return response;
             }
             builder.setHeader("Authorization", "bearer " + token);
-            response = ApiManager.HTTP_CLIENT.send(builder.build(), bodyHandler);
+            response = NetManager.HTTP_CLIENT.send(builder.build(), bodyHandler);
         }
         return response;
     }
@@ -178,7 +179,7 @@ public class GuildApiManager extends Api {
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
                         .build();
-                HttpResponse<String> response = ApiManager.HTTP_CLIENT.send(request,
+                HttpResponse<String> response = NetManager.HTTP_CLIENT.send(request,
                         HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() / 100 == 2) {
                     GuildApi.LOGGER.info("Api token refresh call successful: {}", response.statusCode());
@@ -226,6 +227,10 @@ public class GuildApiManager extends Api {
         }, "API delete thread").start();
     }
 
+    public String getBaseURL() {
+        return baseURL;
+    }
+
     @Override
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registry) -> dispatcher.register(
@@ -253,27 +258,31 @@ public class GuildApiManager extends Api {
                     }
                     return 0;
                 })));
-        WynnApiEvents.SUCCESS.register(this::wynnPlayerLoaded);
     }
 
-    private void wynnPlayerLoaded() {
+    @Override
+    protected void ready() {
         crashed = false;
-        wynnPlayerInfo = Managers.Api.getApi("wynn", WynnApiManager.class).wynnPlayerInfo;
+        wynnPlayerInfo = Managers.Net.getApi("wynn", WynnApiManager.class).wynnPlayerInfo;
         try {
-            baseURL = GuildApi.secrets.get("guild_raid_urls").getAsJsonObject()
-                    .get(wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString())
-                    .getAsString();
+            if (GuildApi.isDevelopment()) {
+                baseURL = "http://localhost:3000/";
+            } else {
+                baseURL = GuildApi.secrets.get("guild_raid_urls").getAsJsonObject()
+                        .get(wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString())
+                        .getAsString();
+            }
+            super.init();
         } catch (Exception e) {
             // TODO implement retry when actually using a server for guild base urls.
             String guildString = null;
             if (wynnPlayerInfo.get("guild").isJsonObject()) {
                 guildString = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
             }
-            Managers.Api.apiCrash(Text.literal(
+            Managers.Net.apiCrash(Text.literal(
                             "Couldn't fetch base url for server of guild \"" + guildString + "\". " +
                                     "Talk to a chief about setting one up for your guild.")
                     .setStyle(Style.EMPTY.withColor(Formatting.RED)), this);
         }
-        super.init();
     }
 }

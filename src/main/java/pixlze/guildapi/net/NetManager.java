@@ -8,7 +8,7 @@ import java.net.http.HttpClient;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ApiManager {
+public class NetManager {
     // dependency : connection manager
     public static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
     // TODO add event for when an api is loaded so that things that depend on it can realize its loaded (right now im
@@ -31,6 +31,13 @@ public class ApiManager {
         throw new IllegalArgumentException("API not found or wrong type: " + name);
     }
 
+    public void init() {
+        registerApi(new WynnApiManager());
+        registerApi(new GuildApiManager());
+        registerApi(new SocketIOManager());
+        initApis();
+    }
+
     private void registerApi(Api api) {
         apis.put(api.name, api);
     }
@@ -39,11 +46,5 @@ public class ApiManager {
         for (Api a : apis.values()) {
             if (!a.crashed) a.init();
         }
-    }
-
-    public void init() {
-        registerApi(new WynnApiManager());
-        registerApi(new GuildApiManager());
-        initApis();
     }
 }
