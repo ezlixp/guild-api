@@ -16,6 +16,7 @@ import pixlze.guildapi.utils.McUtils;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
@@ -56,6 +57,7 @@ public class GuildApiManager extends Api {
             return null;
         }
         HttpRequest.Builder builder = HttpRequest.newBuilder().uri(URI.create(baseURL + path)).GET();
+        if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
         JsonElement out = null;
         try {
             HttpResponse<String> response = NetManager.HTTP_CLIENT.send(builder.build(),
@@ -134,6 +136,7 @@ public class GuildApiManager extends Api {
                     .headers("Content-Type", "application/json", "Authorization",
                             "bearer " + token)
                     .POST(HttpRequest.BodyPublishers.ofString(body.toString()));
+            if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
             try {
                 @SuppressWarnings("unchecked")
                 HttpResponse<String> response = (HttpResponse<String>) tryToken(builder,
@@ -211,6 +214,7 @@ public class GuildApiManager extends Api {
                     .uri(URI.create(baseURL + path))
                     .header("Authorization", "bearer " + token)
                     .DELETE();
+            if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
             try {
                 @SuppressWarnings("unchecked")
                 HttpResponse<String> response = (HttpResponse<String>) tryToken(builder,

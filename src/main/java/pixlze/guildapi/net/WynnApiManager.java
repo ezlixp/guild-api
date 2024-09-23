@@ -50,7 +50,7 @@ public class WynnApiManager extends Api {
         new Thread(() -> {
             if (McUtils.mc().player != null) {
                 try {
-                    URI uri = URI.create(GuildApi.isDevelopment() ? "https://api.wynncraft.com/v3/player/pixlze":"https://api.wynncraft.com/v3/player/" + McUtils.mc().player.getUuidAsString());
+                    URI uri = URI.create(GuildApi.isDevelopment() ? "https://api.wynncraft.com/v3/player/doggc":"https://api.wynncraft.com/v3/player/" + McUtils.mc().player.getUuidAsString());
                     HttpRequest request = HttpRequest.newBuilder()
                             .uri(uri)
                             .build();

@@ -7,6 +7,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pixlze.guildapi.components.Managers;
+import pixlze.guildapi.components.Models;
 
 import java.io.File;
 import java.io.InputStream;
@@ -46,6 +47,6 @@ public class GuildApi implements ClientModInitializer {
         Managers.Connection.init();
         Managers.Net.init();
         Managers.Feature.init();
-
+        Models.WorldState.init();
     }
 }

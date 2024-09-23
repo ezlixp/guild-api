@@ -1,5 +1,8 @@
 package pixlze.guildapi.features;
 
+import pixlze.guildapi.features.list.AspectListFeature;
+import pixlze.guildapi.features.list.TomeListFeature;
+
 public class FeatureManager {
 //    private static final Map<Feature, FeatureState> FEATURES = new LinkedHashMap<>();
 

@@ -32,6 +32,9 @@ public class ConnectionManager {
         if (handler.getConnection().getAddress() instanceof InetSocketAddress address) {
             if (!isConnected && WYNNCRAFT_SERVER_PATTERN.matcher(address.getHostName()).matches()) {
                 connect();
+            } else if (WYNNCRAFT_SERVER_PATTERN.matcher(address.getHostName()).matches()) {
+                GuildApi.LOGGER.info("server change");
+                WynncraftConnectionEvents.CHANGE.invoker().interact();
             }
         }
 

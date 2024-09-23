@@ -16,6 +16,12 @@ public interface WynncraftConnectionEvents {
                     listener.interact();
                 }
             });
+    Event<WynncraftConnectionEvents> CHANGE = EventFactory.createArrayBacked(WynncraftConnectionEvents.class,
+            (listeners) -> () -> {
+                for (WynncraftConnectionEvents listener : listeners) {
+                    listener.interact();
+                }
+            });
 
     void interact();
 }

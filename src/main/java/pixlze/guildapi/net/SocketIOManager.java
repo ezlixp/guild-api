@@ -6,7 +6,9 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
-import pixlze.guildapi.mod.event.WynncraftConnectionEvents;
+import pixlze.guildapi.components.Models;
+import pixlze.guildapi.models.event.WorldStateEvents;
+import pixlze.guildapi.models.type.WorldState;
 import pixlze.guildapi.net.type.Api;
 
 import java.net.URI;
@@ -58,16 +60,28 @@ public class SocketIOManager extends Api {
         IO.Options options = IO.Options.builder()
                 .setExtraHeaders(Collections.singletonMap("authorization", Collections.singletonList("bearer " + guild.getToken())))
                 .build();
-        socket = IO.socket(URI.create(guild.getBaseURL() + "aspects"), options).connect();
-        socket.emit("sync");
-        WynncraftConnectionEvents.JOIN.register(() -> {
+        socket = IO.socket(URI.create(guild.getBaseURL() + "aspects"), options);
+        if (GuildApi.isDevelopment() || Models.WorldState.onWorld()) {
+            GuildApi.LOGGER.info("socket on main");
             socket.connect();
-            GuildApi.LOGGER.info("socket open");
-        });
-        WynncraftConnectionEvents.LEAVE.register(() -> {
-            socket.disconnect();
-            GuildApi.LOGGER.info("socket closed");
-        });
+            socket.emit("sync");
+        }
+        WorldStateEvents.CHANGE.register(this::worldStateChanged);
         super.init();
+    }
+
+    private void worldStateChanged(WorldState state) {
+        if (state == WorldState.WORLD) {
+            if (!socket.isActive()) {
+                socket.connect();
+                socket.emit("sync");
+                GuildApi.LOGGER.info("socket on");
+            }
+        } else {
+            if (socket.isActive()) {
+                socket.disconnect();
+                GuildApi.LOGGER.info("socket off");
+            }
+        }
     }
 }
