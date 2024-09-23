@@ -1,5 +1,7 @@
 package pixlze.guildapi.features.list;
 
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -9,7 +11,9 @@ import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mc.event.WynnChatMessageEvents;
 import pixlze.guildapi.net.GuildApiManager;
 import pixlze.guildapi.utils.ChatUtils;
+import pixlze.guildapi.utils.McUtils;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,8 +26,20 @@ public class TomeListFeature extends ListFeature {
 
     @Override
     public void init() {
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(ClientCommandManager.literal("tomelist")
+                .then(ClientCommandManager.literal("add"))
+                .executes(context -> {
+                    Managers.Net.getApi("guild", GuildApiManager.class)
+                            .post("tomes", Managers.Json.toJsonObject("{\"username\":\"" + McUtils.playerName() + "\"}"), true);
+                    return 0;
+                }))
+        );
         WynnChatMessageEvents.CHAT.register(this::onWynnMessage);
-        super.init();
+        super.registerCommands(List.of(new ListSubCommand("add", (context) -> {
+            Managers.Net.getApi("guild", GuildApiManager.class)
+                    .post("tomes", Managers.Json.toJsonObject("{\"username\":\"" + McUtils.playerName() + "\"}"), true);
+            return 0;
+        })));
     }
 
     private void onWynnMessage(Text message) {

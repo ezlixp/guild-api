@@ -4,8 +4,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
@@ -20,10 +22,10 @@ import java.util.List;
 import java.util.function.Function;
 
 public class ListFeature extends Feature {
+    private final String name;
+    private final String endpoint;
+    private final Function<JsonObject, MutableText> lineParser;
     private JsonElement cachedResponse;
-    private String name;
-    private String endpoint;
-    private Function<JsonObject, MutableText> lineParser;
 
     public ListFeature(String name, String endpoint, Function<JsonObject, MutableText> lineParser) {
         this.name = name;
@@ -33,28 +35,37 @@ public class ListFeature extends Feature {
 
     @Override
     public void init() {
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(ClientCommandManager.literal(name + "list")
-                .executes(context -> {
-                    listItems(0, true);
-                    return 0;
-                })
-                .then(ClientCommandManager.argument("page", IntegerArgumentType.integer(1))
-                        .executes(context -> {
+        registerCommands(List.of());
+    }
 
-                            int page = IntegerArgumentType.getInteger(context, "page");
-                            listItems(page - 1, true);
-                            return 0;
-                        }).then(ClientCommandManager.argument("reload", BoolArgumentType.bool())
-                                .executes(context -> {
-                                    int page = IntegerArgumentType.getInteger(context, "page");
-                                    boolean reload = BoolArgumentType.getBool(context, "reload");
-                                    listItems(page - 1, reload);
-                                    return 0;
-                                })
-                        )
-                )
-
-        ));
+    public void registerCommands(List<ListSubCommand> subCommands) {
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+                    LiteralArgumentBuilder<FabricClientCommandSource> builder = ClientCommandManager.literal(name + "list")
+                            .executes(context -> {
+                                listItems(0, true);
+                                return 0;
+                            });
+                    for (ListSubCommand subCommand : subCommands) {
+                        builder.then(ClientCommandManager.literal(subCommand.name)
+                                .executes(context -> (subCommand.runs.run(context))));
+                    }
+                    builder.then(ClientCommandManager.argument("page", IntegerArgumentType.integer(1))
+                            .executes(context -> {
+                                int page = IntegerArgumentType.getInteger(context, "page");
+                                listItems(page - 1, true);
+                                return 0;
+                            }).then(ClientCommandManager.argument("reload", BoolArgumentType.bool())
+                                    .executes(context -> {
+                                        int page = IntegerArgumentType.getInteger(context, "page");
+                                        boolean reload = BoolArgumentType.getBool(context, "reload");
+                                        listItems(page - 1, reload);
+                                        return 0;
+                                    })
+                            )
+                    );
+                    dispatcher.register(builder);
+                }
+        );
     }
 
     private void listItems(int page, boolean reload) {
@@ -64,7 +75,9 @@ public class ListFeature extends Feature {
             else response = cachedResponse;
             cachedResponse = response;
             if (response == null) {
-                if (!reload) McUtils.sendLocalMessage(Text.literal("No cached list data").withColor(0xFFFFFF));
+                assert Formatting.YELLOW.getColorValue() != null;
+                if (!reload) McUtils.sendLocalMessage(Text.literal("No cached list data")
+                        .withColor(Formatting.YELLOW.getColorValue()));
                 return;
             }
             List<JsonElement> listItems = response.getAsJsonArray().asList();

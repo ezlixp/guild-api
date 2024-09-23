@@ -66,6 +66,9 @@ public class GuildApiManager extends Api {
                 out = Managers.Json.toJsonElement(response.body());
             else checkError(response, builder, HttpResponse.BodyHandlers.ofString(), true);
         } catch (Exception e) {
+            assert Formatting.RED.getColorValue() != null;
+            McUtils.sendLocalMessage(Text.literal("Fatal API error: " + e + " " + e.getMessage())
+                    .withColor(Formatting.RED.getColorValue()));
             GuildApi.LOGGER.error("api GET exception {} {} ", e, e.getMessage());
         }
         return out;
@@ -148,7 +151,11 @@ public class GuildApiManager extends Api {
                     checkError(response, builder, HttpResponse.BodyHandlers.ofString(), print);
                 }
             } catch (Exception e) {
+                assert Formatting.RED.getColorValue() != null;
+                McUtils.sendLocalMessage(Text.literal("Fatal API error: " + e + " " + e.getMessage())
+                        .withColor(Formatting.RED.getColorValue()));
                 GuildApi.LOGGER.error("api POST exception: {} {}", e, e.getMessage());
+
             }
         }, "API post thread").start();
     }
@@ -226,6 +233,9 @@ public class GuildApiManager extends Api {
                     checkError(response, builder, HttpResponse.BodyHandlers.ofString(), print);
                 }
             } catch (Exception e) {
+                assert Formatting.RED.getColorValue() != null;
+                McUtils.sendLocalMessage(Text.literal("Fatal API error: " + e + " " + e.getMessage())
+                        .withColor(Formatting.RED.getColorValue()));
                 GuildApi.LOGGER.error("api delete error: {} {}", e, e.getMessage());
             }
         }, "API delete thread").start();
