@@ -79,7 +79,8 @@ public class TomeListFeature extends ListFeature {
             if (exception == null && res != null) {
                 McUtils.sendLocalMessage(Text.literal(res.getAsJsonObject()
                         .get("username")
-                        .getAsString() + " is at position " + res.getAsJsonObject()
+                        .getAsString() + " is at position " + res
+                        .getAsJsonObject()
                         .get("position").getAsString() + ".").withColor(0xFFFFFF));
             }
         });

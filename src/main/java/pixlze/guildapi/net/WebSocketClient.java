@@ -9,9 +9,10 @@ import java.util.concurrent.CompletableFuture;
 
 public class WebSocketClient extends Api {
     private WebSocket.Listener listener;
+    // connect to api
 
     protected WebSocketClient() {
-        super("websocket", List.of(WynnApiClient.class));
+        super("websocket", List.of(GuildApiClient.class));
         CompletableFuture<WebSocket> ws = NetManager.HTTP_CLIENT.newWebSocketBuilder()
                 .buildAsync(URI.create("null"), listener);
     }

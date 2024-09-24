@@ -75,7 +75,7 @@ public class ListFeature extends Feature {
             cachedResponse = res;
             if (res == null) {
                 assert Formatting.YELLOW.getColorValue() != null;
-                if (!reload) McUtils.sendLocalMessage(Text.literal("No cached list data")
+                if (!reload) McUtils.sendLocalMessage(Text.literal("No list data")
                         .withColor(Formatting.YELLOW.getColorValue()));
                 return;
             }
