@@ -18,11 +18,11 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.LinkedList;
 
-public class WynnApiManager extends Api {
+public class WynnApiClient extends Api {
     public JsonObject wynnPlayerInfo;
     private boolean reloading = false;
 
-    protected WynnApiManager() {
+    protected WynnApiClient() {
         super("wynn", new LinkedList<>());
     }
 

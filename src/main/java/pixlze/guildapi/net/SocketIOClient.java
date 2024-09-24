@@ -17,12 +17,12 @@ import java.util.List;
 import java.util.Map;
 
 
-public class SocketIOManager extends Api {
+public class SocketIOClient extends Api {
     private Socket socket;
-    private GuildApiManager guild;
+    private GuildApiClient guild;
 
-    public SocketIOManager() {
-        super("socket", List.of(Managers.Net.getApi("guild", GuildApiManager.class)));
+    public SocketIOClient() {
+        super("socket", List.of(GuildApiClient.class));
         if (GuildApi.isDevelopment()) {
             ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
                 dispatcher.register(ClientCommandManager.literal("socket").executes((context) -> {
@@ -53,7 +53,7 @@ public class SocketIOManager extends Api {
     @Override
     protected void ready() {
         crashed = false;
-        guild = Managers.Net.getApi("guild", GuildApiManager.class);
+        guild = Managers.Net.getApi("guild", GuildApiClient.class);
         initSocket();
     }
 

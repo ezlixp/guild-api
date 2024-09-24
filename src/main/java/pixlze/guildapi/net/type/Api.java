@@ -7,13 +7,13 @@ import java.util.List;
 
 public class Api {
     public final String name;
-    private final List<Api> dependencies;
+    private final List<Class<? extends Api>> dependencies;
     public boolean crashed = false;
     protected String baseURL;
     protected boolean enabled = false;
     private int missingDeps;
 
-    protected Api(String name, List<Api> dependencies) {
+    protected Api(String name, List<Class<? extends Api>> dependencies) {
         this.name = name;
         this.dependencies = dependencies;
         missingDeps = dependencies.size();
@@ -25,7 +25,7 @@ public class Api {
     }
 
     public boolean depends(Api api) {
-        return dependencies.contains(api);
+        return dependencies.contains(api.getClass());
     }
 
     private void dependencyLoaded() {

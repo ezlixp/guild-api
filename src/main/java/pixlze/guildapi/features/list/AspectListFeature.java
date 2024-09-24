@@ -10,13 +10,14 @@ import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mc.event.WynnChatMessageEvents;
-import pixlze.guildapi.net.GuildApiManager;
-import pixlze.guildapi.net.SocketIOManager;
+import pixlze.guildapi.net.GuildApiClient;
+import pixlze.guildapi.net.SocketIOClient;
 import pixlze.guildapi.utils.ChatUtils;
 import pixlze.guildapi.utils.McUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,20 +54,20 @@ public class AspectListFeature extends ListFeature {
         Matcher aspectMatcher = Pattern.compile("^ (.*?) rewarded an Aspect to (.*)$").matcher(aspectMessage);
         if (aspectMatcher.find()) {
             GuildApi.LOGGER.info("{} gave an aspect to {}", aspectMatcher.group(1), aspectMatcher.group(2));
-            Managers.Net.getApi("socket", SocketIOManager.class)
+            Managers.Net.getApi("socket", SocketIOClient.class)
                     .emitEvent("give_aspect", Collections.singletonMap("player", aspectMatcher.group(2)));
         }
     }
 
     private void search(String username) {
-        new Thread(() -> {
-            JsonElement response = Managers.Net.getApi("guild", GuildApiManager.class)
-                    .get("aspects/" + username);
-            if (response != null) {
-                McUtils.sendLocalMessage(Text.literal(response.getAsJsonObject()
-                        .get("username").getAsString() + " is owed " + response.getAsJsonObject()
+        CompletableFuture<JsonElement> response = Managers.Net.getApi("guild", GuildApiClient.class)
+                .get("aspects/" + username);
+        response.whenCompleteAsync((res, exception) -> {
+            if (exception == null && res != null) {
+                McUtils.sendLocalMessage(Text.literal(res.getAsJsonObject()
+                        .get("username").getAsString() + " is owed " + res.getAsJsonObject()
                         .get("aspects").getAsString() + " aspects.").withColor(0xFFFFFF));
             }
-        }, "Aspectlist Search Thread").start();
+        });
     }
 }

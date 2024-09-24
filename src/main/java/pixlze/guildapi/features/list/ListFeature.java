@@ -15,10 +15,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.features.Feature;
-import pixlze.guildapi.net.GuildApiManager;
+import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.utils.McUtils;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class ListFeature extends Feature {
@@ -67,18 +68,18 @@ public class ListFeature extends Feature {
     }
 
     private void listItems(int page, boolean reload) {
-        new Thread(() -> {
-            JsonElement response;
-            if (reload) response = Managers.Net.getApi("guild", GuildApiManager.class).get(endpoint);
-            else response = cachedResponse;
-            cachedResponse = response;
-            if (response == null) {
+        CompletableFuture<JsonElement> response = new CompletableFuture<>();
+        if (reload) response = Managers.Net.getApi("guild", GuildApiClient.class).get(endpoint);
+        else response.complete(cachedResponse);
+        response.whenCompleteAsync((res, exception) -> {
+            cachedResponse = res;
+            if (res == null) {
                 assert Formatting.YELLOW.getColorValue() != null;
                 if (!reload) McUtils.sendLocalMessage(Text.literal("No cached list data")
                         .withColor(Formatting.YELLOW.getColorValue()));
                 return;
             }
-            List<JsonElement> listItems = response.getAsJsonArray().asList();
+            List<JsonElement> listItems = res.getAsJsonArray().asList();
             MutableText listMessage = Text.literal(name.substring(0, 1)
                             .toUpperCase() + name.substring(1) + " list page " + (page + 1) + ":\n")
                     .setStyle(Style.EMPTY.withColor(Formatting.WHITE));
@@ -102,6 +103,6 @@ public class ListFeature extends Feature {
                                     .withClickEvent(hasNext ? new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + name + "list view " + (page + 2) + " false"):null)));
             listMessage.append("\n");
             McUtils.sendLocalMessage(listMessage);
-        }).start();
+        });
     }
 }

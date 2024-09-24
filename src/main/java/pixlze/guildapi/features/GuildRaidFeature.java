@@ -6,7 +6,7 @@ import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mc.event.WynnChatMessageEvents;
-import pixlze.guildapi.net.GuildApiManager;
+import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.utils.ChatUtils;
 import pixlze.guildapi.utils.McUtils;
 
@@ -38,7 +38,7 @@ public class GuildRaidFeature extends Feature {
             requestBody.add("users", Managers.Json.toJsonElement(Arrays.toString(new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(4)})));
             requestBody.addProperty("raid", raidMatcher.group(5));
             requestBody.addProperty("timestamp", Instant.now().toEpochMilli());
-            Managers.Net.getApi("guild", GuildApiManager.class).post("addRaid", requestBody, false);
+            Managers.Net.getApi("guild", GuildApiClient.class).post("addRaid", requestBody, false);
         }
     }
 }
