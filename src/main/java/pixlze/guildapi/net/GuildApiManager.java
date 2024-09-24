@@ -33,8 +33,8 @@ public class GuildApiManager extends Api {
                     .setStyle(Style.EMPTY.withColor(Formatting.RED)));
     private final Text successMessage = Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN));
     private final List<String> nonErrors = List.of("User could not be found in tome list.", "duplicate raid",
-            "User already in tome list.");
-    private final List<String> printNonErrors = List.of("User already in tome list.");
+            "User already in tome list.", "Specified user could not be found in tome list.", "Specified user could not be found in aspect list.");
+    private final List<String> printNonErrors = List.of("Specified user could not be found in tome list.", "User already in tome list.", "Specified user could not be found in aspect list.");
     private String token;
     private JsonObject wynnPlayerInfo;
     private HttpRequest.Builder lastFailed = null;
@@ -64,7 +64,7 @@ public class GuildApiManager extends Api {
                     HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() / 100 == 2)
                 out = Managers.Json.toJsonElement(response.body());
-            else checkError(response, builder, HttpResponse.BodyHandlers.ofString(), true);
+            else checkError(response, builder, HttpResponse.BodyHandlers.ofString(), false);
         } catch (Exception e) {
             assert Formatting.RED.getColorValue() != null;
             McUtils.sendLocalMessage(Text.literal("Fatal API error: " + e + " " + e.getMessage())

@@ -45,8 +45,9 @@ public class SocketIOManager extends Api {
     }
 
     public void emitEvent(String event, Map<?, ?> data) {
-        if (socket != null)
+        if (socket != null && socket.connected())
             socket.emit(event, data);
+        else GuildApi.LOGGER.warn("skipped event because of missing or inactive socket");
     }
 
     @Override
@@ -62,9 +63,7 @@ public class SocketIOManager extends Api {
                 .build();
         socket = IO.socket(URI.create(guild.getBaseURL() + "aspects"), options);
         if (GuildApi.isDevelopment() || Models.WorldState.onWorld()) {
-            GuildApi.LOGGER.info("socket on main");
             socket.connect();
-            socket.emit("sync");
         }
         WorldStateEvents.CHANGE.register(this::worldStateChanged);
         super.init();
@@ -72,13 +71,12 @@ public class SocketIOManager extends Api {
 
     private void worldStateChanged(WorldState state) {
         if (state == WorldState.WORLD) {
-            if (!socket.isActive()) {
+            if (!socket.connected()) {
                 socket.connect();
-                socket.emit("sync");
                 GuildApi.LOGGER.info("socket on");
             }
         } else {
-            if (socket.isActive()) {
+            if (socket.connected()) {
                 socket.disconnect();
                 GuildApi.LOGGER.info("socket off");
             }

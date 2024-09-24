@@ -1,5 +1,7 @@
 package pixlze.guildapi.features.list;
 
+import com.google.gson.JsonElement;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.client.MinecraftClient;
@@ -35,11 +37,25 @@ public class TomeListFeature extends ListFeature {
                 }))
         );
         WynnChatMessageEvents.CHAT.register(this::onWynnMessage);
-        super.registerCommands(List.of(new ListSubCommand("add", (context) -> {
-            Managers.Net.getApi("guild", GuildApiManager.class)
-                    .post("tomes", Managers.Json.toJsonObject("{\"username\":\"" + McUtils.playerName() + "\"}"), true);
-            return 0;
-        })));
+        super.registerCommands(
+                List.of(ClientCommandManager.literal("add").executes((context) -> {
+                                    Managers.Net.getApi("guild", GuildApiManager.class)
+                                            .post("tomes", Managers.Json.toJsonObject("{\"username\":\"" + McUtils.playerName() + "\"}"), true);
+                                    return 0;
+
+                                }
+                        ), ClientCommandManager.literal("search").executes((context) -> {
+                                    search(McUtils.playerName());
+                                    return 0;
+                                })
+                                .then(ClientCommandManager.argument("username", StringArgumentType.word())
+                                        .executes((context) -> {
+                                            search(StringArgumentType.getString(context, "username"));
+                                            return 0;
+                                        })
+                                )
+                )
+        );
     }
 
     private void onWynnMessage(Text message) {
@@ -53,5 +69,18 @@ public class TomeListFeature extends ListFeature {
             GuildApi.LOGGER.info("{} gave a tome to {}", tomeMatcher.group(1), tomeMatcher.group(2));
             Managers.Net.getApi("guild", GuildApiManager.class).delete("tomes/" + tomeMatcher.group(2), false);
         }
+    }
+
+    private void search(String username) {
+        new Thread(() -> {
+            JsonElement response = Managers.Net.getApi("guild", GuildApiManager.class)
+                    .get("tomes/" + username);
+            if (response != null) {
+                McUtils.sendLocalMessage(Text.literal(response.getAsJsonObject()
+                        .get("username")
+                        .getAsString() + " is at position " + response.getAsJsonObject()
+                        .get("position").getAsString() + ".").withColor(0xFFFFFF));
+            }
+        }, "Tomelist Search Thread").start();
     }
 }

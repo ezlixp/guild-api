@@ -38,31 +38,29 @@ public class ListFeature extends Feature {
         registerCommands(List.of());
     }
 
-    public void registerCommands(List<ListSubCommand> subCommands) {
+    public void registerCommands(List<LiteralArgumentBuilder<FabricClientCommandSource>> subCommands) {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
                     LiteralArgumentBuilder<FabricClientCommandSource> builder = ClientCommandManager.literal(name + "list")
                             .executes(context -> {
                                 listItems(0, true);
                                 return 0;
-                            });
-                    for (ListSubCommand subCommand : subCommands) {
-                        builder.then(ClientCommandManager.literal(subCommand.name)
-                                .executes(context -> (subCommand.runs.run(context))));
+                            }).then(ClientCommandManager.literal("view")
+                                    .then(ClientCommandManager.argument("page", IntegerArgumentType.integer(1))
+                                            .executes(context -> {
+                                                int page = IntegerArgumentType.getInteger(context, "page");
+                                                listItems(page - 1, true);
+                                                return 0;
+                                            }).then(ClientCommandManager.argument("reload", BoolArgumentType.bool())
+                                                    .executes(context -> {
+                                                        int page = IntegerArgumentType.getInteger(context, "page");
+                                                        boolean reload = BoolArgumentType.getBool(context, "reload");
+                                                        listItems(page - 1, reload);
+                                                        return 0;
+                                                    })
+                                            )));
+                    for (LiteralArgumentBuilder<FabricClientCommandSource> subCommand : subCommands) {
+                        builder.then(subCommand);
                     }
-                    builder.then(ClientCommandManager.argument("page", IntegerArgumentType.integer(1))
-                            .executes(context -> {
-                                int page = IntegerArgumentType.getInteger(context, "page");
-                                listItems(page - 1, true);
-                                return 0;
-                            }).then(ClientCommandManager.argument("reload", BoolArgumentType.bool())
-                                    .executes(context -> {
-                                        int page = IntegerArgumentType.getInteger(context, "page");
-                                        boolean reload = BoolArgumentType.getBool(context, "reload");
-                                        listItems(page - 1, reload);
-                                        return 0;
-                                    })
-                            )
-                    );
                     dispatcher.register(builder);
                 }
         );
@@ -98,10 +96,10 @@ public class ListFeature extends Feature {
             listMessage.append("\n");
             listMessage.append(Text.literal("<< Prev")
                             .setStyle(Style.EMPTY.withColor(hasPrev ? Formatting.GREEN:Formatting.GRAY).withBold(true)
-                                    .withClickEvent(hasPrev ? new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + name + "list " + page + " false"):null)))
+                                    .withClickEvent(hasPrev ? new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + name + "list view " + page + " false"):null)))
                     .append("          ").append(Text.literal("Next >>")
                             .setStyle(Style.EMPTY.withColor(hasNext ? Formatting.GREEN:Formatting.GRAY).withBold(true)
-                                    .withClickEvent(hasNext ? new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + name + "list " + (page + 2) + " false"):null)));
+                                    .withClickEvent(hasNext ? new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + name + "list view " + (page + 2) + " false"):null)));
             listMessage.append("\n");
             McUtils.sendLocalMessage(listMessage);
         }).start();

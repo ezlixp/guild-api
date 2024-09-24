@@ -1,5 +1,8 @@
 package pixlze.guildapi.features.list;
 
+import com.google.gson.JsonElement;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -7,10 +10,13 @@ import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mc.event.WynnChatMessageEvents;
+import pixlze.guildapi.net.GuildApiManager;
 import pixlze.guildapi.net.SocketIOManager;
 import pixlze.guildapi.utils.ChatUtils;
+import pixlze.guildapi.utils.McUtils;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +31,16 @@ public class AspectListFeature extends ListFeature {
     @Override
     public void init() {
         WynnChatMessageEvents.CHAT.register(this::onWynnMessage);
-        super.init();
+        super.registerCommands(List.of(ClientCommandManager.literal("search").executes((context) -> {
+                    search(McUtils.playerName());
+                    return 0;
+                })
+                .then(ClientCommandManager.argument("username", StringArgumentType.word())
+                        .executes((context) -> {
+                            search(StringArgumentType.getString(context, "username"));
+                            return 0;
+                        })
+                )));
 
     }
 
@@ -41,5 +56,17 @@ public class AspectListFeature extends ListFeature {
             Managers.Net.getApi("socket", SocketIOManager.class)
                     .emitEvent("give_aspect", Collections.singletonMap("player", aspectMatcher.group(2)));
         }
+    }
+
+    private void search(String username) {
+        new Thread(() -> {
+            JsonElement response = Managers.Net.getApi("guild", GuildApiManager.class)
+                    .get("aspects/" + username);
+            if (response != null) {
+                McUtils.sendLocalMessage(Text.literal(response.getAsJsonObject()
+                        .get("username").getAsString() + " is owed " + response.getAsJsonObject()
+                        .get("aspects").getAsString() + " aspects.").withColor(0xFFFFFF));
+            }
+        }, "Aspectlist Search Thread").start();
     }
 }

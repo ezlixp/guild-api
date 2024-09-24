@@ -3,6 +3,7 @@ package pixlze.guildapi.models;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
+import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.mc.event.PlayerInfoChangedEvents;
 import pixlze.guildapi.mc.event.ScreenOpen;
 import pixlze.guildapi.mod.event.WynncraftConnectionEvents;
@@ -32,6 +33,10 @@ public class WorldStateModel {
     }
 
     public void connecting() {
+        if (GuildApi.isDevelopment()) {
+            setState(WorldState.WORLD);
+            return;
+        }
         setState(WorldState.CONNECTING);
         currentTabListFooter = Text.empty();
     }
