@@ -5,7 +5,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
-import pixlze.guildapi.mc.event.WynnChatMessageEvents;
+import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.utils.ChatUtils;
 import pixlze.guildapi.utils.McUtils;
@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 public class GuildRaidFeature extends Feature {
     @Override
     public void init() {
-        WynnChatMessageEvents.CHAT.register(this::onWynnMessage);
+        WynnChatMessage.EVENT.register(this::onWynnMessage);
     }
 
     private void onWynnMessage(Text message) {

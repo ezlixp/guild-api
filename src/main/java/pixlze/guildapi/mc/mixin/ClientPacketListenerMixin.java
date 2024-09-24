@@ -12,7 +12,7 @@ import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mc.event.PlayerInfoChangedEvents;
 import pixlze.guildapi.mc.event.PlayerTeleport;
 import pixlze.guildapi.mc.event.ScreenOpen;
-import pixlze.guildapi.mc.event.WynnChatMessageEvents;
+import pixlze.guildapi.mc.event.WynnChatMessage;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public class ClientPacketListenerMixin {
@@ -20,7 +20,7 @@ public class ClientPacketListenerMixin {
     private void onGameMessage(GameMessageS2CPacket packet, CallbackInfo ci) {
         if (!MinecraftClient.getInstance().isOnThread()) return;
         if (!packet.overlay() && Managers.Connection.onWynncraft()) {
-            WynnChatMessageEvents.CHAT.invoker().interact(packet.content());
+            WynnChatMessage.EVENT.invoker().interact(packet.content());
         }
     }
 

@@ -72,6 +72,9 @@ jar {
     archiveClassifier.set("dev")
 }
 
+// dev jar is jar with fabric loom sources
+// remap jar takes the dev jar and converts it to minecraft sources
+
 shadowJar {
     configurations = [project.configurations.shadow]
     archiveClassifier.set("dev")

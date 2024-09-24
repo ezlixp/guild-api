@@ -16,26 +16,18 @@ public class ChatUtils {
     public static final StringVisitable.StyledVisitor<String> PLAIN_VISITOR = new StringVisitable.StyledVisitor<>() {
         @Override
         public Optional<String> accept(Style style, String asString) {
-            if (style.getFont().equals(Identifier.of("default"))) {
-                currentVisit.append(asString.replaceAll("§.", ""));
-            }
+            currentVisit.append(asString.replaceAll("§.", ""));
             return Optional.empty();
         }
     };
     private static boolean afterNewline;
     public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = (style, asString) -> {
-        if (style.getFont().getPath().startsWith("hud")) {
-            return "break".describeConstable();
-        }
-        addStyleCodes(style, asString, "&", "\\\\n");
+        addStyleCodes(style, asString, "§", "\\\\n");
         return Optional.empty();
     };
     public static final StringVisitable.StyledVisitor<String> RAID_VISITOR = new StringVisitable.StyledVisitor<>() {
         @Override
         public Optional<String> accept(Style style, String asString) {
-            if (style.getFont().getPath().startsWith("hud")) {
-                return "break".describeConstable();
-            }
             if (!style.getFont().equals(Identifier.of("default"))) {
                 afterNewline = true;
                 return Optional.empty();
@@ -58,10 +50,10 @@ public class ChatUtils {
                                 }
                                 currentVisit.append(onHover.getFirst().getString()).append("§b");
                             } else if (!onHover.isEmpty() && onHover.getFirst()
-                                                                    .getString() != null && onHover.getFirst()
-                                                                                                   .getString()
-                                                                                                   .contains(
-                                                                                                           "real username is")) {
+                                    .getString() != null && onHover.getFirst()
+                                    .getString()
+                                    .contains(
+                                            "real username is")) {
                                 if (onHover.size() > 1) {
                                     if (!afterNewline) {
                                         currentVisit.append("§e");
@@ -72,7 +64,7 @@ public class ChatUtils {
                                         currentVisit.append("§e");
                                     }
                                     currentVisit.append(onHover.getFirst().getSiblings().getFirst().getString())
-                                                .append("§b");
+                                            .append("§b");
                                 }
                             } else {
                                 currentVisit.append(asString.replaceAll("\\n", ""));
@@ -81,13 +73,13 @@ public class ChatUtils {
                             currentVisit.append(asString.replaceAll("\\n", ""));
                         }
                     } else if (onHover == null || onHover.size() < 2 || onHover.get(1)
-                                                                               .getString() == null || !Objects.requireNonNull(
+                            .getString() == null || !Objects.requireNonNull(
                             onHover.get(1).getString()).contains("'s nickname is ")) {
                         currentVisit.append(asString.replaceAll("\\n", ""));
                     }
                 } catch (Exception e) {
                     GuildApi.LOGGER.error("raid visitor hover error: {} {} {} with astring {}", e.getMessage(), e,
-                                          asString, onHover);
+                            asString, onHover);
                 }
             } else {
                 addStyleCodes(style, asString, "§", "");
@@ -108,7 +100,7 @@ public class ChatUtils {
                     }
                 }
                 currentVisit.append(formatCode)
-                            .append(Objects.requireNonNull(Formatting.byColorIndex(colorIndex)).getCode());
+                        .append(Objects.requireNonNull(Formatting.byColorIndex(colorIndex)).getCode());
             }
             if (style.isBold()) {
                 currentVisit.append(formatCode).append(Formatting.BOLD.getCode());

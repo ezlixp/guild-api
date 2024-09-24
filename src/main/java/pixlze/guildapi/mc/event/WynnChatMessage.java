@@ -5,9 +5,9 @@ import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.text.Text;
 
 
-public interface WynnChatMessageEvents {
-    Event<WynnChatMessageEvents> CHAT = EventFactory.createArrayBacked(WynnChatMessageEvents.class, (listeners) -> (message) -> {
-        for (WynnChatMessageEvents listener : listeners) {
+public interface WynnChatMessage {
+    Event<WynnChatMessage> EVENT = EventFactory.createArrayBacked(WynnChatMessage.class, (listeners) -> (message) -> {
+        for (WynnChatMessage listener : listeners) {
             listener.interact(message);
         }
     });
