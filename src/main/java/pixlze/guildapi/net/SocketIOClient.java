@@ -67,10 +67,19 @@ public class SocketIOClient extends Api {
                     Matcher foregroundMatcher = guildForegroundPattern.matcher(m);
                     Matcher backgroundMatcher = guildBackgroundPattern.matcher(m);
                     if (foregroundMatcher.find()) {
-                        discordEmit("send", Map.of("username", foregroundMatcher
-                                .group(4), "message", foregroundMatcher.group(5)));
+                        String username = foregroundMatcher.group(4);
+                        List<String> usernames = TextUtils.extractUsernames(message);
+                        if (!usernames.isEmpty()) {
+                            username = usernames.getFirst();
+                        }
+                        discordEmit("send", Map.of("username", username, "message", foregroundMatcher.group(5)));
                     } else if (backgroundMatcher.find()) {
-                        discordEmit("send", Map.of("username", backgroundMatcher.group(4), "message", backgroundMatcher.group(5)));
+                        String username = backgroundMatcher.group(4);
+                        List<String> usernames = TextUtils.extractUsernames(message);
+                        if (!usernames.isEmpty()) {
+                            username = usernames.getFirst();
+                        }
+                        discordEmit("send", Map.of("username", username, "message", backgroundMatcher.group(5)));
                     }
                 }
         );

@@ -15,13 +15,6 @@ import java.util.Optional;
 
 public class TextUtils {
     private static ArrayList<String> extractedUsernames;
-    private static StringBuilder currentVisit;
-    public static final StringVisitable.StyledVisitor<String> PLAIN_VISITOR = (style, asString) -> {
-        currentVisit.append(asString.replaceAll("§.", ""));
-        return Optional.empty();
-    };
-    private static boolean afterNewline;
-    private static String formatCode = "§";
     public static final StringVisitable.StyledVisitor<String> USERNAME_EXTRACTOR_VISITOR = (style, asString) -> {
         if (style.getHoverEvent() != null) {
             List<Text> onHover = null;
@@ -35,17 +28,34 @@ public class TextUtils {
                 if (onHover != null) {
                     if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(
                             onHover.get(1).getString()).contains("nickname is")) {
-                        if (!afterNewline) {
-                            currentVisit.append(formatCode).append("e");
-                        }
-                        GuildApi.LOGGER.info("username found: {}", onHover.getFirst().getString());
+                        GuildApi.LOGGER.info("wynntils username found: {}", onHover.getFirst().getString());
                         extractedUsernames.add(onHover.getFirst().getString());
+                    } else if (!onHover.isEmpty() && onHover.getFirst()
+                            .getString() != null && onHover.getFirst()
+                            .getString()
+                            .contains(
+                                    "real username is")) {
+                        if (onHover.size() > 1) {
+                            GuildApi.LOGGER.info("username found multi part: {}", onHover.get(1).getString());
+                            extractedUsernames.add(onHover.get(1).getString());
+                        } else {
+                            GuildApi.LOGGER.info("username found sibling: {}", onHover.getFirst().getSiblings()
+                                    .getFirst().getString());
+                            extractedUsernames.add(onHover.getFirst().getSiblings().getFirst().getString());
+                        }
                     }
                 }
             }
         }
         return Optional.empty();
     };
+    private static StringBuilder currentVisit;
+    public static final StringVisitable.StyledVisitor<String> PLAIN_VISITOR = (style, asString) -> {
+        currentVisit.append(asString.replaceAll("§.", ""));
+        return Optional.empty();
+    };
+    private static boolean afterNewline;
+    private static String formatCode = "§";
     public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = (style, asString) -> {
         addStyleCodes(style, asString, "\n");
         return Optional.empty();

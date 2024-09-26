@@ -117,7 +117,6 @@ public final class ChatHandler {
     }
 
     private void postChatLine(Text line) {
-        GuildApi.LOGGER.info("post chat line: {}", TextUtils.parseStyled(line, "§"));
         TextUtils.extractUsernames(line);
         if (!TextUtils.parsePlain(line).isBlank()) {
             oneBeforeLastRealChat = lastRealChat;
