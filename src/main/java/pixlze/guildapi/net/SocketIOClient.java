@@ -8,7 +8,6 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.components.Models;
 import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
-import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.models.event.WorldStateEvents;
 import pixlze.guildapi.models.type.WorldState;
 import pixlze.guildapi.net.type.Api;
@@ -64,21 +63,14 @@ public class SocketIOClient extends Api {
         guild = Managers.Net.getApi("guild", GuildApiClient.class);
         initSocket();
         ChatMessageReceived.EVENT.register((message) -> {
-//            GuildApi.LOGGER.info("chatmessagereceived: {}", TextUtils.parsePlain(message));
-        });
-        WynnChatMessage.EVENT.register((message) -> {
-                    String m = TextUtils.parseStyled(message);
+                    String m = TextUtils.parseStyled(message, "§");
                     Matcher foregroundMatcher = guildForegroundPattern.matcher(m);
                     Matcher backgroundMatcher = guildBackgroundPattern.matcher(m);
                     if (foregroundMatcher.find()) {
                         discordEmit("send", Map.of("username", foregroundMatcher
                                 .group(4), "message", foregroundMatcher.group(5)));
                     } else if (backgroundMatcher.find()) {
-                        GuildApi.LOGGER.info("background");
-                        // TODO implement chat handler like wynntils
-                        // don't need to implement all of wynntils features, just check for new lines during npc dialog
-
-//                        discordEmit("send", Map.of("username", backgroundMatcher.group(4), "message", backgroundMatcher.group(5)));
+                        discordEmit("send", Map.of("username", backgroundMatcher.group(4), "message", backgroundMatcher.group(5)));
                     }
                 }
         );

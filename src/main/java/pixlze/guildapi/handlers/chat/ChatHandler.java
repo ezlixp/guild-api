@@ -43,14 +43,14 @@ public final class ChatHandler {
                 if (chatScreenTicks != 0) {
                     processCollected();
                 }
-                collectedLines = new ArrayList<>();
+                collectedLines = new ArrayList<>(lines);
                 chatScreenTicks = currentTicks;
             }
         } else {
             if (chatScreenTicks != 0) {
                 processCollected();
             }
-            ChatMessageReceived.EVENT.invoker().interact(message);
+            postChatLine(message);
         }
     }
 
@@ -63,6 +63,11 @@ public final class ChatHandler {
 
     private void processCollected() {
         List<Text> lines = new ArrayList<>(collectedLines);
+//        for (Text line : lines) {
+//            if (!TextUtils.parsePlain(line).isBlank())
+//                GuildApi.LOGGER.info("Collected line: {}", line.getString());
+//        }
+//        GuildApi.LOGGER.info("Collected line spacer: \n\n\n");
 
         collectedLines = new ArrayList<>();
         chatScreenTicks = 0;
@@ -111,20 +116,24 @@ public final class ChatHandler {
         processNewLines(newLines, expectedConfirmationlessDialogue);
     }
 
-    private void processNewLines(LinkedList<Text> newLines, boolean expectedConfirmationlessDialogue) {
-        GuildApi.LOGGER.info("processing new lines");
-        for (Text line : newLines) {
-            if (line.getString().isBlank()) continue;
-            GuildApi.LOGGER.info("newline: {}", TextUtils.parsePlain(line));
+    private void postChatLine(Text line) {
+        GuildApi.LOGGER.info("post chat line: {}", TextUtils.parseStyled(line, "§"));
+        TextUtils.extractUsernames(line);
+        if (!TextUtils.parsePlain(line).isBlank()) {
+            oneBeforeLastRealChat = lastRealChat;
+            lastRealChat = TextUtils.parsePlain(line);
         }
+        ChatMessageReceived.EVENT.invoker().interact(line);
+    }
+
+    private void processNewLines(LinkedList<Text> newLines, boolean expectedConfirmationlessDialogue) {
         LinkedList<Text> newChatLines = new LinkedList<>();
 
         Text firstText = newLines.getFirst();
-        boolean isNpcConfirm = NPC_CONFIRM_PATTERN.matcher(firstText.getString()).find();
+        boolean isNpcConfirm = NPC_CONFIRM_PATTERN.matcher(TextUtils.parseStyled(firstText, "§")).find();
         boolean isNpcSelect = NPC_SELECT_PATTERN.matcher(firstText.getString()).find();
 
         if (isNpcConfirm || isNpcSelect) {
-            GuildApi.LOGGER.info("new line is npc confirm");
             newLines.removeFirst();
             if (newLines.isEmpty()) {
                 return;
@@ -174,17 +183,6 @@ public final class ChatHandler {
                 newChatLines.addLast(line);
             }
         }
-
         newChatLines.forEach(this::postChatLine);
-
-    }
-
-    private void postChatLine(Text line) {
-        GuildApi.LOGGER.info("post chat line: {}", TextUtils.parseStyled(line));
-        if (!TextUtils.parsePlain(line).isBlank()) {
-            oneBeforeLastRealChat = lastRealChat;
-            lastRealChat = TextUtils.parsePlain(line);
-        }
-        ChatMessageReceived.EVENT.invoker().interact(line);
     }
 }

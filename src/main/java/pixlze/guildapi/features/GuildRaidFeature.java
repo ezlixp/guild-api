@@ -5,7 +5,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
-import pixlze.guildapi.mc.event.WynnChatMessage;
+import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.TextUtils;
@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 public class GuildRaidFeature extends Feature {
     @Override
     public void init() {
-        WynnChatMessage.EVENT.register(this::onWynnMessage);
+        ChatMessageReceived.EVENT.register(this::onWynnMessage);
     }
 
     private void onWynnMessage(Text message) {
@@ -26,7 +26,7 @@ public class GuildRaidFeature extends Feature {
             GuildApi.LOGGER.info("not render thread message");
             return;
         }
-        String raidMessage = TextUtils.parseRaid(message);
+        String raidMessage = TextUtils.parseRaid(message, "§");
         Matcher raidMatcher = Pattern.compile(".*§e(.*?)§b.*§e(.*?)§b.*§e(.*?)§b.*§e(.*?)§b.*?§3(.*?)§b")
                 .matcher(raidMessage);
 //        Matcher raidMatcher = Pattern.compile(".*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*?&3(.*?)&b").matcher

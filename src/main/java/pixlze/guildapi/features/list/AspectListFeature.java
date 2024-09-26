@@ -9,7 +9,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
-import pixlze.guildapi.mc.event.WynnChatMessage;
+import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.net.SocketIOClient;
 import pixlze.guildapi.utils.McUtils;
@@ -31,7 +31,7 @@ public class AspectListFeature extends ListFeature {
 
     @Override
     public void init() {
-        WynnChatMessage.EVENT.register(this::onWynnMessage);
+        ChatMessageReceived.EVENT.register(this::onWynnMessage);
         super.registerCommands(List.of(ClientCommandManager.literal("search").executes((context) -> {
                     search(McUtils.playerName());
                     return 0;

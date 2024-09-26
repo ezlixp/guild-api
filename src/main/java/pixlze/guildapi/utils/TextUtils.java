@@ -14,81 +14,104 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class TextUtils {
+    private static ArrayList<String> extractedUsernames;
     private static StringBuilder currentVisit;
     public static final StringVisitable.StyledVisitor<String> PLAIN_VISITOR = (style, asString) -> {
         currentVisit.append(asString.replaceAll("§.", ""));
         return Optional.empty();
     };
     private static boolean afterNewline;
-    public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = (style, asString) -> {
-        addStyleCodes(style, asString, "§", "\\\\n");
+    private static String formatCode = "§";
+    public static final StringVisitable.StyledVisitor<String> USERNAME_EXTRACTOR_VISITOR = (style, asString) -> {
+        if (style.getHoverEvent() != null) {
+            List<Text> onHover = null;
+            if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text) {
+                onHover = ((Text) Objects.requireNonNull(
+                        style.getHoverEvent().getValue(style.getHoverEvent().getAction()))).getSiblings();
+            } else {
+                GuildApi.LOGGER.info("non text event while extracting: {} in message {}", style, asString);
+            }
+            if (asString.indexOf('/') == -1) {
+                if (onHover != null) {
+                    if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(
+                            onHover.get(1).getString()).contains("nickname is")) {
+                        if (!afterNewline) {
+                            currentVisit.append(formatCode).append("e");
+                        }
+                        GuildApi.LOGGER.info("username found: {}", onHover.getFirst().getString());
+                        extractedUsernames.add(onHover.getFirst().getString());
+                    }
+                }
+            }
+        }
         return Optional.empty();
     };
-    public static final StringVisitable.StyledVisitor<String> RAID_VISITOR = new StringVisitable.StyledVisitor<>() {
-        @Override
-        public Optional<String> accept(Style style, String asString) {
-            if (!style.getFont().equals(Identifier.of("default"))) {
-                afterNewline = true;
-                return Optional.empty();
+    public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = (style, asString) -> {
+        addStyleCodes(style, asString, "\n");
+        return Optional.empty();
+    };
+    public static final StringVisitable.StyledVisitor<String> RAID_VISITOR = (style, asString) -> {
+        if (!style.getFont().equals(Identifier.of("default"))) {
+            afterNewline = true;
+            return Optional.empty();
+        }
+        if (style.getHoverEvent() != null) {
+            List<Text> onHover = null;
+            if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text) {
+                onHover = ((Text) Objects.requireNonNull(
+                        style.getHoverEvent().getValue(style.getHoverEvent().getAction()))).getSiblings();
+            } else {
+                GuildApi.LOGGER.info("non text event: {} in message {}", style, asString);
             }
-            if (style.getHoverEvent() != null) {
-                List<Text> onHover = null;
-                if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text) {
-                    onHover = ((Text) Objects.requireNonNull(
-                            style.getHoverEvent().getValue(style.getHoverEvent().getAction()))).getSiblings();
-                } else {
-                    GuildApi.LOGGER.info("non text event: {} in message {}", style, asString);
-                }
-                try {
-                    if (asString.indexOf('/') == -1) {
-                        if (onHover != null) {
-                            if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(
-                                    onHover.get(1).getString()).contains("nickname is")) {
+            try {
+                if (asString.indexOf('/') == -1) {
+                    if (onHover != null) {
+                        if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(
+                                onHover.get(1).getString()).contains("nickname is")) {
+                            if (!afterNewline) {
+                                currentVisit.append(formatCode).append("e");
+                            }
+                            currentVisit.append(onHover.getFirst().getString()).append("§b");
+                        } else if (!onHover.isEmpty() && onHover.getFirst()
+                                .getString() != null && onHover.getFirst()
+                                .getString()
+                                .contains(
+                                        "real username is")) {
+                            if (onHover.size() > 1) {
                                 if (!afterNewline) {
                                     currentVisit.append("§e");
                                 }
-                                currentVisit.append(onHover.getFirst().getString()).append("§b");
-                            } else if (!onHover.isEmpty() && onHover.getFirst()
-                                    .getString() != null && onHover.getFirst()
-                                    .getString()
-                                    .contains(
-                                            "real username is")) {
-                                if (onHover.size() > 1) {
-                                    if (!afterNewline) {
-                                        currentVisit.append("§e");
-                                    }
-                                    currentVisit.append(onHover.get(1).getString()).append("§b");
-                                } else {
-                                    if (!afterNewline) {
-                                        currentVisit.append("§e");
-                                    }
-                                    currentVisit.append(onHover.getFirst().getSiblings().getFirst().getString())
-                                            .append("§b");
-                                }
+                                currentVisit.append(onHover.get(1).getString()).append("§b");
                             } else {
-                                currentVisit.append(asString.replaceAll("\\n", ""));
+                                if (!afterNewline) {
+                                    currentVisit.append("§e");
+                                }
+                                currentVisit.append(onHover.getFirst().getSiblings().getFirst().getString())
+                                        .append("§b");
                             }
                         } else {
                             currentVisit.append(asString.replaceAll("\\n", ""));
                         }
-                    } else if (onHover == null || onHover.size() < 2 || onHover.get(1)
-                            .getString() == null || !Objects.requireNonNull(
-                            onHover.get(1).getString()).contains("'s nickname is ")) {
+                    } else {
                         currentVisit.append(asString.replaceAll("\\n", ""));
                     }
-                } catch (Exception e) {
-                    GuildApi.LOGGER.error("raid visitor hover error: {} {} {} with astring {}", e.getMessage(), e,
-                            asString, onHover);
+                } else if (onHover == null || onHover.size() < 2 || onHover.get(1)
+                        .getString() == null || !Objects.requireNonNull(
+                        onHover.get(1).getString()).contains("'s nickname is ")) {
+                    currentVisit.append(asString.replaceAll("\\n", ""));
                 }
-            } else {
-                addStyleCodes(style, asString, "§", "");
+            } catch (Exception e) {
+                GuildApi.LOGGER.error("raid visitor hover error: {} {} {} with astring {}", e.getMessage(), e,
+                        asString, onHover);
             }
-            afterNewline = false;
-            return Optional.empty();
+        } else {
+            addStyleCodes(style, asString, "");
         }
+        afterNewline = false;
+        return Optional.empty();
     };
 
-    private static void addStyleCodes(Style style, String asString, String formatCode, String newline) {
+    private static void addStyleCodes(Style style, String asString, String newline) {
         if (!afterNewline) {
             if (style.getColor() != null) {
                 int colorIndex = 0;
@@ -125,7 +148,7 @@ public class TextUtils {
         MutableText currentPart = Text.empty();
         for (Text part : message.getWithStyle(message.getStyle())) {
             if (part.getString().equals("\n")) {
-                splitted.add(part);
+                splitted.add(currentPart);
                 currentPart = Text.empty();
             } else {
                 currentPart.append(part);
@@ -135,13 +158,21 @@ public class TextUtils {
         return splitted;
     }
 
-    public static String parseStyled(Text text) {
+    public static List<String> extractUsernames(Text message) {
+        extractedUsernames = new ArrayList<>();
+        message.visit(USERNAME_EXTRACTOR_VISITOR, message.getStyle());
+        return extractedUsernames;
+    }
+
+    public static String parseStyled(Text text, String formatCode) {
+        TextUtils.formatCode = formatCode;
         currentVisit = new StringBuilder();
         text.visit(STYLED_VISITOR, text.getStyle());
         return currentVisit.toString();
     }
 
-    public static String parseRaid(Text text) {
+    public static String parseRaid(Text text, String formatCode) {
+        TextUtils.formatCode = formatCode;
         currentVisit = new StringBuilder();
         text.visit(RAID_VISITOR, text.getStyle());
         return currentVisit.toString();

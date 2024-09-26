@@ -10,7 +10,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
-import pixlze.guildapi.mc.event.WynnChatMessage;
+import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.TextUtils;
@@ -37,7 +37,7 @@ public class TomeListFeature extends ListFeature {
                     return 0;
                 }))
         );
-        WynnChatMessage.EVENT.register(this::onWynnMessage);
+        ChatMessageReceived.EVENT.register(this::onWynnMessage);
         super.registerCommands(
                 List.of(ClientCommandManager.literal("add").executes((context) -> {
                                     Managers.Net.getApi("guild", GuildApiClient.class)
