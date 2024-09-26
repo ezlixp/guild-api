@@ -12,8 +12,8 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.net.GuildApiClient;
-import pixlze.guildapi.utils.ChatUtils;
 import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.TextUtils;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -64,7 +64,7 @@ public class TomeListFeature extends ListFeature {
             GuildApi.LOGGER.info("not render thread message");
             return;
         }
-        String tomeMessage = ChatUtils.parsePlain(message);
+        String tomeMessage = TextUtils.parsePlain(message);
         Matcher tomeMatcher = Pattern.compile("^ (.*?) rewarded a Guild Tome to (.*)$").matcher(tomeMessage);
         if (tomeMatcher.find()) {
             GuildApi.LOGGER.info("{} gave a tome to {}", tomeMatcher.group(1), tomeMatcher.group(2));

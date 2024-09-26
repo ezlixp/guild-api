@@ -12,8 +12,8 @@ import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.net.SocketIOClient;
-import pixlze.guildapi.utils.ChatUtils;
 import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.TextUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -50,7 +50,7 @@ public class AspectListFeature extends ListFeature {
             GuildApi.LOGGER.info("not render thread message");
             return;
         }
-        String aspectMessage = ChatUtils.parsePlain(message);
+        String aspectMessage = TextUtils.parsePlain(message);
         Matcher aspectMatcher = Pattern.compile("^ (.*?) rewarded an Aspect to (.*)$").matcher(aspectMessage);
         if (aspectMatcher.find()) {
             GuildApi.LOGGER.info("{} gave an aspect to {}", aspectMatcher.group(1), aspectMatcher.group(2));

@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.mc.mixin.accessors.ChatHudAccessorInvoker;
-import pixlze.guildapi.utils.ChatUtils;
+import pixlze.guildapi.utils.TextUtils;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ public abstract class ChatScreenMixin extends Screen {
         int chatWidth = chatHudAccessorInvoker.invokeGetWidth();
         double lineHeight =
                 chatHudAccessorInvoker.invokeGetLineHeight() * MinecraftClient.getInstance().options.getChatScale()
-                                                                                                    .getValue(); //
+                        .getValue(); //
         // chat spacing
 
 
@@ -47,21 +47,21 @@ public abstract class ChatScreenMixin extends Screen {
                 if (line > chatHud.getVisibleLineCount() + scrollOffset) break;
 
                 int lines = ChatMessages.breakRenderedChatMessageLines(message.content(), chatWidth, textRenderer)
-                                        .size();
+                        .size();
                 if (line >= scrollOffset) {
                     if (mouseX <= chatWidth && mouseY <= chatBottom - lineHeight * (line - scrollOffset) && mouseY >= chatBottom - lineHeight * (line + lines - scrollOffset)) {
                         if (Screen.hasControlDown()) {
                             MinecraftClient.getInstance().keyboard.setClipboard(
-                                    ChatUtils.parsePlain(message.content()));
+                                    TextUtils.parsePlain(message.content()));
                         }
                         if (Screen.hasAltDown()) {
                             MinecraftClient.getInstance().keyboard.setClipboard(
-                                    ChatUtils.parseStyled(message.content()));
+                                    TextUtils.parseStyled(message.content()));
                         }
                         if (Screen.hasShiftDown()) {
                             MinecraftClient.getInstance().keyboard.setClipboard(message.content().toString());
                             GuildApi.LOGGER.info("{} with raid visitor. the message has {} lines",
-                                                 ChatUtils.parseRaid(message.content()), lines);
+                                    TextUtils.parseRaid(message.content()), lines);
                         }
                     }
                 }

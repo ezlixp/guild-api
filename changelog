@@ -1,7 +1,14 @@
+new features:
+- bridge
+
 changes:
 - change tomelistAdd to tomelist add
 - add tomelist search <player> to find index of player in the tomelist
-- add aspectlist search <player> to find aspects owed of player
+- add aspectlist sarch <player> to find aspects owed of player
+- overhaul aspect message duplication filtering to not require chiefs to install the mod
 
 breaking:
 - overhaul aspect message duplication filtering to not require chiefs to install the mod
+
+bug fixes:
+- not consuming api output when retrying get commands

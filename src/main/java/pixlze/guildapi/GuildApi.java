@@ -6,6 +6,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pixlze.guildapi.components.Handlers;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.components.Models;
 
@@ -44,6 +45,7 @@ public class GuildApi implements ClientModInitializer {
         }
 
 
+        Handlers.Chat.init();
         Managers.Connection.init();
         Managers.Net.init();
         Managers.Feature.init();

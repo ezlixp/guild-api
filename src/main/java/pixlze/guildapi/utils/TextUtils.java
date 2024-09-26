@@ -1,5 +1,6 @@
 package pixlze.guildapi.utils;
 
+import net.minecraft.text.MutableText;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -7,18 +8,16 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import pixlze.guildapi.GuildApi;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class ChatUtils {
+public class TextUtils {
     private static StringBuilder currentVisit;
-    public static final StringVisitable.StyledVisitor<String> PLAIN_VISITOR = new StringVisitable.StyledVisitor<>() {
-        @Override
-        public Optional<String> accept(Style style, String asString) {
-            currentVisit.append(asString.replaceAll("§.", ""));
-            return Optional.empty();
-        }
+    public static final StringVisitable.StyledVisitor<String> PLAIN_VISITOR = (style, asString) -> {
+        currentVisit.append(asString.replaceAll("§.", ""));
+        return Optional.empty();
     };
     private static boolean afterNewline;
     public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = (style, asString) -> {
@@ -121,6 +120,27 @@ public class ChatUtils {
         currentVisit.append(asString.replaceAll("\\n", newline).replaceAll("§", formatCode));
     }
 
+    public static List<Text> splitLines(Text message) {
+        ArrayList<Text> splitted = new ArrayList<>();
+        MutableText currentPart = Text.empty();
+        for (Text part : message.getWithStyle(message.getStyle())) {
+            if (part.getString().equals("\n")) {
+                splitted.add(part);
+                currentPart = Text.empty();
+            } else {
+                currentPart.append(part);
+            }
+        }
+        if (!currentPart.equals(Text.empty())) splitted.add(currentPart);
+        return splitted;
+    }
+
+    public static String parseStyled(Text text) {
+        currentVisit = new StringBuilder();
+        text.visit(STYLED_VISITOR, text.getStyle());
+        return currentVisit.toString();
+    }
+
     public static String parseRaid(Text text) {
         currentVisit = new StringBuilder();
         text.visit(RAID_VISITOR, text.getStyle());
@@ -130,12 +150,6 @@ public class ChatUtils {
     public static String parsePlain(Text text) {
         currentVisit = new StringBuilder();
         text.visit(PLAIN_VISITOR, text.getStyle());
-        return currentVisit.toString();
-    }
-
-    public static String parseStyled(Text text) {
-        currentVisit = new StringBuilder();
-        text.visit(STYLED_VISITOR, text.getStyle());
         return currentVisit.toString();
     }
 }

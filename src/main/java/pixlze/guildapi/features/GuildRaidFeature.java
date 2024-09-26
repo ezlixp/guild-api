@@ -7,8 +7,8 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.net.GuildApiClient;
-import pixlze.guildapi.utils.ChatUtils;
 import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.TextUtils;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -26,7 +26,7 @@ public class GuildRaidFeature extends Feature {
             GuildApi.LOGGER.info("not render thread message");
             return;
         }
-        String raidMessage = ChatUtils.parseRaid(message);
+        String raidMessage = TextUtils.parseRaid(message);
         Matcher raidMatcher = Pattern.compile(".*§e(.*?)§b.*§e(.*?)§b.*§e(.*?)§b.*§e(.*?)§b.*?§3(.*?)§b")
                 .matcher(raidMessage);
 //        Matcher raidMatcher = Pattern.compile(".*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*&e(.*?)&b.*?&3(.*?)&b").matcher
