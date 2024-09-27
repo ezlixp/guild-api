@@ -22,8 +22,8 @@ import java.util.regex.Pattern;
 
 
 public class SocketIOClient extends Api {
-    private final Pattern guildForegroundPattern = Pattern.compile("^§b((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06)).*§3(.*):§b (.*)$");
-    private final Pattern guildBackgroundPattern = Pattern.compile("^§8((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06)).*§8(.*):§8 (.*)$");
+    private final Pattern guildForegroundPattern = Pattern.compile("^§b((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06)).*§3(.*):§b (.*)$", Pattern.DOTALL);
+    private final Pattern guildBackgroundPattern = Pattern.compile("^§8((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06)).*§8(.*):§8 (.*)$", Pattern.DOTALL);
     private Socket aspectSocket;
     private Socket discordSocket;
     private GuildApiClient guild;
@@ -33,27 +33,23 @@ public class SocketIOClient extends Api {
         if (GuildApi.isDevelopment()) {
             ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
                 dispatcher.register(ClientCommandManager.literal("socket").executes((context) -> {
-                            aspectSocket.disconnect().connect();
-                            return 0;
-                        })
-                );
+                    aspectSocket.disconnect().connect();
+                    return 0;
+                }));
                 dispatcher.register(ClientCommandManager.literal("emit").executes((context) -> {
-                            aspectEmit("give_aspect", Collections.singletonMap("player", "test"));
-                            return 0;
-                        })
-                );
+                    aspectEmit("give_aspect", Collections.singletonMap("player", "test"));
+                    return 0;
+                }));
                 dispatcher.register(ClientCommandManager.literal("index").executes((context) -> {
-                            aspectEmit("debug_index", null);
-                            return 0;
-                        })
-                );
+                    aspectEmit("debug_index", null);
+                    return 0;
+                }));
             });
         }
     }
 
     public void aspectEmit(String event, Map<?, ?> data) {
-        if (aspectSocket != null && aspectSocket.connected())
-            aspectSocket.emit(event, data);
+        if (aspectSocket != null && aspectSocket.connected()) aspectSocket.emit(event, data);
         else GuildApi.LOGGER.warn("skipped event because of missing or inactive aspect socket");
     }
 
@@ -63,26 +59,29 @@ public class SocketIOClient extends Api {
         guild = Managers.Net.getApi("guild", GuildApiClient.class);
         initSocket();
         ChatMessageReceived.EVENT.register((message) -> {
-                    String m = TextUtils.parseStyled(message, "§");
-                    Matcher foregroundMatcher = guildForegroundPattern.matcher(m);
-                    Matcher backgroundMatcher = guildBackgroundPattern.matcher(m);
-                    if (foregroundMatcher.find()) {
-                        String username = foregroundMatcher.group(4);
-                        List<String> usernames = TextUtils.extractUsernames(message);
-                        if (!usernames.isEmpty()) {
-                            username = usernames.getFirst();
-                        }
-                        discordEmit("send", Map.of("username", username, "message", foregroundMatcher.group(5)));
-                    } else if (backgroundMatcher.find()) {
-                        String username = backgroundMatcher.group(4);
-                        List<String> usernames = TextUtils.extractUsernames(message);
-                        if (!usernames.isEmpty()) {
-                            username = usernames.getFirst();
-                        }
-                        discordEmit("send", Map.of("username", username, "message", backgroundMatcher.group(5)));
-                    }
+            GuildApi.LOGGER.info("received: {}", message.getString());
+            String m = TextUtils.parseStyled(message, "§");
+            // TODO make parse styled seperate into lines from \n and strip beginnings after newline
+            // next lnies start with §b󏿼󐀆§b
+            Matcher foregroundMatcher = guildForegroundPattern.matcher(m);
+            Matcher backgroundMatcher = guildBackgroundPattern.matcher(m);
+            if (foregroundMatcher.find()) {
+                GuildApi.LOGGER.info("found {}", message.getString());
+                String username = foregroundMatcher.group(4);
+                List<String> usernames = TextUtils.extractUsernames(message);
+                if (!usernames.isEmpty()) {
+                    username = usernames.getFirst();
                 }
-        );
+                discordEmit("send", Map.of("username", username, "message", foregroundMatcher.group(5)));
+            } else if (backgroundMatcher.find()) {
+                String username = backgroundMatcher.group(4);
+                List<String> usernames = TextUtils.extractUsernames(message);
+                if (!usernames.isEmpty()) {
+                    username = usernames.getFirst();
+                }
+                discordEmit("send", Map.of("username", username, "message", backgroundMatcher.group(5)));
+            }
+        });
     }
 
     private void initSocket() {
@@ -99,9 +98,9 @@ public class SocketIOClient extends Api {
         super.init();
     }
 
-    public void discordEmit(String event, Map<?, ?> data) {
+    public void discordEmit(String event, Map<String, Object> data) {
         if (discordSocket != null && discordSocket.connected()) {
-            GuildApi.LOGGER.info("emitting");
+            GuildApi.LOGGER.info("emitting, {}", data.getOrDefault("message", "doesn't exist"));
             discordSocket.emit(event, data);
         } else GuildApi.LOGGER.warn("skipped event because of missing or inactive discord socket");
     }

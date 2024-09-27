@@ -117,7 +117,6 @@ public final class ChatHandler {
     }
 
     private void postChatLine(Text line) {
-        TextUtils.extractUsernames(line);
         if (!TextUtils.parsePlain(line).isBlank()) {
             oneBeforeLastRealChat = lastRealChat;
             lastRealChat = TextUtils.parsePlain(line);
