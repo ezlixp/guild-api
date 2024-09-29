@@ -52,6 +52,7 @@ public class TextUtils {
         return Optional.empty();
     };
     private static String newline = "\n";
+    private static boolean first = false;
     private static StringBuilder currentVisit;
     public static final StringVisitable.StyledVisitor<String> PLAIN_VISITOR = (style, asString) -> {
         currentVisit.append(asString.replaceAll("§.", ""));
@@ -125,7 +126,7 @@ public class TextUtils {
     };
 
     private static void addStyleCodes(Style style, String asString) {
-        if (BLOCK_MARKER_PATTERN.matcher(asString).find()) {
+        if (BLOCK_MARKER_PATTERN.matcher(asString).find() && !first) {
             afterBlockMarker = true;
             return;
         }
@@ -161,6 +162,7 @@ public class TextUtils {
             asString = asString.substring(1);
         }
         currentVisit.append(asString.replaceAll("\\n", newline).replaceAll("§", formatCode));
+        if (first) first = false;
     }
 
     public static List<Text> splitLines(Text message) {
@@ -185,6 +187,7 @@ public class TextUtils {
     }
 
     public static String parseStyled(Text text, String formatCode, String newline) {
+        first = true;
         TextUtils.newline = newline;
         TextUtils.formatCode = formatCode;
         currentVisit = new StringBuilder();

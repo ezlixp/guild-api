@@ -9,7 +9,7 @@
   ],
   "contact": {
     "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "sources": "https://github.com/ezlixp/guild-api"
   },
   "license": "LGPL-3.0-only",
   "icon": "assets/guildapi/icon.png",
