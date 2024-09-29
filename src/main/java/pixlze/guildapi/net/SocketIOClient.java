@@ -60,7 +60,7 @@ public class SocketIOClient extends Api {
         initSocket();
         ChatMessageReceived.EVENT.register((message) -> {
             String m = TextUtils.parseStyled(message, "§", "");
-            GuildApi.LOGGER.info("received: {}", message.getString());
+            GuildApi.LOGGER.info("received: {}", m);
             Matcher foregroundMatcher = guildForegroundPattern.matcher(m);
             Matcher backgroundMatcher = guildBackgroundPattern.matcher(m);
             if (foregroundMatcher.find()) {
