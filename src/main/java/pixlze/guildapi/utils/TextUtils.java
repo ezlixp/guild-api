@@ -12,8 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 public class TextUtils {
+    private static final Pattern BLOCK_MARKER_PATTERN = Pattern.compile("^(§.)?\uDAFF\uDFFC\uE001\uDB00\uDC06(§.)?$");
     private static ArrayList<String> extractedUsernames;
     public static final StringVisitable.StyledVisitor<String> USERNAME_EXTRACTOR_VISITOR = (style, asString) -> {
         if (style.getHoverEvent() != null) {
@@ -49,20 +51,21 @@ public class TextUtils {
         }
         return Optional.empty();
     };
+    private static String newline = "\n";
     private static StringBuilder currentVisit;
     public static final StringVisitable.StyledVisitor<String> PLAIN_VISITOR = (style, asString) -> {
         currentVisit.append(asString.replaceAll("§.", ""));
         return Optional.empty();
     };
-    private static boolean afterNewline;
+    private static boolean afterBlockMarker;
     private static String formatCode = "§";
     public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = (style, asString) -> {
-        addStyleCodes(style, asString, "\n");
+        addStyleCodes(style, asString);
         return Optional.empty();
     };
     public static final StringVisitable.StyledVisitor<String> RAID_VISITOR = (style, asString) -> {
         if (!style.getFont().equals(Identifier.of("default"))) {
-            afterNewline = true;
+            afterBlockMarker = true;
             return Optional.empty();
         }
         if (style.getHoverEvent() != null) {
@@ -78,7 +81,7 @@ public class TextUtils {
                     if (onHover != null) {
                         if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(
                                 onHover.get(1).getString()).contains("nickname is")) {
-                            if (!afterNewline) {
+                            if (!afterBlockMarker) {
                                 currentVisit.append(formatCode).append("e");
                             }
                             currentVisit.append(onHover.getFirst().getString()).append("§b");
@@ -88,12 +91,12 @@ public class TextUtils {
                                 .contains(
                                         "real username is")) {
                             if (onHover.size() > 1) {
-                                if (!afterNewline) {
+                                if (!afterBlockMarker) {
                                     currentVisit.append("§e");
                                 }
                                 currentVisit.append(onHover.get(1).getString()).append("§b");
                             } else {
-                                if (!afterNewline) {
+                                if (!afterBlockMarker) {
                                     currentVisit.append("§e");
                                 }
                                 currentVisit.append(onHover.getFirst().getSiblings().getFirst().getString())
@@ -115,14 +118,18 @@ public class TextUtils {
                         asString, onHover);
             }
         } else {
-            addStyleCodes(style, asString, "");
+            addStyleCodes(style, asString);
         }
-        afterNewline = false;
+        afterBlockMarker = false;
         return Optional.empty();
     };
 
-    private static void addStyleCodes(Style style, String asString, String newline) {
-        if (!afterNewline) {
+    private static void addStyleCodes(Style style, String asString) {
+        if (BLOCK_MARKER_PATTERN.matcher(asString).find()) {
+            afterBlockMarker = true;
+            return;
+        }
+        if (!afterBlockMarker) {
             if (style.getColor() != null) {
                 int colorIndex = 0;
                 for (Formatting format : Formatting.values()) {
@@ -149,6 +156,9 @@ public class TextUtils {
             if (style.isObfuscated()) {
                 currentVisit.append(formatCode).append(Formatting.OBFUSCATED.getCode());
             }
+        } else {
+            afterBlockMarker = false;
+            asString = asString.substring(1);
         }
         currentVisit.append(asString.replaceAll("\\n", newline).replaceAll("§", formatCode));
     }
@@ -174,14 +184,16 @@ public class TextUtils {
         return extractedUsernames;
     }
 
-    public static String parseStyled(Text text, String formatCode) {
+    public static String parseStyled(Text text, String formatCode, String newline) {
+        TextUtils.newline = newline;
         TextUtils.formatCode = formatCode;
         currentVisit = new StringBuilder();
         text.visit(STYLED_VISITOR, text.getStyle());
         return currentVisit.toString();
     }
 
-    public static String parseRaid(Text text, String formatCode) {
+    public static String parseRaid(Text text, String formatCode, String newline) {
+        TextUtils.newline = newline;
         TextUtils.formatCode = formatCode;
         currentVisit = new StringBuilder();
         text.visit(RAID_VISITOR, text.getStyle());

@@ -26,7 +26,7 @@ public class GuildRaidFeature extends Feature {
             GuildApi.LOGGER.info("not render thread message");
             return;
         }
-        String raidMessage = TextUtils.parseRaid(message, "§");
+        String raidMessage = TextUtils.parseRaid(message, "§", "");
         // TODO deprecate parse raid for extract usernames, improve raidmatcher regex.
         Matcher raidMatcher = Pattern.compile(".*§e(.*?)§b.*§e(.*?)§b.*§e(.*?)§b.*§e(.*?)§b.*?§3(.*?)§b")
                 .matcher(raidMessage);

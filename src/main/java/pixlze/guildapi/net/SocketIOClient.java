@@ -22,8 +22,8 @@ import java.util.regex.Pattern;
 
 
 public class SocketIOClient extends Api {
-    private final Pattern guildForegroundPattern = Pattern.compile("^§b((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06)).*§3(.*):§b (.*)$", Pattern.DOTALL);
-    private final Pattern guildBackgroundPattern = Pattern.compile("^§8((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06)).*§8(.*):§8 (.*)$", Pattern.DOTALL);
+    private final Pattern guildForegroundPattern = Pattern.compile("^§b((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06)).*§3(.*):§b (.*)$");
+    private final Pattern guildBackgroundPattern = Pattern.compile("^§8((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06)).*§8(.*):§8 (.*)$");
     private Socket aspectSocket;
     private Socket discordSocket;
     private GuildApiClient guild;
@@ -59,14 +59,11 @@ public class SocketIOClient extends Api {
         guild = Managers.Net.getApi("guild", GuildApiClient.class);
         initSocket();
         ChatMessageReceived.EVENT.register((message) -> {
+            String m = TextUtils.parseStyled(message, "§", "");
             GuildApi.LOGGER.info("received: {}", message.getString());
-            String m = TextUtils.parseStyled(message, "§");
-            // TODO make parse styled seperate into lines from \n and strip beginnings after newline
-            // next lnies start with §b󏿼󐀆§b
             Matcher foregroundMatcher = guildForegroundPattern.matcher(m);
             Matcher backgroundMatcher = guildBackgroundPattern.matcher(m);
             if (foregroundMatcher.find()) {
-                GuildApi.LOGGER.info("found {}", message.getString());
                 String username = foregroundMatcher.group(4);
                 List<String> usernames = TextUtils.extractUsernames(message);
                 if (!usernames.isEmpty()) {

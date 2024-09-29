@@ -128,7 +128,7 @@ public final class ChatHandler {
         LinkedList<Text> newChatLines = new LinkedList<>();
 
         Text firstText = newLines.getFirst();
-        boolean isNpcConfirm = NPC_CONFIRM_PATTERN.matcher(TextUtils.parseStyled(firstText, "§")).find();
+        boolean isNpcConfirm = NPC_CONFIRM_PATTERN.matcher(TextUtils.parseStyled(firstText, "§", "")).find();
         boolean isNpcSelect = NPC_SELECT_PATTERN.matcher(firstText.getString()).find();
 
         if (isNpcConfirm || isNpcSelect) {
