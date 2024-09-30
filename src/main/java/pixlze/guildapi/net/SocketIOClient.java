@@ -1,9 +1,11 @@
 package pixlze.guildapi.net;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.minecraft.block.entity.VaultBlockEntity;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.components.Models;
@@ -11,6 +13,7 @@ import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.models.event.WorldStateEvents;
 import pixlze.guildapi.models.type.WorldState;
 import pixlze.guildapi.net.type.Api;
+import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.TextUtils;
 
 import java.net.URI;
@@ -44,6 +47,10 @@ public class SocketIOClient extends Api {
                     aspectEmit("debug_index", null);
                     return 0;
                 }));
+                dispatcher.register(ClientCommandManager.literal("testmessage").then(ClientCommandManager.argument("message", StringArgumentType.word()).executes((context) -> {
+                    discordEmit("send", Map.of("username", McUtils.playerName(), "message", StringArgumentType.getString(context, "message")));
+                    return 0;
+                })));
             });
         }
     }
