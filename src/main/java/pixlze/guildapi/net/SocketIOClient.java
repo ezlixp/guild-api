@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 public class SocketIOClient extends Api {
     private final Pattern guildForegroundPattern = Pattern.compile("^§b((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))(.*)$");
     private final Pattern guildBackgroundPattern = Pattern.compile("^§8((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))(.*)$");
+    private final Pattern partyConflictPattern = Pattern.compile("^§8\uDAFF\uDFFC\uE001\uDB00\uDC06 [a-zA-Z0-9_]{2,16}:.*$");
     private Socket aspectSocket;
     private Socket discordSocket;
     private GuildApiClient guild;
@@ -80,18 +81,19 @@ public class SocketIOClient extends Api {
         crashed = false;
         guild = Managers.Net.getApi("guild", GuildApiClient.class);
         initSocket();
-        ChatMessageReceived.EVENT.register((message) -> {
-            String m = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));
-            GuildApi.LOGGER.info("received: {}", m);
-            Matcher foregroundMatcher = guildForegroundPattern.matcher(m);
-            Matcher backgroundMatcher = guildBackgroundPattern.matcher(m);
-            // TODO all guild messages start with either the badge or the block indicator, so send all guild messages, not just chat messages
-            if (foregroundMatcher.find()) {
-                discordEmit("wynnMessage", m);
-            } else if (backgroundMatcher.find()) {
-                discordEmit("wynnMessage", m);
-            }
-        });
+        ChatMessageReceived.EVENT.register(this::onWynnMessage);
+    }
+    private void onWynnMessage(Text message) {
+        String m = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));
+        GuildApi.LOGGER.info("received: {}", m);
+        Matcher foregroundMatcher = guildForegroundPattern.matcher(m);
+        Matcher backgroundMatcher = guildBackgroundPattern.matcher(m);
+        Matcher partyConflictMatcher = partyConflictPattern.matcher(m);
+        if (foregroundMatcher.find()) {
+            discordEmit("wynnMessage", m);
+        } else if (backgroundMatcher.find() && !partyConflictMatcher.find()) {
+            discordEmit("wynnMessage", m);
+        }
     }
 
     private void initSocket() {
