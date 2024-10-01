@@ -3,6 +3,7 @@ package pixlze.guildapi.net;
 import net.minecraft.text.Text;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.http.HttpClient;
 import java.util.HashMap;
@@ -13,7 +14,7 @@ public class NetManager {
     private final Map<String, Api> apis = new HashMap<>();
 
     public void apiCrash(Text message, Api api) {
-        McUtils.sendLocalMessage(message);
+        McUtils.sendLocalMessage(message, Prepend.DEFAULT);
         for (Api a : apis.values()) {
             if (a.equals(api) || a.depends(api)) {
                 a.crash();

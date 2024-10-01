@@ -12,6 +12,7 @@ import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mod.event.WynncraftConnectionEvents;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
@@ -34,7 +35,8 @@ public class WynnApiClient extends Api {
                         new Thread(() -> {
                             reloading = true;
                             McUtils.sendLocalMessage(
-                                    Text.literal("Reloading...").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+                                    Text.literal("Reloading...")
+                                            .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT);
                             crashed = false;
                             enabled = true;
                             initWynnPlayerInfo(true);
@@ -66,7 +68,8 @@ public class WynnApiClient extends Api {
                     GuildApi.LOGGER.info("successfully loaded wynn player info");
                     if (print)
                         McUtils.sendLocalMessage(
-                                Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+                                Text.literal("Success!")
+                                        .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT);
                     super.init();
                 } catch (Exception e) {
                     GuildApi.LOGGER.error("wynn player load error: {} {}", e, e.getMessage());

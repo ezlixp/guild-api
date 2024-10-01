@@ -9,6 +9,7 @@ import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.TextUtils;
+import pixlze.guildapi.utils.type.Prepend;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -34,7 +35,7 @@ public class GuildRaidFeature extends Feature {
 //        (raidMessage);
         if (raidMatcher.find() && !raidMessage.contains(":")) {
             GuildApi.LOGGER.info("guild raid {} finished", raidMatcher.group(5));
-            McUtils.sendLocalMessage(Text.literal("Guild raid finished.").withColor(0x00FF00));
+            McUtils.sendLocalMessage(Text.literal("Guild raid finished.").withColor(0x00FF00), Prepend.DEFAULT);
             JsonObject requestBody = new JsonObject();
             requestBody.add("users", Managers.Json.toJsonElement(Arrays.toString(new String[]{raidMatcher.group(1), raidMatcher.group(2), raidMatcher.group(3), raidMatcher.group(4)})));
             requestBody.addProperty("raid", raidMatcher.group(5));

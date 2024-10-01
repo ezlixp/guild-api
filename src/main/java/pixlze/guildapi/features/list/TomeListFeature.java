@@ -14,6 +14,7 @@ import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.TextUtils;
+import pixlze.guildapi.utils.type.Prepend;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -81,7 +82,7 @@ public class TomeListFeature extends ListFeature {
                         .get("username")
                         .getAsString() + " is at position " + res
                         .getAsJsonObject()
-                        .get("position").getAsString() + ".").withColor(0xFFFFFF));
+                        .get("position").getAsString() + ".").withColor(0xFFFFFF), Prepend.DEFAULT);
             }
         });
     }

@@ -17,6 +17,7 @@ import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.features.Feature;
 import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.type.Prepend;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -76,7 +77,7 @@ public class ListFeature extends Feature {
             if (res == null) {
                 assert Formatting.YELLOW.getColorValue() != null;
                 if (!reload) McUtils.sendLocalMessage(Text.literal("No list data")
-                        .withColor(Formatting.YELLOW.getColorValue()));
+                        .withColor(Formatting.YELLOW.getColorValue()), Prepend.DEFAULT);
                 return;
             }
             List<JsonElement> listItems = res.getAsJsonArray().asList();
@@ -102,7 +103,7 @@ public class ListFeature extends Feature {
                             .setStyle(Style.EMPTY.withColor(hasNext ? Formatting.GREEN:Formatting.GRAY).withBold(true)
                                     .withClickEvent(hasNext ? new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + name + "list view " + (page + 2) + " false"):null)));
             listMessage.append("\n");
-            McUtils.sendLocalMessage(listMessage);
+            McUtils.sendLocalMessage(listMessage, Prepend.DEFAULT);
         });
     }
 }

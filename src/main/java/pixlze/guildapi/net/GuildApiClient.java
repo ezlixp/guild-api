@@ -13,6 +13,7 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -35,6 +36,7 @@ public class GuildApiClient extends Api {
     private final List<String> nonErrors = List.of("User could not be found in tome list.", "duplicate raid",
             "User already in tome list.", "Specified user could not be found in tome list.", "Specified user could not be found in aspect list.");
     private final List<String> printNonErrors = List.of("Specified user could not be found in tome list.", "User already in tome list.", "Specified user could not be found in aspect list.");
+    public String guildPrefix = "";
     private String token;
     private JsonObject wynnPlayerInfo;
     private HttpRequest.Builder lastFailed = null;
@@ -54,7 +56,7 @@ public class GuildApiClient extends Api {
         if (!enabled) {
             GuildApi.LOGGER.warn("skipped api get because api service were crashed");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
+                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT);
             failedPromise = out;
             return out;
         }
@@ -66,9 +68,9 @@ public class GuildApiClient extends Api {
             if (exception != null) {
                 assert Formatting.RED.getColorValue() != null;
                 McUtils.sendLocalMessage(Text.literal("Fatal API error: " + exception + " " + exception.getMessage())
-                        .withColor(Formatting.RED.getColorValue()));
+                        .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT);
                 lastFailed = builder;
-                McUtils.sendLocalMessage(retryMessage);
+                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT);
                 GuildApi.LOGGER.error("api GET exception {} {} ", exception, exception.getMessage());
                 failedPromise = out;
             } else {
@@ -87,7 +89,7 @@ public class GuildApiClient extends Api {
             if (isError(error)) {
                 lastFailed = builder;
                 GuildApi.LOGGER.error("API error: {}", error);
-                McUtils.sendLocalMessage(retryMessage);
+                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT);
             } else {
                 if (failedPromise != null) {
                     failedPromise.complete(Managers.Json.toJsonElement(response.body()));
@@ -96,14 +98,15 @@ public class GuildApiClient extends Api {
                 lastFailed = null;
                 GuildApi.LOGGER.warn("API non error: {}", error);
                 if (printNonError(error))
-                    McUtils.sendLocalMessage(Text.literal(error).setStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
+                    McUtils.sendLocalMessage(Text.literal(error)
+                            .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT);
                 else if (print)
                     successMessage();
 
             }
         } else {
             lastFailed = builder;
-            McUtils.sendLocalMessage(retryMessage);
+            McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT);
         }
     }
 
@@ -131,14 +134,14 @@ public class GuildApiClient extends Api {
     }
 
     private void successMessage() {
-        McUtils.sendLocalMessage(successMessage);
+        McUtils.sendLocalMessage(successMessage, Prepend.DEFAULT);
     }
 
     public void post(String path, JsonObject body, boolean print) {
         if (!enabled) {
             GuildApi.LOGGER.warn("skipped api post because api service were crashed");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
+                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT);
             return;
         }
         HttpRequest.Builder builder = HttpRequest.newBuilder()
@@ -152,9 +155,9 @@ public class GuildApiClient extends Api {
             if (exception != null) {
                 assert Formatting.RED.getColorValue() != null;
                 McUtils.sendLocalMessage(Text.literal("Fatal API error: " + exception + " " + exception.getMessage())
-                        .withColor(Formatting.RED.getColorValue()));
+                        .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT);
                 lastFailed = builder;
-                McUtils.sendLocalMessage(retryMessage);
+                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT);
                 GuildApi.LOGGER.error("api POST exception: {} {}", exception, exception.getMessage());
             } else {
                 if (res.statusCode() / 100 == 2) {
@@ -233,7 +236,7 @@ public class GuildApiClient extends Api {
         if (!enabled) {
             GuildApi.LOGGER.warn("Skipped api delete because api services weren't enabled");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
+                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT);
             return;
         }
         HttpRequest.Builder builder = HttpRequest.newBuilder()
@@ -246,9 +249,9 @@ public class GuildApiClient extends Api {
             if (exception != null) {
                 assert Formatting.RED.getColorValue() != null;
                 McUtils.sendLocalMessage(Text.literal("Fatal API error: " + exception + " " + exception.getMessage())
-                        .withColor(Formatting.RED.getColorValue()));
+                        .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT);
                 lastFailed = builder;
-                McUtils.sendLocalMessage(retryMessage);
+                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT);
                 GuildApi.LOGGER.error("api delete error: {} {}", exception, exception.getMessage());
             } else {
                 if (res.statusCode() / 100 == 2) {
@@ -273,16 +276,17 @@ public class GuildApiClient extends Api {
                     if (!retrying) {
                         retrying = true;
                         McUtils.sendLocalMessage(
-                                Text.literal("Retrying...").setStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+                                Text.literal("Retrying...")
+                                        .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT);
                         CompletableFuture<HttpResponse<String>> response = tryToken(lastFailed);
                         response.whenCompleteAsync((res, exception) -> {
                             GuildApi.LOGGER.info("retrying {} {}", res, exception);
                             if (exception != null) {
                                 GuildApi.LOGGER.error("Retry exception: {} {}", exception, exception.getMessage());
-                                McUtils.sendLocalMessage(retryMessage);
+                                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT);
                             } else {
                                 if (res.statusCode() / 100 == 2) {
-                                    McUtils.sendLocalMessage(successMessage);
+                                    McUtils.sendLocalMessage(successMessage, Prepend.DEFAULT);
                                     if (failedPromise != null) {
                                         failedPromise.complete(Managers.Json.toJsonElement(res.body()));
                                         failedPromise = null;
@@ -307,8 +311,9 @@ public class GuildApiClient extends Api {
             if (GuildApi.isDevelopment()) {
                 baseURL = "http://localhost:3000/";
             } else {
+                guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
                 baseURL = GuildApi.secrets.get("guild_raid_urls").getAsJsonObject()
-                        .get(wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString())
+                        .get(guildPrefix)
                         .getAsString();
             }
             super.init();
