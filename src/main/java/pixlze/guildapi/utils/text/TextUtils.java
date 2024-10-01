@@ -42,13 +42,6 @@ public class TextUtils {
         return TextVisitors.currentVisit.toString();
     }
 
-    public static String parseRaid(Text text, TextParseOptions options) {
-        TextVisitors.options = options;
-        TextVisitors.currentVisit = new StringBuilder();
-        text.visit(TextVisitors.RAID_VISITOR, text.getStyle());
-        return TextVisitors.currentVisit.toString();
-    }
-
     public static String parsePlain(Text text) {
         TextVisitors.currentVisit = new StringBuilder();
         text.visit(TextVisitors.PLAIN_VISITOR, text.getStyle());
@@ -70,66 +63,6 @@ public class TextUtils {
             } else {
                 handleStyles(style, asString);
             }
-            return Optional.empty();
-        };
-        public static final StringVisitable.StyledVisitor<String> RAID_VISITOR = (style, asString) -> {
-            if (!style.getFont().equals(Identifier.of("default"))) {
-                afterBlockMarker = true;
-                return Optional.empty();
-            }
-            if (style.getHoverEvent() != null) {
-                List<Text> onHover = null;
-                if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text) {
-                    onHover = ((Text) Objects.requireNonNull(
-                            style.getHoverEvent().getValue(style.getHoverEvent().getAction()))).getSiblings();
-                } else {
-                    GuildApi.LOGGER.info("non text event: {} in message {}", style, asString);
-                }
-                try {
-                    if (asString.indexOf('/') == -1) {
-                        if (onHover != null) {
-                            if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(
-                                    onHover.get(1).getString()).contains("nickname is")) {
-                                if (!afterBlockMarker) {
-                                    currentVisit.append(options.formatCode).append("e");
-                                }
-                                currentVisit.append(onHover.getFirst().getString()).append("§b");
-                            } else if (!onHover.isEmpty() && onHover.getFirst()
-                                    .getString() != null && onHover.getFirst()
-                                    .getString()
-                                    .contains(
-                                            "real username is")) {
-                                if (onHover.size() > 1) {
-                                    if (!afterBlockMarker) {
-                                        currentVisit.append("§e");
-                                    }
-                                    currentVisit.append(onHover.get(1).getString()).append("§b");
-                                } else {
-                                    if (!afterBlockMarker) {
-                                        currentVisit.append("§e");
-                                    }
-                                    currentVisit.append(onHover.getFirst().getSiblings().getFirst().getString())
-                                            .append("§b");
-                                }
-                            } else {
-                                currentVisit.append(asString.replaceAll("\\n", ""));
-                            }
-                        } else {
-                            currentVisit.append(asString.replaceAll("\\n", ""));
-                        }
-                    } else if (onHover == null || onHover.size() < 2 || onHover.get(1)
-                            .getString() == null || !Objects.requireNonNull(
-                            onHover.get(1).getString()).contains("'s nickname is ")) {
-                        currentVisit.append(asString.replaceAll("\\n", ""));
-                    }
-                } catch (Exception e) {
-                    GuildApi.LOGGER.error("raid visitor hover error: {} {} {} with astring {}", e.getMessage(), e,
-                            asString, onHover);
-                }
-            } else {
-                handleStyles(style, asString);
-            }
-            afterBlockMarker = false;
             return Optional.empty();
         };
 

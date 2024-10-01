@@ -61,8 +61,6 @@ public abstract class ChatScreenMixin extends Screen {
                         }
                         if (Screen.hasShiftDown()) {
                             MinecraftClient.getInstance().keyboard.setClipboard(message.content().toString());
-                            GuildApi.LOGGER.info("{} with raid visitor. the message has {} lines",
-                                    TextUtils.parseRaid(message.content(), TextParseOptions.DEFAULT), lines);
                         }
                     }
                 }

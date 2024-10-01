@@ -24,7 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AspectListFeature extends ListFeature {
-    private static final Pattern ASPECT_MESSAGE_PATTERN = Pattern.compile("^§b((\uDAFF\uDFFC\uE001\uDB00\uDC06)|(\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE))§b §3(.*?)(§3)? rewarded §ean Aspect§3 to §3(.*)$");
+    private final Pattern ASPECT_MATCHER_PATTERN = Pattern.compile("^§.((\uDAFF\uDFFC\uE001\uDB00\uDC06)|(\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE))§. §.(?<giver>.*?)(§.)? rewarded §.an Aspect§. to §.(?<receiver>.*)(§.)?$");
 
     public AspectListFeature() {
         super("aspect", "aspects", (listItem) -> Text.literal(listItem.get("username")
@@ -55,14 +55,11 @@ public class AspectListFeature extends ListFeature {
             return;
         }
         String aspectMessage = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));
-
-        Matcher aspectMatcher = ASPECT_MESSAGE_PATTERN.matcher(aspectMessage);
+        Matcher aspectMatcher = ASPECT_MATCHER_PATTERN.matcher(aspectMessage);
         if (aspectMatcher.find()) {
-            String giver = aspectMatcher.group(4);
-            String receiver = aspectMatcher.group(6);
-            GuildApi.LOGGER.info("{} gave an aspect to {}", giver, receiver);
+            GuildApi.LOGGER.info("{} gave an aspect to {}", aspectMatcher.group("giver"), aspectMatcher.group("receiver"));
             Managers.Net.getApi("socket", SocketIOClient.class)
-                    .aspectEmit("give_aspect", Collections.singletonMap("player", receiver));
+                    .aspectEmit("give_aspect", Collections.singletonMap("player", aspectMatcher.group("receiver")));
         }
     }
 
