@@ -33,13 +33,7 @@ public class GuildApi implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         // TODO add test command for guild server (/ping?)
-        development = Boolean.parseBoolean(System.getProperty("development")) || FabricLoader.getInstance().isDevelopmentEnvironment();
-            GuildApi.LOGGER.info(System.getProperty("development"));
-        if (development) {
-            GuildApi.LOGGER.info("running in a development environment");
-        }
-        System.setProperty("java.awt.headless", "false");
-
+        development = FabricLoader.getInstance().isDevelopmentEnvironment();
 
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("secrets.json");
         if (inputStream == null) {
