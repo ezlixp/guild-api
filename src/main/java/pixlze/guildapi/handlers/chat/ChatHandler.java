@@ -7,7 +7,8 @@ import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.models.event.WorldStateEvents;
 import pixlze.guildapi.models.type.WorldState;
 import pixlze.guildapi.utils.McUtils;
-import pixlze.guildapi.utils.TextUtils;
+import pixlze.guildapi.utils.text.TextUtils;
+import pixlze.guildapi.utils.text.type.TextParseOptions;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -128,7 +129,7 @@ public final class ChatHandler {
         LinkedList<Text> newChatLines = new LinkedList<>();
 
         Text firstText = newLines.getFirst();
-        boolean isNpcConfirm = NPC_CONFIRM_PATTERN.matcher(TextUtils.parseStyled(firstText, "§", "")).find();
+        boolean isNpcConfirm = NPC_CONFIRM_PATTERN.matcher(TextUtils.parseStyled(firstText, TextParseOptions.DEFAULT)).find();
         boolean isNpcSelect = NPC_SELECT_PATTERN.matcher(firstText.getString()).find();
 
         if (isNpcConfirm || isNpcSelect) {

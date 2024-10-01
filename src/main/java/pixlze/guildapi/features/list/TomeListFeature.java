@@ -13,7 +13,7 @@ import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.utils.McUtils;
-import pixlze.guildapi.utils.TextUtils;
+import pixlze.guildapi.utils.text.TextUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.util.List;

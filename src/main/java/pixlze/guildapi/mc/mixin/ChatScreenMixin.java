@@ -13,7 +13,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.mc.mixin.accessors.ChatHudAccessorInvoker;
-import pixlze.guildapi.utils.TextUtils;
+import pixlze.guildapi.utils.text.TextUtils;
+import pixlze.guildapi.utils.text.type.TextParseOptions;
 
 import java.util.List;
 
@@ -56,12 +57,12 @@ public abstract class ChatScreenMixin extends Screen {
                         }
                         if (Screen.hasAltDown()) {
                             MinecraftClient.getInstance().keyboard.setClipboard(
-                                    TextUtils.parseStyled(message.content(), "§", ""));
+                                    TextUtils.parseStyled(message.content(), TextParseOptions.DEFAULT));
                         }
                         if (Screen.hasShiftDown()) {
                             MinecraftClient.getInstance().keyboard.setClipboard(message.content().toString());
                             GuildApi.LOGGER.info("{} with raid visitor. the message has {} lines",
-                                    TextUtils.parseRaid(message.content(), "§", ""), lines);
+                                    TextUtils.parseRaid(message.content(), TextParseOptions.DEFAULT), lines);
                         }
                     }
                 }

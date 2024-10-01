@@ -18,7 +18,8 @@ import pixlze.guildapi.models.event.WorldStateEvents;
 import pixlze.guildapi.models.type.WorldState;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
-import pixlze.guildapi.utils.TextUtils;
+import pixlze.guildapi.utils.text.TextUtils;
+import pixlze.guildapi.utils.text.type.TextParseOptions;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.URI;
@@ -67,9 +68,9 @@ public class SocketIOClient extends Api {
         else GuildApi.LOGGER.warn("skipped event because of missing or inactive aspect socket");
     }
 
-    public void discordEmit(String event, Map<String, Object> data) {
+    public void discordEmit(String event, Object data) {
         if (discordSocket != null && discordSocket.connected()) {
-            GuildApi.LOGGER.info("emitting, {}", data.getOrDefault("content", "doesn't exist"));
+            GuildApi.LOGGER.info("emitting, {}", data);
             discordSocket.emit(event, data);
         } else GuildApi.LOGGER.warn("skipped event because of missing or inactive discord socket");
     }
@@ -80,17 +81,15 @@ public class SocketIOClient extends Api {
         guild = Managers.Net.getApi("guild", GuildApiClient.class);
         initSocket();
         ChatMessageReceived.EVENT.register((message) -> {
-            String m = TextUtils.parseStyled(message, "§", "");
+            String m = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));
             GuildApi.LOGGER.info("received: {}", m);
             Matcher foregroundMatcher = guildForegroundPattern.matcher(m);
             Matcher backgroundMatcher = guildBackgroundPattern.matcher(m);
             // TODO all guild messages start with either the badge or the block indicator, so send all guild messages, not just chat messages
             if (foregroundMatcher.find()) {
-                List<String> usernames = TextUtils.extractUsernames(message);
-                discordEmit("wynnMessage", Map.of("content", foregroundMatcher.group(4), "extractedUsernames", usernames));
+                discordEmit("wynnMessage", m);
             } else if (backgroundMatcher.find()) {
-                List<String> usernames = TextUtils.extractUsernames(message);
-                discordEmit("wynnMessage", Map.of("username", backgroundMatcher.group(4), "extractedUsernames", usernames));
+                discordEmit("wynnMessage", m);
             }
         });
     }

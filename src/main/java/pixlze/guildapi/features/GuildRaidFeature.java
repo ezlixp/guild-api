@@ -8,7 +8,8 @@ import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.utils.McUtils;
-import pixlze.guildapi.utils.TextUtils;
+import pixlze.guildapi.utils.text.TextUtils;
+import pixlze.guildapi.utils.text.type.TextParseOptions;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.time.Instant;
@@ -27,7 +28,7 @@ public class GuildRaidFeature extends Feature {
             GuildApi.LOGGER.info("not render thread message");
             return;
         }
-        String raidMessage = TextUtils.parseRaid(message, "§", "");
+        String raidMessage = TextUtils.parseRaid(message, TextParseOptions.DEFAULT);
         // TODO deprecate parse raid for extract usernames, improve raidmatcher regex.
         Matcher raidMatcher = Pattern.compile(".*§e(.*?)§b.*§e(.*?)§b.*§e(.*?)§b.*§e(.*?)§b.*?§3(.*?)§b")
                 .matcher(raidMessage);
