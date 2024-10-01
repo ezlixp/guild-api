@@ -84,6 +84,7 @@ public class SocketIOClient extends Api {
             GuildApi.LOGGER.info("received: {}", m);
             Matcher foregroundMatcher = guildForegroundPattern.matcher(m);
             Matcher backgroundMatcher = guildBackgroundPattern.matcher(m);
+            // TODO all guild messages start with either the badge or the block indicator, so send all guild messages, not just chat messages
             if (foregroundMatcher.find()) {
                 String username = foregroundMatcher.group(4);
                 List<String> usernames = TextUtils.extractUsernames(message);
