@@ -70,7 +70,6 @@ public class TextUtils {
             } else {
                 handleStyles(style, asString);
             }
-            handleStyles(style, asString);
             return Optional.empty();
         };
         public static final StringVisitable.StyledVisitor<String> RAID_VISITOR = (style, asString) -> {
@@ -183,14 +182,14 @@ public class TextUtils {
                             if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(
                                     onHover.get(1).getString()).contains("nickname is")) {
                                 GuildApi.LOGGER.info("wynntils username found: {} {}", style, asString);
-                                currentVisit.append(onHover.getFirst().getString());
+                                handleStyles(style.withItalic(false), onHover.getFirst().getString());
                             } else if (!onHover.isEmpty() && onHover.getFirst().getString() != null && onHover.getFirst().getString().contains("real username is")) {
                                 if (onHover.size() > 1) {
                                     GuildApi.LOGGER.info("username found multi part: {} {}", style, asString);
-                                    currentVisit.append(onHover.get(1).getString());
+                                    handleStyles(style.withItalic(false), onHover.get(1).getString());
                                 } else {
                                     GuildApi.LOGGER.info("username found sibling: {} {}", style, asString);
-                                    currentVisit.append(onHover.getFirst().getSiblings().getFirst().getString());
+                                    handleStyles(style.withItalic(false), onHover.getFirst().getSiblings().getFirst().getString());
                                 }
                             }
                         }
