@@ -3,7 +3,6 @@ package pixlze.guildapi.features.list;
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -30,14 +29,6 @@ public class TomeListFeature extends ListFeature {
 
     @Override
     public void init() {
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(ClientCommandManager.literal("tomelist")
-                .then(ClientCommandManager.literal("add"))
-                .executes(context -> {
-                    Managers.Net.getApi("guild", GuildApiClient.class)
-                            .post("tomes", Managers.Json.toJsonObject("{\"username\":\"" + McUtils.playerName() + "\"}"), true);
-                    return 0;
-                }))
-        );
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
         super.registerCommands(
                 List.of(ClientCommandManager.literal("add").executes((context) -> {

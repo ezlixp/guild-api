@@ -31,9 +31,9 @@ import java.util.regex.Pattern;
 
 
 public class SocketIOClient extends Api {
-    private final Pattern guildForegroundPattern = Pattern.compile("^§b((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))(?<content>.*)$");
-    private final Pattern guildBackgroundPattern = Pattern.compile("^§8((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))(?<content>.*)$");
-    private final Pattern partyConflictPattern = Pattern.compile("^§8\uDAFF\uDFFC\uE001\uDB00\uDC06§8 [a-zA-Z0-9_]{2,16}:.*$");
+    private final Pattern GUILD_PATTERN = Pattern.compile("^§[b8]((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§[b8] (?<content>.*)$");
+    private final Pattern GUILD_MESSAGE_PATTERN = Pattern.compile("^.*§[38](?<author>.+?)(§[38])?:§[b8] (?<content>.*)$");
+    private final Pattern PARTY_CONFLICT_PATTERN = Pattern.compile("^§8\uDAFF\uDFFC\uE001\uDB00\uDC06§8 [a-zA-Z0-9_]{2,16}:.*$");
     private Socket aspectSocket;
     private Socket discordSocket;
     private GuildApiClient guild;
@@ -83,18 +83,6 @@ public class SocketIOClient extends Api {
         initSocket();
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
     }
-    private void onWynnMessage(Text message) {
-        String m = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));
-        GuildApi.LOGGER.info("received: {}", m);
-        Matcher foregroundMatcher = guildForegroundPattern.matcher(m);
-        Matcher backgroundMatcher = guildBackgroundPattern.matcher(m);
-        Matcher partyConflictMatcher = partyConflictPattern.matcher(m);
-        if (foregroundMatcher.find()) {
-            discordEmit("wynnMessage", foregroundMatcher.group("content"));
-        } else if (backgroundMatcher.find() && !partyConflictMatcher.find()) {
-            discordEmit("wynnMessage", backgroundMatcher.group("content"));
-        }
-    }
 
     private void initSocket() {
         IO.Options options = IO.Options.builder()
@@ -109,6 +97,16 @@ public class SocketIOClient extends Api {
         }
         WorldStateEvents.CHANGE.register(this::worldStateChanged);
         super.init();
+    }
+
+    private void onWynnMessage(Text message) {
+        String m = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));
+        GuildApi.LOGGER.info("received: {}", m);
+        Matcher guildMatcher = GUILD_PATTERN.matcher(m);
+        Matcher partyConflictMatcher = PARTY_CONFLICT_PATTERN.matcher(m);
+        if (guildMatcher.find() && !partyConflictMatcher.find()) {
+            discordEmit("wynnMessage", format(guildMatcher.group("content")));
+        }
     }
 
     private void setupListeners() {
@@ -149,5 +147,13 @@ public class SocketIOClient extends Api {
                 GuildApi.LOGGER.info("discord socket off");
             }
         }
+    }
+
+    private Object format(String content) {
+        Matcher guildMessageMatcher = GUILD_MESSAGE_PATTERN.matcher(content);
+        if (guildMessageMatcher.find()) {
+            return Map.of("Username", guildMessageMatcher.group("author"), "TextContent", guildMessageMatcher.group("content"));
+        }
+        return Map.of("TextContent", content);
     }
 }
