@@ -105,7 +105,7 @@ public class SocketIOClient extends Api {
         Matcher guildMatcher = GUILD_PATTERN.matcher(m);
         Matcher partyConflictMatcher = PARTY_CONFLICT_PATTERN.matcher(m);
         if (guildMatcher.find() && !partyConflictMatcher.find()) {
-            discordEmit("wynnMessage", format(guildMatcher.group("content")));
+            discordEmit("wynnMessage", guildMatcher.group("content"));
         }
     }
 
@@ -147,13 +147,5 @@ public class SocketIOClient extends Api {
                 GuildApi.LOGGER.info("discord socket off");
             }
         }
-    }
-
-    private Object format(String content) {
-        Matcher guildMessageMatcher = GUILD_MESSAGE_PATTERN.matcher(content);
-        if (guildMessageMatcher.find()) {
-            return Map.of("Username", guildMessageMatcher.group("author"), "TextContent", guildMessageMatcher.group("content"));
-        }
-        return Map.of("TextContent", content);
     }
 }
