@@ -10,6 +10,7 @@ public class FeatureManager {
         registerFeature(new GuildRaidFeature());
         registerFeature(new AspectListFeature());
         registerFeature(new TomeListFeature());
+        registerFeature(new DiscordBridgeFeature());
     }
 
     private void registerFeature(Feature feature) {

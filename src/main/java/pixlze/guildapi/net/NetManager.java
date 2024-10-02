@@ -1,6 +1,7 @@
 package pixlze.guildapi.net;
 
 import net.minecraft.text.Text;
+import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
@@ -25,7 +26,8 @@ public class NetManager {
     public <T extends Api> T getApi(String name, Class<T> apiClass) {
         Api api = apis.get(name);
         if (apiClass.isInstance(api)) return apiClass.cast(api);
-        throw new IllegalArgumentException("API not found or wrong type: " + name);
+        GuildApi.LOGGER.error("Requested api \"{}\" does not exist/has not been loaded.", name);
+        return null;
     }
 
     public void init() {

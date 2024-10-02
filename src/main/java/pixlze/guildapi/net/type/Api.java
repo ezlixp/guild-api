@@ -17,10 +17,10 @@ public class Api {
         this.name = name;
         this.dependencies = dependencies;
         missingDeps = dependencies.size();
-        NetEvents.LOADED.register(this::apiLoaded);
+        NetEvents.LOADED.register(this::onApiLoaded);
     }
 
-    private void apiLoaded(Api api) {
+    private void onApiLoaded(Api api) {
         if (this.depends(api)) dependencyLoaded();
     }
 

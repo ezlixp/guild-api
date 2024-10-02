@@ -5,35 +5,22 @@ import io.socket.client.IO;
 import io.socket.client.Socket;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import org.json.JSONException;
-import org.json.JSONObject;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.components.Models;
-import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.models.event.WorldStateEvents;
 import pixlze.guildapi.models.type.WorldState;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
-import pixlze.guildapi.utils.text.TextUtils;
-import pixlze.guildapi.utils.text.type.TextParseOptions;
-import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.function.Consumer;
 
 
 public class SocketIOClient extends Api {
-    private final Pattern GUILD_PATTERN = Pattern.compile("^§[b8]((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§[b8] (?<content>.*)$");
-    private final Pattern GUILD_MESSAGE_PATTERN = Pattern.compile("^.*§[38](?<author>.+?)(§[38])?:§[b8] (?<content>.*)$");
-    private final Pattern PARTY_CONFLICT_PATTERN = Pattern.compile("^§8\uDAFF\uDFFC\uE001\uDB00\uDC06§8 [a-zA-Z0-9_]{2,16}:.*$");
     private Socket aspectSocket;
     private Socket discordSocket;
     private GuildApiClient guild;
@@ -81,7 +68,6 @@ public class SocketIOClient extends Api {
         crashed = false;
         guild = Managers.Net.getApi("guild", GuildApiClient.class);
         initSocket();
-        ChatMessageReceived.EVENT.register(this::onWynnMessage);
     }
 
     private void initSocket() {
@@ -90,41 +76,12 @@ public class SocketIOClient extends Api {
                 .build();
         aspectSocket = IO.socket(URI.create(guild.getBaseURL() + "aspects"), options);
         discordSocket = IO.socket(URI.create(guild.getBaseURL() + "discord"), options);
-        setupListeners();
         if (GuildApi.isDevelopment() || Models.WorldState.onWorld()) {
             aspectSocket.connect();
             discordSocket.connect();
         }
         WorldStateEvents.CHANGE.register(this::worldStateChanged);
         super.init();
-    }
-
-    private void onWynnMessage(Text message) {
-        String m = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));
-        GuildApi.LOGGER.info("received: {}", m);
-        Matcher guildMatcher = GUILD_PATTERN.matcher(m);
-        Matcher partyConflictMatcher = PARTY_CONFLICT_PATTERN.matcher(m);
-        if (guildMatcher.find() && !partyConflictMatcher.find()) {
-            discordEmit("wynnMessage", guildMatcher.group("content"));
-        }
-    }
-
-    private void setupListeners() {
-        discordSocket.on("discordMessage", (args) -> {
-            if (args[0] instanceof JSONObject data) {
-                GuildApi.LOGGER.info("{}", data);
-                try {
-                    McUtils.sendLocalMessage(Text.literal(guild.guildPrefix)
-                            .setStyle(Style.EMPTY.withColor(Formatting.AQUA)).append(" -> ")
-                            .append(Text.literal(data.get("Author").toString())
-                                    .fillStyle(Style.EMPTY.withColor(Formatting.DARK_AQUA).withBold(true)).append(": "))
-                            .append(Text.literal(data.get("Content").toString())
-                                    .setStyle(Style.EMPTY.withColor(Formatting.AQUA))), Prepend.GUILD);
-                } catch (JSONException e) {
-                    GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
-                }
-            }
-        });
     }
 
     private void worldStateChanged(WorldState state) {
@@ -147,5 +104,9 @@ public class SocketIOClient extends Api {
                 GuildApi.LOGGER.info("discord socket off");
             }
         }
+    }
+
+    public void addDiscordListener(String name, Consumer<Object[]> listener) {
+        discordSocket.on(name, listener::accept);
     }
 }
