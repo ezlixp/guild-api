@@ -53,7 +53,6 @@ public class DiscordBridgeFeature extends Feature {
             ChatMessageReceived.EVENT.register(this::onWynnMessage);
             Managers.Net.getApi("socket", SocketIOClient.class).addDiscordListener("discordMessage", (args) -> {
                 if (args[0] instanceof JSONObject data) {
-                    GuildApi.LOGGER.info("{}", data);
                     try {
                         McUtils.sendLocalMessage(Text.literal(Managers.Net.getApi("guild", GuildApiClient.class).guildPrefix)
                                 .setStyle(Style.EMPTY.withColor(Formatting.AQUA)).append(" -> ")
