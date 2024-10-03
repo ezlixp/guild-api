@@ -11,7 +11,9 @@ import pixlze.guildapi.components.Models;
 import pixlze.guildapi.models.event.WorldStateEvents;
 import pixlze.guildapi.models.type.WorldState;
 import pixlze.guildapi.net.type.Api;
+import pixlze.guildapi.utils.FontUtils;
 import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.URI;
 import java.util.Collections;
@@ -38,7 +40,8 @@ public class SocketIOClient extends Api {
                     return 0;
                 }));
                 dispatcher.register(ClientCommandManager.literal("index").executes((context) -> {
-                    aspectEmit("debug_index", null);
+//                    aspectEmit("debug_index", null);
+                    McUtils.sendLocalMessage(FontUtils.BannerPillFont.parseStringWithFill("test"), Prepend.GUILD);
                     return 0;
                 }));
                 dispatcher.register(ClientCommandManager.literal("testmessage")
