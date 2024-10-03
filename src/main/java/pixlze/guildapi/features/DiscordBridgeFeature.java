@@ -36,11 +36,14 @@ public class DiscordBridgeFeature extends Feature {
             LiteralArgumentBuilder<FabricClientCommandSource> base = ClientCommandManager.literal("discord")
                     .then(ClientCommandManager.argument("message", StringArgumentType.greedyString())
                             .executes((context) -> {
+                                String message = StringArgumentType.getString(context, "message")
+                                        .replaceAll("[^A-Za-z0-9!@#$%^&*()\\[\\]{}\\\\|;:'\",.<>/?`~ ]", "");
+                                if (message.isBlank()) return 0;
                                 if (Managers.Net.getApi("socket", SocketIOClient.class) != null) {
                                     Managers.Net.getApi("socket", SocketIOClient.class)
-                                            .discordEmit("wynnMessage", "[Discord Only] " + McUtils.playerName() + ": " + StringArgumentType.getString(context, "message"));
+                                            .discordEmit("discordOnlyWynnMessage", "[Discord Only] " + McUtils.playerName() + ": " + message);
                                     Managers.Net.getApi("socket", SocketIOClient.class)
-                                            .discordEmit("discordMessage", Map.of("Author", McUtils.playerName(), "Content", StringArgumentType.getString(context, "message")));
+                                            .discordEmit("discordMessage", Map.of("Author", McUtils.playerName(), "Content", message));
 
                                 }
                                 return 0;
