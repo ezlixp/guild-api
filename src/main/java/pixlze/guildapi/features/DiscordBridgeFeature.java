@@ -22,6 +22,7 @@ import pixlze.guildapi.utils.text.TextUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
 import pixlze.guildapi.utils.type.Prepend;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +30,7 @@ public class DiscordBridgeFeature extends Feature {
     private final Pattern GUILD_PATTERN = Pattern.compile("^§[b8]((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§[b8] (?<content>.*)$");
     private final Pattern PARTY_CONFLICT_PATTERN = Pattern.compile("^§8\uDAFF\uDFFC\uE001\uDB00\uDC06§8 [a-zA-Z0-9_]{2,16}:.*$");
 
+    // TODO filter out illegal characters here
     @Override
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
@@ -38,6 +40,9 @@ public class DiscordBridgeFeature extends Feature {
                                 if (Managers.Net.getApi("socket", SocketIOClient.class) != null) {
                                     Managers.Net.getApi("socket", SocketIOClient.class)
                                             .discordEmit("wynnMessage", "[Discord Only] " + McUtils.playerName() + ": " + StringArgumentType.getString(context, "message"));
+                                    Managers.Net.getApi("socket", SocketIOClient.class)
+                                            .discordEmit("discordMessage", Map.of("Author", McUtils.playerName(), "Content", StringArgumentType.getString(context, "message")));
+
                                 }
                                 return 0;
                             })
