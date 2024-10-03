@@ -55,23 +55,8 @@ public class DiscordBridgeFeature extends Feature {
     private void onApiLoaded(Api api) {
         if (api.getClass().equals(SocketIOClient.class)) {
             ChatMessageReceived.EVENT.register(this::onWynnMessage);
-            Managers.Net.getApi("socket", SocketIOClient.class).addDiscordListener("discordMessage", (args) -> {
-                if (args[0] instanceof JSONObject data) {
-                    try {
-                        McUtils.sendLocalMessage(Text.empty()
-                                .append(FontUtils.BannerPillFont.parseStringWithFill("discord")
-                                        .fillStyle(Style.EMPTY.withColor(Formatting.AQUA)))
-                                .append(" ")
-                                .append(Text.literal(data.get("Author").toString())
-                                        .fillStyle(Style.EMPTY.withColor(Formatting.DARK_AQUA).withBold(true))
-                                        .append(": "))
-                                .append(Text.literal(data.get("Content").toString())
-                                        .setStyle(Style.EMPTY.withColor(Formatting.AQUA))), Prepend.GUILD);
-                    } catch (Exception e) {
-                        GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
-                    }
-                }
-            });
+            Managers.Net.getApi("socket", SocketIOClient.class)
+                    .addDiscordListener("discordMessage", this::onDiscordMessage);
 
         }
     }
@@ -84,6 +69,25 @@ public class DiscordBridgeFeature extends Feature {
         if (guildMatcher.find() && !partyConflictMatcher.find()) {
             Managers.Net.getApi("socket", SocketIOClient.class)
                     .discordEmit("wynnMessage", guildMatcher.group("content"));
+        }
+    }
+
+    private void onDiscordMessage(Object[] args) {
+        if (args[0] instanceof JSONObject data) {
+            try {
+                if (data.get("Content").toString().isBlank()) return;
+                McUtils.sendLocalMessage(Text.empty()
+                        .append(FontUtils.BannerPillFont.parseStringWithFill("discord")
+                                .fillStyle(Style.EMPTY.withColor(Formatting.AQUA)))
+                        .append(" ")
+                        .append(Text.literal(data.get("Author").toString())
+                                .fillStyle(Style.EMPTY.withColor(Formatting.DARK_AQUA).withBold(true))
+                                .append(": "))
+                        .append(Text.literal(data.get("Content").toString())
+                                .setStyle(Style.EMPTY.withColor(Formatting.AQUA))), Prepend.GUILD);
+            } catch (Exception e) {
+                GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
+            }
         }
     }
 }
