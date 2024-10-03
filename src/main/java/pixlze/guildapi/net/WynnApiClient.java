@@ -11,6 +11,7 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mod.event.WynncraftConnectionEvents;
 import pixlze.guildapi.net.type.Api;
+import pixlze.guildapi.utils.JsonUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
@@ -59,7 +60,7 @@ public class WynnApiClient extends Api {
                     HttpResponse<String> response = NetManager.HTTP_CLIENT.send(request,
                             HttpResponse.BodyHandlers.ofString());
                     GuildApi.LOGGER.info("wynn response: {}", response.body());
-                    wynnPlayerInfo = Managers.Json.toJsonObject(response.body());
+                    wynnPlayerInfo = JsonUtils.toJsonObject(response.body());
                     if (wynnPlayerInfo.get("Error") != null) {
                         String message = wynnPlayerInfo.get("Error").getAsString();
                         wynnPlayerInfo = null;

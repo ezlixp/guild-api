@@ -11,8 +11,8 @@ import pixlze.guildapi.components.Models;
 import pixlze.guildapi.models.event.WorldStateEvents;
 import pixlze.guildapi.models.type.WorldState;
 import pixlze.guildapi.net.type.Api;
-import pixlze.guildapi.utils.FontUtils;
 import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.text.FontUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.URI;

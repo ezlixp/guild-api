@@ -12,6 +12,7 @@ import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.net.type.Api;
+import pixlze.guildapi.utils.JsonUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
@@ -38,6 +39,7 @@ public class GuildApiClient extends Api {
     private final List<String> printNonErrors = List.of("Specified user could not be found in tome list.", "User already in tome list.", "Specified user could not be found in aspect list.");
     public String guildPrefix = "";
     private String token;
+    private JsonElement validationKey;
     private JsonObject wynnPlayerInfo;
     private HttpRequest.Builder lastFailed = null;
     private CompletableFuture<JsonElement> failedPromise = null;
@@ -75,7 +77,7 @@ public class GuildApiClient extends Api {
                 failedPromise = out;
             } else {
                 if (res.statusCode() / 100 == 2)
-                    out.complete(Managers.Json.toJsonElement(res.body()));
+                    out.complete(JsonUtils.toJsonElement(res.body()));
                 else checkError(res, builder, false);
             }
         });
@@ -92,7 +94,7 @@ public class GuildApiClient extends Api {
                 McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT);
             } else {
                 if (failedPromise != null) {
-                    failedPromise.complete(Managers.Json.toJsonElement(response.body()));
+                    failedPromise.complete(JsonUtils.toJsonElement(response.body()));
                     failedPromise = null;
                 }
                 lastFailed = null;
@@ -114,8 +116,8 @@ public class GuildApiClient extends Api {
         GuildApi.LOGGER.info(body);
         String out = null;
         try {
-            if (Managers.Json.toJsonObject(body).get("error") != null)
-                out = Managers.Json.toJsonObject(body).get("error").getAsString();
+            if (JsonUtils.toJsonObject(body).get("error") != null)
+                out = JsonUtils.toJsonObject(body).get("error").getAsString();
             else {
                 out = "";
             }
@@ -200,7 +202,7 @@ public class GuildApiClient extends Api {
         if (wynnPlayerInfo != null) {
             try {
                 JsonObject requestBody = new JsonObject();
-                requestBody.add("validationKey", GuildApi.secrets.get("validation_key"));
+                requestBody.add("validationKey", validationKey);
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(
                                 GuildApi.secrets.get("guild_raid_urls").getAsJsonObject()
@@ -216,7 +218,7 @@ public class GuildApiClient extends Api {
                         HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() / 100 == 2) {
                     GuildApi.LOGGER.info("Api token refresh call successful: {}", response.statusCode());
-                    JsonObject responseObject = Managers.Json.toJsonObject(response.body());
+                    JsonObject responseObject = JsonUtils.toJsonObject(response.body());
                     token = responseObject.get("token").getAsString();
                     return true;
                 }
@@ -288,7 +290,7 @@ public class GuildApiClient extends Api {
                                 if (res.statusCode() / 100 == 2) {
                                     McUtils.sendLocalMessage(successMessage, Prepend.DEFAULT);
                                     if (failedPromise != null) {
-                                        failedPromise.complete(Managers.Json.toJsonElement(res.body()));
+                                        failedPromise.complete(JsonUtils.toJsonElement(res.body()));
                                         failedPromise = null;
                                     }
                                     lastFailed = null;
@@ -308,15 +310,32 @@ public class GuildApiClient extends Api {
         crashed = false;
         wynnPlayerInfo = Managers.Net.getApi("wynn", WynnApiClient.class).wynnPlayerInfo;
         try {
-            if (GuildApi.isDevelopment()) {
-                baseURL = "http://localhost:3000/";
-            } else {
-                guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
-                baseURL = GuildApi.secrets.get("guild_raid_urls").getAsJsonObject()
-                        .get(guildPrefix)
-                        .getAsString();
-            }
-            super.init();
+//            if (GuildApi.isDevelopment()) {
+//                baseURL = "http://localhost:3000/";
+//            } else {
+            guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(GuildApi.secrets.get("url").getAsString() + "guild/" + guildPrefix))
+                    .header("Authorization", "bearer " + GuildApi.secrets.get("password").getAsString())
+                    .GET()
+                    .build();
+            NetManager.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                    .whenCompleteAsync((response, error) -> {
+                        if (error != null) {
+                            GuildApi.LOGGER.error("get guild url error: {} {}", error, error.getMessage());
+                            return;
+                        }
+                        if (response.statusCode() / 100 != 2) {
+                            GuildApi.LOGGER.info("get guild url error: {}", response.body());
+                            return;
+                        }
+                        JsonObject res = JsonUtils.toJsonObject(response.body());
+                        baseURL = res.get("url").getAsString();
+                        validationKey = res.get("validationKey");
+                        GuildApi.LOGGER.info("successfully loaded base url");
+                        super.init();
+                    });
+//            }
         } catch (Exception e) {
             // TODO implement retry when actually using a server for guild base urls.
             String guildString = null;

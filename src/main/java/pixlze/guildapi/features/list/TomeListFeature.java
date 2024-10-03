@@ -11,6 +11,7 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.net.GuildApiClient;
+import pixlze.guildapi.utils.JsonUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.TextUtils;
 import pixlze.guildapi.utils.type.Prepend;
@@ -33,7 +34,7 @@ public class TomeListFeature extends ListFeature {
         super.registerCommands(
                 List.of(ClientCommandManager.literal("add").executes((context) -> {
                                     Managers.Net.getApi("guild", GuildApiClient.class)
-                                            .post("tomes", Managers.Json.toJsonObject("{\"username\":\"" + McUtils.playerName() + "\"}"), true);
+                                            .post("tomes", JsonUtils.toJsonObject("{\"username\":\"" + McUtils.playerName() + "\"}"), true);
                                     return 0;
 
                                 }

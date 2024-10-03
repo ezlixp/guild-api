@@ -8,16 +8,15 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import org.json.JSONException;
 import org.json.JSONObject;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
-import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.net.SocketIOClient;
 import pixlze.guildapi.net.event.NetEvents;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.text.FontUtils;
 import pixlze.guildapi.utils.text.TextUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
 import pixlze.guildapi.utils.type.Prepend;
@@ -59,14 +58,16 @@ public class DiscordBridgeFeature extends Feature {
             Managers.Net.getApi("socket", SocketIOClient.class).addDiscordListener("discordMessage", (args) -> {
                 if (args[0] instanceof JSONObject data) {
                     try {
-                        McUtils.sendLocalMessage(Text.literal(Managers.Net.getApi("guild", GuildApiClient.class).guildPrefix)
-                                .setStyle(Style.EMPTY.withColor(Formatting.AQUA)).append(" -> ")
+                        McUtils.sendLocalMessage(Text.empty()
+                                .append(FontUtils.BannerPillFont.parseStringWithFill("discord")
+                                        .fillStyle(Style.EMPTY.withColor(Formatting.AQUA)))
+                                .append(" ")
                                 .append(Text.literal(data.get("Author").toString())
                                         .fillStyle(Style.EMPTY.withColor(Formatting.DARK_AQUA).withBold(true))
                                         .append(": "))
                                 .append(Text.literal(data.get("Content").toString())
                                         .setStyle(Style.EMPTY.withColor(Formatting.AQUA))), Prepend.GUILD);
-                    } catch (JSONException e) {
+                    } catch (Exception e) {
                         GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
                     }
                 }

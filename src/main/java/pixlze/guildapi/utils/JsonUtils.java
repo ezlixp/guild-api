@@ -1,18 +1,18 @@
-package pixlze.guildapi.json;
+package pixlze.guildapi.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-public class JsonManager {
+public class JsonUtils {
     public static final Gson GSON = new GsonBuilder().create();
 
-    public JsonElement toJsonElement(String convert) {
+    public static JsonElement toJsonElement(String convert) {
         return GSON.fromJson(convert, JsonElement.class);
     }
 
-    public JsonObject toJsonObject(String convert) {
+    public static JsonObject toJsonObject(String convert) {
         return GSON.fromJson(convert, JsonObject.class);
     }
 
