@@ -308,14 +308,14 @@ public class GuildApiClient extends Api {
         crashed = false;
         wynnPlayerInfo = Managers.Net.getApi("wynn", WynnApiClient.class).wynnPlayerInfo;
         try {
-//            if (GuildApi.isDevelopment()) {
-//                baseURL = "http://localhost:3000/";
-//            } else {
-            guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
-            baseURL = GuildApi.secrets.get("guild_raid_urls").getAsJsonObject()
-                    .get(guildPrefix)
-                    .getAsString();
-//            }
+            if (GuildApi.isDevelopment()) {
+                baseURL = "http://localhost:3000/";
+            } else {
+                guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
+                baseURL = GuildApi.secrets.get("guild_raid_urls").getAsJsonObject()
+                        .get(guildPrefix)
+                        .getAsString();
+            }
             super.init();
         } catch (Exception e) {
             // TODO implement retry when actually using a server for guild base urls.
