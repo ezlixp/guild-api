@@ -45,6 +45,9 @@ public class DiscordBridgeFeature extends Feature {
                                     Managers.Net.getApi("socket", SocketIOClient.class)
                                             .discordEmit("discordMessage", Map.of("Author", McUtils.playerName(), "Content", message));
 
+                                } else {
+                                    McUtils.sendLocalMessage(Text.literal("Still connecting to server...")
+                                            .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT);
                                 }
                                 return 0;
                             })
