@@ -14,6 +14,7 @@ import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.utils.JsonUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.TextUtils;
+import pixlze.guildapi.utils.text.type.TextParseOptions;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.util.List;
@@ -22,6 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TomeListFeature extends ListFeature {
+    private final Pattern TOME_MESSAGE_PATTERN = Pattern.compile("§.(?<giver>.*?)(§.)? rewarded §.a Guild Tome§. to §.(?<receiver>.*?)(§.)?");
+
     public TomeListFeature() {
         super("tome", "tomes", (listItem) ->
                 Text.literal(listItem.get("username")
@@ -57,11 +60,11 @@ public class TomeListFeature extends ListFeature {
             GuildApi.LOGGER.info("not render thread message");
             return;
         }
-        String tomeMessage = TextUtils.parsePlain(message);
-        Matcher tomeMatcher = Pattern.compile("^ (.*?) rewarded a Guild Tome to (.*)$").matcher(tomeMessage);
+        String tomeMessage = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));
+        Matcher tomeMatcher = TOME_MESSAGE_PATTERN.matcher(tomeMessage);
         if (tomeMatcher.find()) {
-            GuildApi.LOGGER.info("{} gave a tome to {}", tomeMatcher.group(1), tomeMatcher.group(2));
-            Managers.Net.getApi("guild", GuildApiClient.class).delete("tomes/" + tomeMatcher.group(2), false);
+            GuildApi.LOGGER.info("{} gave a tome to {}", tomeMatcher.group("giver"), tomeMatcher.group("receiver"));
+            Managers.Net.getApi("guild", GuildApiClient.class).delete("tomes/" + tomeMatcher.group("receiver"), false);
         }
     }
 

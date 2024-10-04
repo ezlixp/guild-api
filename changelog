@@ -1,0 +1,2 @@
+fix aspectlist receiver regex matching colour code at end if nickname
+fix tomelist regex not working
