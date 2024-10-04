@@ -204,13 +204,7 @@ public class GuildApiClient extends Api {
                 JsonObject requestBody = new JsonObject();
                 requestBody.add("validationKey", validationKey);
                 HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(
-                                GuildApi.secrets.get("guild_raid_urls").getAsJsonObject()
-                                        .get(wynnPlayerInfo.get("guild")
-                                                .getAsJsonObject()
-                                                .get("prefix")
-                                                .getAsString())
-                                        .getAsString() + "auth/getToken"))
+                        .uri(URI.create(baseURL + "auth/getToken"))
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
                         .build();
@@ -218,6 +212,7 @@ public class GuildApiClient extends Api {
                         HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() / 100 == 2) {
                     GuildApi.LOGGER.info("Api token refresh call successful: {}", response.statusCode());
+                    GuildApi.LOGGER.info("{}", response.body());
                     JsonObject responseObject = JsonUtils.toJsonObject(response.body());
                     token = responseObject.get("token").getAsString();
                     return true;
