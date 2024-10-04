@@ -36,8 +36,9 @@ public class DiscordBridgeFeature extends Feature {
             LiteralArgumentBuilder<FabricClientCommandSource> base = ClientCommandManager.literal("discord")
                     .then(ClientCommandManager.argument("message", StringArgumentType.greedyString())
                             .executes((context) -> {
-                                String message = StringArgumentType.getString(context, "message")
-                                        .replaceAll("[^A-Za-z0-9!@#$%^&*()\\[\\]{}\\\\|;:'\",.<>/?`~ ]", "");
+                                String message = StringArgumentType.getString(context, "message");
+                                GuildApi.LOGGER.info("raw message: {}", message);
+                                message = message.replaceAll("[\u200C\uE087\uE013\u2064\uE071\uE012\uE000\uE089\uE088\uE07F\uE08B\uE07E\uE080ÁÀ֎]", "");
                                 if (message.isBlank()) return 0;
                                 if (Managers.Net.getApi("socket", SocketIOClient.class) != null) {
                                     Managers.Net.getApi("socket", SocketIOClient.class)
@@ -78,6 +79,7 @@ public class DiscordBridgeFeature extends Feature {
     private void onDiscordMessage(Object[] args) {
         if (args[0] instanceof JSONObject data) {
             try {
+                GuildApi.LOGGER.info("received discord {}", data.get("Content").toString());
                 if (data.get("Content").toString().isBlank()) return;
                 McUtils.sendLocalMessage(Text.empty()
                         .append(FontUtils.BannerPillFont.parseStringWithFill("discord")
