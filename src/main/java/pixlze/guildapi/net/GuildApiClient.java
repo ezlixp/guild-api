@@ -212,7 +212,6 @@ public class GuildApiClient extends Api {
                         HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() / 100 == 2) {
                     GuildApi.LOGGER.info("Api token refresh call successful: {}", response.statusCode());
-                    GuildApi.LOGGER.info("{}", response.body());
                     JsonObject responseObject = JsonUtils.toJsonObject(response.body());
                     token = responseObject.get("token").getAsString();
                     return true;
