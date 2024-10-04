@@ -23,7 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TomeListFeature extends ListFeature {
-    private final Pattern TOME_MESSAGE_PATTERN = Pattern.compile("§.(?<giver>.*?)(§.)? rewarded §.a Guild Tome§. to §.(?<receiver>.*?)(§.)?");
+    private final Pattern TOME_MESSAGE_PATTERN = Pattern.compile("^§.(?<giver>.*?)(§.)? rewarded §.a Guild Tome§. to §.(?<receiver>.*?)(§.)?$");
 
     public TomeListFeature() {
         super("tome", "tomes", (listItem) ->
