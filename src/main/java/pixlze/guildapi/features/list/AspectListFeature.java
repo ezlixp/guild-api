@@ -24,7 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AspectListFeature extends ListFeature {
-    private final Pattern ASPECT_MATCHER_PATTERN = Pattern.compile("^§.((\uDAFF\uDFFC\uE001\uDB00\uDC06)|(\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE))§. §.(?<giver>.*?)(§.)? rewarded §.an Aspect§. to §.(?<receiver>.*)(§.)?$");
+    private final Pattern ASPECT_MATCHER_PATTERN = Pattern.compile("^§.((\uDAFF\uDFFC\uE001\uDB00\uDC06)|(\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE))§. §.(?<giver>.*?)(§.)? rewarded §.an Aspect§. to §.(?<receiver>.*?)(§.)?$");
 
     public AspectListFeature() {
         super("aspect", "aspects", (listItem) -> Text.literal(listItem.get("username")
