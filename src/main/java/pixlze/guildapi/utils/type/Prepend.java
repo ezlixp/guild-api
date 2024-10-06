@@ -7,10 +7,10 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
 public enum Prepend {
-    DEFAULT(Text.empty().append(Text.literal("[Guild API] ").setStyle(Style.EMPTY.withColor(Formatting.GOLD)))),
+    DEFAULT(Text.literal("[Guild API] ").setStyle(Style.EMPTY.withColor(Formatting.GOLD))),
     EMPTY(Text.empty()),
-    GUILD(Text.empty().append(Text.literal("󏿼󏿿󏿾")
-            .append(" ").setStyle(Style.EMPTY.withFont(Identifier.of("chat")).withColor(Formatting.AQUA))));
+    GUILD(Text.literal("󏿼󏿿󏿾")
+            .append(" ").setStyle(Style.EMPTY.withFont(Identifier.of("chat")).withColor(Formatting.AQUA)));
 
     private final MutableText prepend;
 

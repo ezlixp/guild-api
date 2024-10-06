@@ -25,6 +25,6 @@ public class McUtils {
             GuildApi.LOGGER.error("Tried to send local message but player was null.");
             return;
         }
-        player().sendMessage(prepend.append(message));
+        player().sendMessage(Text.empty().append(prepend).append(message));
     }
 }

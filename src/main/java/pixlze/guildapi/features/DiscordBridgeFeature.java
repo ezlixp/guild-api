@@ -88,10 +88,10 @@ public class DiscordBridgeFeature extends Feature {
                                 .fillStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))
                         .append(" ")
                         .append(Text.literal(data.get("Author").toString())
-                                .fillStyle(Style.EMPTY.withColor(Formatting.DARK_AQUA).withBold(true))
+                                .fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))
                                 .append(": "))
                         .append(Text.literal(data.get("Content").toString())
-                                .setStyle(Style.EMPTY.withColor(Formatting.AQUA))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
+                                .setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
             } catch (Exception e) {
                 GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
             }
