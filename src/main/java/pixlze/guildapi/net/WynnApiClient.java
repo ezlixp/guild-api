@@ -19,6 +19,7 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.LinkedList;
+import java.util.UUID;
 
 public class WynnApiClient extends Api {
     public JsonObject wynnPlayerInfo;
@@ -37,7 +38,7 @@ public class WynnApiClient extends Api {
                             reloading = true;
                             McUtils.sendLocalMessage(
                                     Text.literal("Reloading...")
-                                            .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT);
+                                            .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get());
                             crashed = false;
                             enabled = true;
                             initWynnPlayerInfo(true);
@@ -70,7 +71,7 @@ public class WynnApiClient extends Api {
                     if (print)
                         McUtils.sendLocalMessage(
                                 Text.literal("Success!")
-                                        .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT);
+                                        .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get());
                     super.init();
                 } catch (Exception e) {
                     GuildApi.LOGGER.error("wynn player load error: {} {}", e, e.getMessage());
@@ -92,7 +93,7 @@ public class WynnApiClient extends Api {
     }
 
     private void onWynnJoin() {
-        if (wynnPlayerInfo == null) {
+        if (wynnPlayerInfo == null || !McUtils.player().getUuid().equals(UUID.fromString(wynnPlayerInfo.get("uuid").getAsString()))) {
             initWynnPlayerInfo(false);
         } else {
             GuildApi.LOGGER.warn("wynn player already initialized");

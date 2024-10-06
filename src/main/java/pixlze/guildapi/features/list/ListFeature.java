@@ -77,7 +77,7 @@ public class ListFeature extends Feature {
             if (res == null) {
                 assert Formatting.YELLOW.getColorValue() != null;
                 if (!reload) McUtils.sendLocalMessage(Text.literal("No list data")
-                        .withColor(Formatting.YELLOW.getColorValue()), Prepend.DEFAULT);
+                        .withColor(Formatting.YELLOW.getColorValue()), Prepend.DEFAULT.get());
                 return;
             }
             List<JsonElement> listItems = res.getAsJsonArray().asList();
@@ -103,7 +103,7 @@ public class ListFeature extends Feature {
                             .setStyle(Style.EMPTY.withColor(hasNext ? Formatting.GREEN:Formatting.GRAY).withBold(true)
                                     .withClickEvent(hasNext ? new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + name + "list view " + (page + 2) + " false"):null)));
             listMessage.append("\n");
-            McUtils.sendLocalMessage(listMessage, Prepend.DEFAULT);
+            McUtils.sendLocalMessage(listMessage, Prepend.DEFAULT.get());
         });
     }
 }

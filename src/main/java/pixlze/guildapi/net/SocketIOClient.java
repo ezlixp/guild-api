@@ -41,7 +41,7 @@ public class SocketIOClient extends Api {
                 }));
                 dispatcher.register(ClientCommandManager.literal("index").executes((context) -> {
 //                    aspectEmit("debug_index", null);
-                    McUtils.sendLocalMessage(FontUtils.BannerPillFont.parseStringWithFill("test"), Prepend.GUILD);
+                    McUtils.sendLocalMessage(FontUtils.BannerPillFont.parseStringWithFill("test"), Prepend.GUILD.get());
                     return 0;
                 }));
                 dispatcher.register(ClientCommandManager.literal("testmessage")

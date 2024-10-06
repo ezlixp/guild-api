@@ -15,7 +15,7 @@ public class NetManager {
     private final Map<String, Api> apis = new HashMap<>();
 
     public void apiCrash(Text message, Api api) {
-        McUtils.sendLocalMessage(message, Prepend.DEFAULT);
+        McUtils.sendLocalMessage(message, Prepend.DEFAULT.get());
         for (Api a : apis.values()) {
             if (a.equals(api) || a.depends(api)) {
                 a.crash();

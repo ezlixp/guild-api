@@ -34,7 +34,7 @@ public class GuildRaidFeature extends Feature {
         Matcher raidMatcher = RAID_PATTERN.matcher(TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true)));
         if (raidMatcher.find()) {
             GuildApi.LOGGER.info("guild raid {} finished", raidMatcher.group("raid"));
-            McUtils.sendLocalMessage(Text.literal("Guild raid finished.").withColor(0x00FF00), Prepend.DEFAULT);
+            McUtils.sendLocalMessage(Text.literal("Guild raid finished.").withColor(0x00FF00), Prepend.DEFAULT.get());
             JsonObject requestBody = new JsonObject();
             requestBody.add("users", JsonUtils.toJsonElement(Arrays.toString(new String[]{raidMatcher.group("player1"), raidMatcher.group("player2"), raidMatcher.group("player3"), raidMatcher.group("player4")})));
             requestBody.addProperty("raid", raidMatcher.group("raid"));

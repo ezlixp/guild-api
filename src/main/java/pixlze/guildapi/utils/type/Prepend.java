@@ -14,11 +14,15 @@ public enum Prepend {
 
     private final MutableText prepend;
 
-    private Prepend(MutableText prepend) {
+    Prepend(MutableText prepend) {
         this.prepend = prepend;
     }
 
     public MutableText get() {
         return prepend.copy();
+    }
+
+    public MutableText getWithStyle(Style style) {
+        return prepend.copy().fillStyle(style);
     }
 }

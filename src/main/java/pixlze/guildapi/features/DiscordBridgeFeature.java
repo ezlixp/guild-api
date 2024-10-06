@@ -47,7 +47,7 @@ public class DiscordBridgeFeature extends Feature {
 
                                 } else {
                                     McUtils.sendLocalMessage(Text.literal("Still connecting to server...")
-                                            .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT);
+                                            .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get());
                                 }
                                 return 0;
                             })
@@ -85,13 +85,13 @@ public class DiscordBridgeFeature extends Feature {
                 if (data.get("Content").toString().isBlank()) return;
                 McUtils.sendLocalMessage(Text.empty()
                         .append(FontUtils.BannerPillFont.parseStringWithFill("discord")
-                                .fillStyle(Style.EMPTY.withColor(Formatting.AQUA)))
+                                .fillStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))
                         .append(" ")
                         .append(Text.literal(data.get("Author").toString())
                                 .fillStyle(Style.EMPTY.withColor(Formatting.DARK_AQUA).withBold(true))
                                 .append(": "))
                         .append(Text.literal(data.get("Content").toString())
-                                .setStyle(Style.EMPTY.withColor(Formatting.AQUA))), Prepend.GUILD);
+                                .setStyle(Style.EMPTY.withColor(Formatting.AQUA))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
             } catch (Exception e) {
                 GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
             }

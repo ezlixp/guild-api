@@ -70,7 +70,7 @@ public class AspectListFeature extends ListFeature {
             if (exception == null && res != null) {
                 McUtils.sendLocalMessage(Text.literal(res.getAsJsonObject()
                         .get("username").getAsString() + " is owed " + res.getAsJsonObject()
-                        .get("aspects").getAsString() + " aspects.").withColor(0xFFFFFF), Prepend.DEFAULT);
+                        .get("aspects").getAsString() + " aspects.").withColor(0xFFFFFF), Prepend.DEFAULT.get());
             }
         });
     }

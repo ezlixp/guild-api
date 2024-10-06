@@ -77,7 +77,7 @@ public class TomeListFeature extends ListFeature {
                         .get("username")
                         .getAsString() + " is at position " + res
                         .getAsJsonObject()
-                        .get("position").getAsString() + ".").withColor(0xFFFFFF), Prepend.DEFAULT);
+                        .get("position").getAsString() + ".").withColor(0xFFFFFF), Prepend.DEFAULT.get());
             }
         });
     }
