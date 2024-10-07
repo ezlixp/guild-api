@@ -267,7 +267,6 @@ public class GuildApiClient extends Api {
         return baseURL;
     }
 
-    @Override
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registry) -> dispatcher.register(
                 ClientCommandManager.literal("retryLastFailed").executes((context) -> {
@@ -314,7 +313,7 @@ public class GuildApiClient extends Api {
         try {
             if (GuildApi.isDevelopment()) {
                 baseURL = "http://localhost:3000/";
-                super.init();
+                super.enable();
             } else {
                 guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
                 HttpRequest request = HttpRequest.newBuilder()
@@ -336,7 +335,7 @@ public class GuildApiClient extends Api {
                             baseURL = res.get("url").getAsString();
                             validationKey = res.get("validationKey");
                             GuildApi.LOGGER.info("successfully loaded base url");
-                            super.init();
+                            super.enable();
                         });
             }
         } catch (Exception e) {
@@ -351,4 +350,5 @@ public class GuildApiClient extends Api {
                     .setStyle(Style.EMPTY.withColor(Formatting.RED)), this);
         }
     }
+
 }

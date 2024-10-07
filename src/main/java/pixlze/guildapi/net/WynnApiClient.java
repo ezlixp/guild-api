@@ -37,7 +37,6 @@ public class WynnApiClient extends Api {
         return instance;
     }
 
-    @Override
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(
                 ClientCommandManager.literal("reloadWynnInfo").executes(context -> {
@@ -79,7 +78,7 @@ public class WynnApiClient extends Api {
                         McUtils.sendLocalMessage(
                                 Text.literal("Success!")
                                         .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get());
-                    super.init();
+                    super.enable();
                 } catch (Exception e) {
                     GuildApi.LOGGER.error("wynn player load error: {} {}", e, e.getMessage());
                     Managers.Net.apiCrash(

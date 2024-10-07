@@ -1,7 +1,6 @@
 package pixlze.guildapi.net.type;
 
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.net.event.NetEvents;
 
 import java.util.List;
@@ -14,6 +13,7 @@ public abstract class Api {
     private int missingDeps;
 
     // TODO move api get posts here
+    // TODO improve dependencies system to show which dependencies specifically are unloaded to ensure no duplications
     protected Api(String name, List<Class<? extends Api>> dependencies) {
         this.name = name;
         this.dependencies = dependencies;
@@ -27,7 +27,7 @@ public abstract class Api {
     }
 
     private void onApiDisabled(Api api) {
-        if (this.depends(api)) ++missingDeps;
+        if (this.depends(api)) dependencyUnloaded();
     }
 
     public boolean depends(Api api) {
@@ -41,27 +41,35 @@ public abstract class Api {
         }
     }
 
-    protected void ready() {
-        init();
+    private void dependencyUnloaded() {
+        ++missingDeps;
+        unready();
     }
 
-    public void init() {
+    protected void ready() {
+        enable();
+    }
+
+    protected void unready() {
+        disable();
+    }
+
+    public void enable() {
         if (!enabled) {
             enabled = true;
             NetEvents.LOADED.invoker().interact(this);
         }
     }
 
-    public abstract <T extends Api> T getInstance();
-
     public void disable() {
         if (enabled) {
-            GuildApi.LOGGER.warn("{} disabling service", name);
+            GuildApi.LOGGER.warn("disabling {} service", name);
             enabled = false;
-            for (Api api : Managers.Net.getDependsOn(this)) {
-                if (api.enabled) api.disable();
-            }
             NetEvents.DISABLED.invoker().interact(this);
         }
     }
+
+    public abstract void init();
+
+    public abstract <T extends Api> T getInstance();
 }

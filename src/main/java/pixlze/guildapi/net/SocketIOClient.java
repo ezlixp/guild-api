@@ -12,8 +12,6 @@ import pixlze.guildapi.models.event.WorldStateEvents;
 import pixlze.guildapi.models.type.WorldState;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
-import pixlze.guildapi.utils.text.FontUtils;
-import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.URI;
 import java.util.Collections;
@@ -32,17 +30,8 @@ public class SocketIOClient extends Api {
         super("socket", List.of(GuildApiClient.class));
         if (GuildApi.isDevelopment()) {
             ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-                dispatcher.register(ClientCommandManager.literal("socket").executes((context) -> {
-                    aspectSocket.disconnect().connect();
-                    return 0;
-                }));
                 dispatcher.register(ClientCommandManager.literal("emit").executes((context) -> {
                     aspectEmit("give_aspect", Collections.singletonMap("player", "test"));
-                    return 0;
-                }));
-                dispatcher.register(ClientCommandManager.literal("index").executes((context) -> {
-//                    aspectEmit("debug_index", null);
-                    McUtils.sendLocalMessage(FontUtils.BannerPillFont.parseStringWithFill("test"), Prepend.GUILD.get());
                     return 0;
                 }));
                 dispatcher.register(ClientCommandManager.literal("testmessage")
@@ -89,12 +78,14 @@ public class SocketIOClient extends Api {
         if (GuildApi.isDevelopment() || Models.WorldState.onWorld()) {
             aspectSocket.connect();
             discordSocket.connect();
+            GuildApi.LOGGER.info("sockets on");
         }
         WorldStateEvents.CHANGE.register(this::worldStateChanged);
-        super.init();
+        super.enable();
     }
 
     private void worldStateChanged(WorldState state) {
+        if (!enabled) return;
         if (state == WorldState.WORLD) {
             if (!aspectSocket.connected()) {
                 aspectSocket.connect();
@@ -114,6 +105,18 @@ public class SocketIOClient extends Api {
                 GuildApi.LOGGER.info("discord socket off");
             }
         }
+    }
+
+    @Override
+    public void init() {
+
+    }
+
+    @Override
+    protected void unready() {
+        super.unready();
+        aspectSocket.disconnect();
+        discordSocket.disconnect();
     }
 
     public void addDiscordListener(String name, Consumer<Object[]> listener) {
