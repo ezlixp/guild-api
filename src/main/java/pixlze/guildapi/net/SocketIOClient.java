@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 
 
 public class SocketIOClient extends Api {
+    private static SocketIOClient instance;
     private Socket aspectSocket;
     private Socket discordSocket;
     private GuildApiClient guild;
@@ -52,6 +53,7 @@ public class SocketIOClient extends Api {
                                 })));
             });
         }
+        instance = this;
     }
 
     public void aspectEmit(String event, Map<?, ?> data) {
@@ -67,8 +69,13 @@ public class SocketIOClient extends Api {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public SocketIOClient getInstance() {
+        return instance;
+    }
+
+    @Override
     protected void ready() {
-        crashed = false;
         guild = Managers.Net.getApi("guild", GuildApiClient.class);
         initSocket();
     }

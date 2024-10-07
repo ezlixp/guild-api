@@ -22,11 +22,19 @@ import java.util.LinkedList;
 import java.util.UUID;
 
 public class WynnApiClient extends Api {
+    private static WynnApiClient instance;
     public JsonObject wynnPlayerInfo;
     private boolean reloading = false;
 
     protected WynnApiClient() {
         super("wynn", new LinkedList<>());
+        instance = this;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public WynnApiClient getInstance() {
+        return instance;
     }
 
     @Override
@@ -39,7 +47,6 @@ public class WynnApiClient extends Api {
                             McUtils.sendLocalMessage(
                                     Text.literal("Reloading...")
                                             .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get());
-                            crashed = false;
                             enabled = true;
                             initWynnPlayerInfo(true);
                             reloading = false;
@@ -93,7 +100,8 @@ public class WynnApiClient extends Api {
     }
 
     private void onWynnJoin() {
-        if (wynnPlayerInfo == null || !McUtils.player().getUuid().equals(UUID.fromString(wynnPlayerInfo.get("uuid").getAsString()))) {
+        if (wynnPlayerInfo == null || !McUtils.player().getUuid()
+                .equals(UUID.fromString(wynnPlayerInfo.get("uuid").getAsString()))) {
             initWynnPlayerInfo(false);
         } else {
             GuildApi.LOGGER.warn("wynn player already initialized");

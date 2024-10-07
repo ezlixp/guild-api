@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class GuildApiClient extends Api {
+    private static GuildApiClient instance;
     private final Text retryMessage = Text.literal("Could not connect to guild server. Click ")
             .setStyle(Style.EMPTY.withColor(Formatting.RED))
             .append(Text.literal("here").setStyle(
@@ -47,7 +48,9 @@ public class GuildApiClient extends Api {
 
     public GuildApiClient() {
         super("guild", List.of(WynnApiClient.class));
+        instance = this;
     }
+
 
     public String getToken() {
         return token;
@@ -300,36 +303,42 @@ public class GuildApiClient extends Api {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public GuildApiClient getInstance() {
+        return instance;
+    }
+
+    @Override
     protected void ready() {
-        crashed = false;
         wynnPlayerInfo = Managers.Net.getApi("wynn", WynnApiClient.class).wynnPlayerInfo;
         try {
-//            if (GuildApi.isDevelopment()) {
-//                baseURL = "http://localhost:3000/";
-//            } else {
-            guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(GuildApi.secrets.get("url").getAsString() + "guild/" + guildPrefix))
-                    .header("Authorization", "bearer " + GuildApi.secrets.get("password").getAsString())
-                    .GET()
-                    .build();
-            NetManager.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                    .whenCompleteAsync((response, error) -> {
-                        if (error != null) {
-                            GuildApi.LOGGER.error("get guild url error: {} {}", error, error.getMessage());
-                            return;
-                        }
-                        if (response.statusCode() / 100 != 2) {
-                            GuildApi.LOGGER.info("get guild url error: {}", response.body());
-                            return;
-                        }
-                        JsonObject res = JsonUtils.toJsonObject(response.body());
-                        baseURL = res.get("url").getAsString();
-                        validationKey = res.get("validationKey");
-                        GuildApi.LOGGER.info("successfully loaded base url");
-                        super.init();
-                    });
-//            }
+            if (GuildApi.isDevelopment()) {
+                baseURL = "http://localhost:3000/";
+                super.init();
+            } else {
+                guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(GuildApi.secrets.get("url").getAsString() + "guild/" + guildPrefix))
+                        .header("Authorization", "bearer " + GuildApi.secrets.get("password").getAsString())
+                        .GET()
+                        .build();
+                NetManager.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                        .whenCompleteAsync((response, error) -> {
+                            if (error != null) {
+                                GuildApi.LOGGER.error("get guild url error: {} {}", error, error.getMessage());
+                                return;
+                            }
+                            if (response.statusCode() / 100 != 2) {
+                                GuildApi.LOGGER.info("get guild url error: {}", response.body());
+                                return;
+                            }
+                            JsonObject res = JsonUtils.toJsonObject(response.body());
+                            baseURL = res.get("url").getAsString();
+                            validationKey = res.get("validationKey");
+                            GuildApi.LOGGER.info("successfully loaded base url");
+                            super.init();
+                        });
+            }
         } catch (Exception e) {
             // TODO implement retry when actually using a server for guild base urls.
             String guildString = null;

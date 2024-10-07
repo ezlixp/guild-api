@@ -7,7 +7,9 @@ import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.http.HttpClient;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class NetManager {
@@ -16,11 +18,15 @@ public class NetManager {
 
     public void apiCrash(Text message, Api api) {
         McUtils.sendLocalMessage(message, Prepend.DEFAULT.get());
-        for (Api a : apis.values()) {
-            if (a.equals(api) || a.depends(api)) {
-                a.crash();
-            }
+        api.disable();
+    }
+
+    public List<Api> getDependsOn(Api parent) {
+        ArrayList<Api> out = new ArrayList<>();
+        for (Api api : apis.values()) {
+            if (api.depends(parent)) out.add(api);
         }
+        return out;
     }
 
     public <T extends Api> T getApi(String name, Class<T> apiClass) {
@@ -37,13 +43,13 @@ public class NetManager {
         initApis();
     }
 
-    private void registerApi(Api api) {
+    private <T extends Api> void registerApi(T api) {
         apis.put(api.name, api);
     }
 
     private void initApis() {
         for (Api a : apis.values()) {
-            if (!a.crashed) a.init();
+            if (!a.enabled) a.init();
         }
     }
 }
