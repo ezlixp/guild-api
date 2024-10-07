@@ -102,6 +102,7 @@ public class WynnApiClient extends Api {
     private void onWynnJoin() {
         if (wynnPlayerInfo == null || !McUtils.player().getUuid()
                 .equals(UUID.fromString(wynnPlayerInfo.get("uuid").getAsString()))) {
+            this.disable();
             initWynnPlayerInfo(false);
         } else {
             GuildApi.LOGGER.warn("wynn player already initialized");

@@ -55,10 +55,13 @@ public abstract class Api {
     public abstract <T extends Api> T getInstance();
 
     public void disable() {
-        GuildApi.LOGGER.warn("{} disabling service", name);
-        enabled = false;
-        for (Api api : Managers.Net.getDependsOn(this)) {
-            if (api.enabled) api.disable();
+        if (enabled) {
+            GuildApi.LOGGER.warn("{} disabling service", name);
+            enabled = false;
+            for (Api api : Managers.Net.getDependsOn(this)) {
+                if (api.enabled) api.disable();
+            }
+            NetEvents.DISABLED.invoker().interact(this);
         }
     }
 }
