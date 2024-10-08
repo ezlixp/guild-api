@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pixlze.guildapi.components.Handlers;
@@ -18,6 +19,7 @@ import java.io.InputStreamReader;
 public class GuildApi implements ClientModInitializer {
     public static final String MOD_ID = "guildapi";
     public static final String MOD_STORAGE_ROOT = "guildapi";
+    public static ModContainer MOD_CONTAINER;
     public static final Logger LOGGER = LoggerFactory.getLogger("guildapi");
     public static JsonObject secrets;
     private static boolean development;
@@ -34,6 +36,10 @@ public class GuildApi implements ClientModInitializer {
     public void onInitializeClient() {
         // TODO add test command for guild server (/ping?)
         development = FabricLoader.getInstance().isDevelopmentEnvironment();
+        if (FabricLoader.getInstance().getModContainer(MOD_ID).isPresent())
+        {
+            MOD_CONTAINER = FabricLoader.getInstance().getModContainer(MOD_ID).get();
+        }
 
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("secrets.json");
         if (inputStream == null) {

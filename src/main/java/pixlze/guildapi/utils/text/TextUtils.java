@@ -49,7 +49,7 @@ public class TextUtils {
     }
 
     public static String highlightUser(String message) {
-        return message.replaceAll("(?i)" + McUtils.playerName(), "§e" + McUtils.playerName() + "§r");
+        return message.replaceAll("(?i)" + McUtils.playerName(), "§e" + McUtils.playerName() + "§d");
     }
 
     static class TextVisitors {

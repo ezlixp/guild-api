@@ -330,7 +330,7 @@ public class GuildApiClient extends Api {
                         JsonObject res = JsonUtils.toJsonObject(response.body());
                         baseURL = GuildApi.isDevelopment() ? "http://localhost:3000/":res.get("url").getAsString();
                         validationKey = res.get("validationKey");
-                        GuildApi.LOGGER.info("successfully loaded base url");
+                        GuildApi.LOGGER.info("successfully loaded base url, {} {}", validationKey, res);
                         super.enable();
                     });
         } catch (Exception e) {

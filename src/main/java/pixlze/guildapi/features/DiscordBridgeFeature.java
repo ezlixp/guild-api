@@ -27,11 +27,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DiscordBridgeFeature extends Feature {
-    private final Pattern GUILD_PATTERN = Pattern.compile("^§.((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§. (?<content>.*)$");
+    private final Pattern GUILD_PATTERN = Pattern.compile("^§[b8]((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§[b8] (?<content>.*)$");
     private final Pattern PARTY_CONFLICT_PATTERN = Pattern.compile("^§8\uDAFF\uDFFC\uE001\uDB00\uDC06§8 [a-zA-Z0-9_]{2,16}:.*$");
     private SocketIOClient socketIOClient;
 
-    @Override
+//    @Override
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(ClientCommandManager.literal("discord")

@@ -41,7 +41,7 @@ public class SocketIOClient extends Api {
                 dispatcher.register(ClientCommandManager.literal("testmessage")
                         .then(ClientCommandManager.argument("message", StringArgumentType.word())
                                 .executes((context) -> {
-                                    emit(discordSocket, "send", Map.of("username", McUtils.playerName(), "message", StringArgumentType.getString(context, "message")));
+                                    emit(discordSocket, "wynnMessage", "asdfasdf");
                                     return 0;
                                 })));
             });
@@ -54,7 +54,6 @@ public class SocketIOClient extends Api {
             GuildApi.LOGGER.info("emitting, {}", data);
             socket.emit(event, data);
         } else {
-            McUtils.sendLocalMessage(Text.literal("§eChat server not connected"), Prepend.GUILD.get());
             GuildApi.LOGGER.warn("skipped event because of missing or inactive socket");
         }
     }
@@ -73,7 +72,7 @@ public class SocketIOClient extends Api {
 
     private void initSocket() {
         IO.Options options = IO.Options.builder()
-                .setExtraHeaders(Map.of("authorization", Collections.singletonList("bearer " + guild.getToken()), "from", Collections.singletonList(McUtils.playerName())))
+                .setExtraHeaders(Map.of("authorization", Collections.singletonList("bearer " + guild.getToken()), "from", Collections.singletonList(McUtils.playerName()), "user-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_CONTAINER.getMetadata().getVersion().getFriendlyString())))
                 .build();
         aspectSocket = IO.socket(URI.create(guild.getBaseURL() + "aspects"), options);
         discordSocket = IO.socket(URI.create(guild.getBaseURL() + "discord"), options);
