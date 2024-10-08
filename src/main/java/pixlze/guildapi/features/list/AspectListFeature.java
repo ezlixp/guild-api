@@ -56,10 +56,10 @@ public class AspectListFeature extends ListFeature {
         }
         String aspectMessage = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));
         Matcher aspectMatcher = ASPECT_MESSAGE_PATTERN.matcher(aspectMessage);
-        if (aspectMatcher.find()) {
+        SocketIOClient socketIOClient = Managers.Net.getApi("socket", SocketIOClient.class);
+        if (aspectMatcher.find() && socketIOClient != null) {
             GuildApi.LOGGER.info("{} gave an aspect to {}", aspectMatcher.group("giver"), aspectMatcher.group("receiver"));
-            Managers.Net.getApi("socket", SocketIOClient.class)
-                    .aspectEmit("give_aspect", Collections.singletonMap("player", aspectMatcher.group("receiver")));
+            socketIOClient.emit(socketIOClient.aspectSocket, "give_aspect", Collections.singletonMap("player", aspectMatcher.group("receiver")));
         }
     }
 

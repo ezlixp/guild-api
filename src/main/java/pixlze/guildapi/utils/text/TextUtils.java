@@ -5,8 +5,8 @@ import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
 
 import java.util.ArrayList;
@@ -47,16 +47,20 @@ public class TextUtils {
         text.visit(TextVisitors.PLAIN_VISITOR, text.getStyle());
         return TextVisitors.currentVisit.toString();
     }
+
+    public static String highlightUser(String message) {
+        return message.replaceAll("(?i)" + McUtils.playerName(), "§e" + McUtils.playerName() + "§r");
+    }
+
     static class TextVisitors {
         static StringBuilder currentVisit;
-        static boolean first = false;
-        static boolean afterBlockMarker;
-        static TextParseOptions options;
-
         public static final StringVisitable.StyledVisitor<String> PLAIN_VISITOR = (style, asString) -> {
             currentVisit.append(asString.replaceAll("§.", ""));
             return Optional.empty();
         };
+        static boolean first = false;
+        static boolean afterBlockMarker;
+        static TextParseOptions options;
         public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = (style, asString) -> {
             if (options.extractUsernames && style.getHoverEvent() != null) {
                 handleStylesWithHover(style, asString);
@@ -65,6 +69,33 @@ public class TextUtils {
             }
             return Optional.empty();
         };
+
+        private static void handleStylesWithHover(Style style, String asString) {
+            assert style.getHoverEvent() != null;
+            if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text) {
+                List<Text> onHover = ((Text) Objects.requireNonNull(
+                        style.getHoverEvent().getValue(style.getHoverEvent().getAction()))).getSiblings();
+                if (asString.indexOf('/') == -1) {
+                    if (onHover != null) {
+                        if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(
+                                onHover.get(1).getString()).contains("nickname is")) {
+                            GuildApi.LOGGER.info("wynntils username found: {} {}", style, asString);
+                            handleStyles(style.withItalic(false), onHover.getFirst().getString());
+                        } else if (!onHover.isEmpty() && onHover.getFirst().getString() != null && onHover.getFirst()
+                                .getString().contains("real username is")) {
+                            if (onHover.size() > 1) {
+                                GuildApi.LOGGER.info("username found multi part: {} {}", style, asString);
+                                handleStyles(style.withItalic(false), onHover.get(1).getString());
+                            } else {
+                                GuildApi.LOGGER.info("username found sibling: {} {}", style, asString);
+                                handleStyles(style.withItalic(false), onHover.getFirst().getSiblings().getFirst()
+                                        .getString());
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         private static void handleStyles(Style style, String asString) {
             if (BLOCK_MARKER_PATTERN.matcher(asString).find() && !first) {
@@ -75,7 +106,8 @@ public class TextUtils {
                 if (style.getColor() != null) {
                     int colorIndex = 0;
                     for (Formatting format : Formatting.values()) {
-                        if (format.getColorValue() != null && format.getColorValue().equals(style.getColor().getRgb())) {
+                        if (format.getColorValue() != null && format.getColorValue()
+                                .equals(style.getColor().getRgb())) {
                             colorIndex = format.getColorIndex();
                             break;
                         }
@@ -102,32 +134,9 @@ public class TextUtils {
                 afterBlockMarker = false;
                 asString = asString.substring(1);
             }
-            TextVisitors.currentVisit.append(asString.replaceAll("\\n", options.newline).replaceAll("§", options.formatCode));
+            TextVisitors.currentVisit.append(asString.replaceAll("\\n", options.newline)
+                    .replaceAll("§", options.formatCode));
             if (first) first = false;
-        }
-        private static void handleStylesWithHover(Style style, String asString) {
-            assert style.getHoverEvent() != null;
-                if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text) {
-                    List<Text> onHover = ((Text) Objects.requireNonNull(
-                            style.getHoverEvent().getValue(style.getHoverEvent().getAction()))).getSiblings();
-                    if (asString.indexOf('/') == -1) {
-                        if (onHover != null) {
-                            if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(
-                                    onHover.get(1).getString()).contains("nickname is")) {
-                                GuildApi.LOGGER.info("wynntils username found: {} {}", style, asString);
-                                handleStyles(style.withItalic(false), onHover.getFirst().getString());
-                            } else if (!onHover.isEmpty() && onHover.getFirst().getString() != null && onHover.getFirst().getString().contains("real username is")) {
-                                if (onHover.size() > 1) {
-                                    GuildApi.LOGGER.info("username found multi part: {} {}", style, asString);
-                                    handleStyles(style.withItalic(false), onHover.get(1).getString());
-                                } else {
-                                    GuildApi.LOGGER.info("username found sibling: {} {}", style, asString);
-                                    handleStyles(style.withItalic(false), onHover.getFirst().getSiblings().getFirst().getString());
-                                }
-                            }
-                        }
-                    }
-                }
         }
     }
 }

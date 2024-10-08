@@ -51,9 +51,39 @@ public class GuildApiClient extends Api {
         instance = this;
     }
 
-
     public String getToken() {
+        if (token == null) getGuildServerToken();
         return token;
+    }
+
+    private boolean getGuildServerToken() {
+        if (wynnPlayerInfo != null) {
+            try {
+                JsonObject requestBody = new JsonObject();
+                requestBody.add("validationKey", validationKey);
+                HttpRequest.Builder builder = HttpRequest.newBuilder()
+                        .uri(URI.create(baseURL + "auth/getToken"))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()));
+                if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
+                HttpResponse<String> response = NetManager.HTTP_CLIENT.send(builder.build(),
+                        HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() / 100 == 2) {
+                    GuildApi.LOGGER.info("Api token refresh call successful: {}", response.statusCode());
+                    JsonObject responseObject = JsonUtils.toJsonObject(response.body());
+                    token = responseObject.get("token").getAsString();
+                    return true;
+                }
+                GuildApi.LOGGER.error("get token error: status {} {}", response.statusCode(), response.body());
+            } catch (JsonSyntaxException e) {
+                GuildApi.LOGGER.error("Json syntax exception: {}", (Object) e.getStackTrace());
+            } catch (Exception e) {
+                GuildApi.LOGGER.error("get token error: {}", e.getMessage());
+            }
+        } else {
+            GuildApi.LOGGER.warn("wynn player not initialized, can't refresh token");
+        }
+        return false;
     }
 
     public CompletableFuture<JsonElement> get(String path) {
@@ -201,36 +231,6 @@ public class GuildApiClient extends Api {
         return out;
     }
 
-    public boolean getGuildServerToken() {
-        if (wynnPlayerInfo != null) {
-            try {
-                JsonObject requestBody = new JsonObject();
-                requestBody.add("validationKey", validationKey);
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(baseURL + "auth/getToken"))
-                        .header("Content-Type", "application/json")
-                        .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
-                        .build();
-                HttpResponse<String> response = NetManager.HTTP_CLIENT.send(request,
-                        HttpResponse.BodyHandlers.ofString());
-                if (response.statusCode() / 100 == 2) {
-                    GuildApi.LOGGER.info("Api token refresh call successful: {}", response.statusCode());
-                    JsonObject responseObject = JsonUtils.toJsonObject(response.body());
-                    token = responseObject.get("token").getAsString();
-                    return true;
-                }
-                GuildApi.LOGGER.error("get token error: status {} {}", response.statusCode(), response.body());
-            } catch (JsonSyntaxException e) {
-                GuildApi.LOGGER.error("Json syntax exception: {}", (Object) e.getStackTrace());
-            } catch (Exception e) {
-                GuildApi.LOGGER.error("get token error: {}", e.getMessage());
-            }
-        } else {
-            GuildApi.LOGGER.warn("wynn player not initialized, can't refresh token");
-        }
-        return false;
-    }
-
     public void delete(String path, boolean print) {
         if (!enabled) {
             GuildApi.LOGGER.warn("Skipped api delete because api services weren't enabled");
@@ -311,33 +311,28 @@ public class GuildApiClient extends Api {
     protected void ready() {
         wynnPlayerInfo = Managers.Net.getApi("wynn", WynnApiClient.class).wynnPlayerInfo;
         try {
-            if (GuildApi.isDevelopment()) {
-                baseURL = "http://localhost:3000/";
-                super.enable();
-            } else {
-                guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(GuildApi.secrets.get("url").getAsString() + "guild/" + guildPrefix))
-                        .header("Authorization", "bearer " + GuildApi.secrets.get("password").getAsString())
-                        .GET()
-                        .build();
-                NetManager.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                        .whenCompleteAsync((response, error) -> {
-                            if (error != null) {
-                                GuildApi.LOGGER.error("get guild url error: {} {}", error, error.getMessage());
-                                return;
-                            }
-                            if (response.statusCode() / 100 != 2) {
-                                GuildApi.LOGGER.info("get guild url error: {}", response.body());
-                                return;
-                            }
-                            JsonObject res = JsonUtils.toJsonObject(response.body());
-                            baseURL = res.get("url").getAsString();
-                            validationKey = res.get("validationKey");
-                            GuildApi.LOGGER.info("successfully loaded base url");
-                            super.enable();
-                        });
-            }
+            guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(GuildApi.secrets.get("url").getAsString() + "guild/" + guildPrefix))
+                    .header("Authorization", "bearer " + GuildApi.secrets.get("password").getAsString())
+                    .GET()
+                    .build();
+            NetManager.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                    .whenCompleteAsync((response, error) -> {
+                        if (error != null) {
+                            GuildApi.LOGGER.error("get guild url error: {} {}", error, error.getMessage());
+                            return;
+                        }
+                        if (response.statusCode() / 100 != 2) {
+                            GuildApi.LOGGER.info("get guild url error: {}", response.body());
+                            return;
+                        }
+                        JsonObject res = JsonUtils.toJsonObject(response.body());
+                        baseURL = GuildApi.isDevelopment() ? "http://localhost:3000/":res.get("url").getAsString();
+                        validationKey = res.get("validationKey");
+                        GuildApi.LOGGER.info("successfully loaded base url");
+                        super.enable();
+                    });
         } catch (Exception e) {
             // TODO implement retry when actually using a server for guild base urls.
             String guildString = null;

@@ -1,13 +1,14 @@
 package pixlze.guildapi.features;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import io.socket.client.Ack;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
@@ -28,32 +29,52 @@ import java.util.regex.Pattern;
 public class DiscordBridgeFeature extends Feature {
     private final Pattern GUILD_PATTERN = Pattern.compile("^§.((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§. (?<content>.*)$");
     private final Pattern PARTY_CONFLICT_PATTERN = Pattern.compile("^§8\uDAFF\uDFFC\uE001\uDB00\uDC06§8 [a-zA-Z0-9_]{2,16}:.*$");
+    private SocketIOClient socketIOClient;
 
     @Override
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            LiteralArgumentBuilder<FabricClientCommandSource> base = ClientCommandManager.literal("discord")
+            dispatcher.register(ClientCommandManager.literal("discord")
                     .then(ClientCommandManager.argument("message", StringArgumentType.greedyString())
                             .executes((context) -> {
                                 String message = StringArgumentType.getString(context, "message");
-                                GuildApi.LOGGER.info("raw message: {}", message);
                                 message = message.replaceAll("[\u200C\uE087\uE013\u2064\uE071\uE012\uE000\uE089\uE088\uE07F\uE08B\uE07E\uE080ÁÀ֎]", "");
                                 if (message.isBlank()) return 0;
-                                if (Managers.Net.getApi("socket", SocketIOClient.class) != null) {
-                                    Managers.Net.getApi("socket", SocketIOClient.class)
-                                            .discordEmit("discordOnlyWynnMessage", "[Discord Only] " + McUtils.playerName() + ": " + message);
-                                    Managers.Net.getApi("socket", SocketIOClient.class)
-                                            .discordEmit("discordMessage", Map.of("Author", McUtils.playerName(), "Content", message));
-
+                                if (socketIOClient != null) {
+                                    socketIOClient.emit(socketIOClient.discordSocket, "discordOnlyWynnMessage", "[Discord Only] " + McUtils.playerName() + ": " + message);
+                                    socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message));
                                 } else {
-                                    McUtils.sendLocalMessage(Text.literal("Still connecting to server...")
+                                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...")
                                             .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get());
                                 }
                                 return 0;
                             })
-                    );
-            dispatcher.register(base);
+                    ));
             dispatcher.register(ClientCommandManager.literal("dc").redirect(dispatcher.getRoot().getChild("discord")));
+
+            dispatcher.register(ClientCommandManager.literal("online").executes((context) -> {
+                if (socketIOClient != null) {
+                    socketIOClient.emit(socketIOClient.discordSocket, "listOnline", (Ack) args -> {
+                        if (args[0] instanceof JSONArray data) {
+                            try {
+                                MutableText message = Text.literal("Online mod users: ");
+                                for (int i = 0; i < data.length(); i++) {
+                                    message.append(data.getString(i));
+                                    if (i != data.length() - 1) message.append(", ");
+                                }
+                                message.setStyle(Style.EMPTY.withColor(Formatting.GREEN));
+                                McUtils.sendLocalMessage(message, Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+                            } catch (Exception e) {
+                                GuildApi.LOGGER.error("error parsing online users: {} {}", e, e.getMessage());
+                            }
+                        }
+                    });
+                } else {
+                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...")
+                            .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get());
+                }
+                return 0;
+            }));
         });
         NetEvents.LOADED.register(this::onApiLoaded);
     }
@@ -61,9 +82,8 @@ public class DiscordBridgeFeature extends Feature {
     private void onApiLoaded(Api api) {
         if (api.getClass().equals(SocketIOClient.class)) {
             ChatMessageReceived.EVENT.register(this::onWynnMessage);
-            Managers.Net.getApi("socket", SocketIOClient.class)
-                    .addDiscordListener("discordMessage", this::onDiscordMessage);
-
+            socketIOClient = Managers.Net.getApi("socket", SocketIOClient.class);
+            socketIOClient.addDiscordListener("discordMessage", this::onDiscordMessage);
         }
     }
 
@@ -73,8 +93,7 @@ public class DiscordBridgeFeature extends Feature {
         Matcher guildMatcher = GUILD_PATTERN.matcher(m);
         Matcher partyConflictMatcher = PARTY_CONFLICT_PATTERN.matcher(m);
         if (guildMatcher.find() && !partyConflictMatcher.find()) {
-            Managers.Net.getApi("socket", SocketIOClient.class)
-                    .discordEmit("wynnMessage", guildMatcher.group("content"));
+            socketIOClient.emit(socketIOClient.discordSocket, "wynnMessage", guildMatcher.group("content"));
         }
     }
 
@@ -90,7 +109,7 @@ public class DiscordBridgeFeature extends Feature {
                         .append(Text.literal(data.get("Author").toString())
                                 .fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))
                                 .append(": "))
-                        .append(Text.literal(data.get("Content").toString())
+                        .append(Text.literal(TextUtils.highlightUser(data.get("Content").toString()))
                                 .setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
             } catch (Exception e) {
                 GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
