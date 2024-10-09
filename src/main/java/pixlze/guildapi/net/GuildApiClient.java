@@ -302,7 +302,6 @@ public class GuildApiClient extends Api {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public GuildApiClient getInstance() {
         return instance;
     }

@@ -32,7 +32,6 @@ public class WynnApiClient extends Api {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public WynnApiClient getInstance() {
         return instance;
     }

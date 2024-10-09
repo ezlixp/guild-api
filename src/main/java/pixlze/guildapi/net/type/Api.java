@@ -71,5 +71,5 @@ public abstract class Api {
 
     public abstract void init();
 
-    public abstract <T extends Api> T getInstance();
+    public abstract Api getInstance();
 }

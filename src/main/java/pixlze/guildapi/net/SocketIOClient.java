@@ -59,7 +59,6 @@ public class SocketIOClient extends Api {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public SocketIOClient getInstance() {
         return instance;
     }
@@ -72,7 +71,8 @@ public class SocketIOClient extends Api {
 
     private void initSocket() {
         IO.Options options = IO.Options.builder()
-                .setExtraHeaders(Map.of("authorization", Collections.singletonList("bearer " + guild.getToken()), "from", Collections.singletonList(McUtils.playerName()), "user-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_CONTAINER.getMetadata().getVersion().getFriendlyString())))
+                .setExtraHeaders(Map.of("authorization", Collections.singletonList("bearer " + guild.getToken()), "from", Collections.singletonList(McUtils.playerName()), "user-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_CONTAINER.getMetadata()
+                        .getVersion().getFriendlyString())))
                 .build();
         aspectSocket = IO.socket(URI.create(guild.getBaseURL() + "aspects"), options);
         discordSocket = IO.socket(URI.create(guild.getBaseURL() + "discord"), options);
