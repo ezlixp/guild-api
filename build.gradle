@@ -69,7 +69,6 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.base.archivesName.get()}" }
     }
-    archiveClassifier.set("dev")
 }
 
 // dev jar is jar with fabric loom sources
