@@ -1,6 +1,5 @@
 package pixlze.guildapi.features;
 
 public abstract class Feature {
-    public void init() {
-    }
+    public abstract void init();
 }

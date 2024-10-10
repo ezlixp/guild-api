@@ -25,14 +25,16 @@ import pixlze.guildapi.utils.type.Prepend;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class DiscordBridgeFeature extends Feature {
     private final Pattern GUILD_PATTERN = Pattern.compile("^§[b8]((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§[b8] (?<content>.*)$");
-    private final Pattern PARTY_CONFLICT_PATTERN = Pattern.compile("^§8\uDAFF\uDFFC\uE001\uDB00\uDC06§8 [a-zA-Z0-9_]{2,16}:.*$");
+    private final Pattern[] CONFLICT_PATTERNS = Stream.of("Sorry, you can't teleport... Try moving away from blocks.", "^[a-zA-Z0-9_]{2,16}:.*$", "You don't have enough mana to cast that spell!")
+            .map(Pattern::compile).toArray(Pattern[]::new);
     private SocketIOClient socketIOClient;
     private boolean loaded = false;
 
-    //    @Override
+    @Override
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(ClientCommandManager.literal("discord")
@@ -92,9 +94,11 @@ public class DiscordBridgeFeature extends Feature {
     private void onWynnMessage(Text message) {
         String m = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));
         GuildApi.LOGGER.info("received: {}", m);
+        for (Pattern conflict : CONFLICT_PATTERNS) {
+            if (conflict.matcher(m).find()) return;
+        }
         Matcher guildMatcher = GUILD_PATTERN.matcher(m);
-        Matcher partyConflictMatcher = PARTY_CONFLICT_PATTERN.matcher(m);
-        if (guildMatcher.find() && !partyConflictMatcher.find()) {
+        if (guildMatcher.find()) {
             socketIOClient.emit(socketIOClient.discordSocket, "wynnMessage", guildMatcher.group("content"));
         }
     }
