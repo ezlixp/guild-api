@@ -80,8 +80,6 @@ public class SocketIOClient extends Api {
         addDiscordListener("connect_error", (err) -> McUtils.sendLocalMessage(Text.literal("§cCould not connect to chat server."),
                 Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.RED))));
         addDiscordListener("connect", (args) -> {
-            GuildApi.LOGGER.info("connect: {}", args);
-            GuildApi.LOGGER.info("here");
             McUtils.sendLocalMessage(Text.literal("§aSuccessfully connected to chat server."), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)));
         });
         if (GuildApi.isDevelopment() || Models.WorldState.onWorld()) {

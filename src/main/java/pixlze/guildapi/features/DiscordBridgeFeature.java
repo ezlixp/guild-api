@@ -30,12 +30,12 @@ import java.util.stream.Stream;
 public class DiscordBridgeFeature extends Feature {
     private final Pattern GUILD_PATTERN = Pattern.compile("^§[b8]((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)" + "|" + "(\uDAFF\uDFFC\uE001\uDB00\uDC06))§[b8] (?<content>" +
             ".*)$");
-    private final Pattern[] CONFLICT_PATTERNS = Stream.of("Sorry, you can't teleport... Try moving away from blocks.", "^[a-zA-Z0-9_]{2,16}:.*$", "^You .*$",  "To rename a pet, use /renamepet. To rename an item, use " + "/renameitem.", "You need to " +
+    private final Pattern[] CONFLICT_PATTERNS = Stream.of("Sorry, you can't teleport... Try moving away from blocks.", "^[a-zA-Z0-9_]{2,16}:.*$", "^You .*$", "To rename a pet, " +
+                    "use /renamepet. To rename an item, use " + "/renameitem.", "You need to " +
                     "be holding a crafted item to rename it!", "/renamepet <pet-name>", "This command is VIP+ only! Buy VIP+ at §cwynncraft.com/store", "This command is HERO " +
-                            "only! Buy HERO at §cwynncraft.com/store", "Invalid command... Type /help for a list of commands", "/toggle [swears/blood/insults/autojoin/music/vet" +
+                    "only! Buy HERO at §cwynncraft.com/store", "Invalid command... Type /help for a list of commands", "/toggle [swears/blood/insults/autojoin/music/vet" +
                     "/war/guildjoin/attacksound/rpwarning/100/sb/autotracking/pouchmsg/combatbar/ghosts/popups/guildpopups/friendpopups/beacon/outlines/bombbell/pouchpickup" +
-                    "/queststartbeacon/publicProfile]", "You must specify a ghost limit to use.", "You're not a vet... Sorry!", "^Did you mean .*$", "Your items are damaged and " +
-                    "have become less effective. Bring them to a Blacksmith to repair them.", "^Party .*$")
+                    "/queststartbeacon/publicProfile]", "You must specify a ghost limit to use.", "You're not a vet... Sorry!", "^Did you mean .*$", "^Your .*$", "^Party .*$")
             .map(Pattern::compile).toArray(Pattern[]::new);
     private SocketIOClient socketIOClient;
     private boolean loaded = false;

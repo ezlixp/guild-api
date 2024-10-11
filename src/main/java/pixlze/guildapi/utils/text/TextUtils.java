@@ -100,7 +100,6 @@ public class TextUtils {
         }
 
         private static void handleStyles(Style style, String asString) {
-            GuildApi.LOGGER.info("handling style: {} {}", style, asString);
             if (BLOCK_MARKER_PATTERN.matcher(asString).find() && !first) {
                 afterBlockMarker = true;
                 return;
