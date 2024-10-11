@@ -26,7 +26,6 @@ import java.util.function.Consumer;
 
 public class SocketIOClient extends Api {
     private static SocketIOClient instance;
-    public Socket aspectSocket;
     public Socket discordSocket;
     private GuildApiClient guild;
 
@@ -34,14 +33,10 @@ public class SocketIOClient extends Api {
         super("socket", List.of(GuildApiClient.class));
         if (GuildApi.isDevelopment()) {
             ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-                dispatcher.register(ClientCommandManager.literal("emit").executes((context) -> {
-                    emit(aspectSocket, "give_aspect", Collections.singletonMap("player", "test"));
-                    return 0;
-                }));
                 dispatcher.register(ClientCommandManager.literal("testmessage")
-                        .then(ClientCommandManager.argument("message", StringArgumentType.word())
+                        .then(ClientCommandManager.argument("message", StringArgumentType.greedyString())
                                 .executes((context) -> {
-                                    emit(discordSocket, "wynnMessage", "asdfasdf");
+                                    emit(discordSocket, "wynnMessage", StringArgumentType.getString(context, "message").replaceAll("&", "§"));
                                     return 0;
                                 })));
             });
@@ -75,7 +70,6 @@ public class SocketIOClient extends Api {
                         "-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_CONTAINER.getMetadata()
                         .getVersion().getFriendlyString())))
                 .build();
-        aspectSocket = IO.socket(URI.create(guild.getBaseURL() + "aspects"), options);
         discordSocket = IO.socket(URI.create(guild.getBaseURL() + "discord"), options);
         addDiscordListener("connect_error", (err) -> McUtils.sendLocalMessage(Text.literal("§cCould not connect to chat server."),
                 Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.RED))));
@@ -83,7 +77,6 @@ public class SocketIOClient extends Api {
             McUtils.sendLocalMessage(Text.literal("§aSuccessfully connected to chat server."), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)));
         });
         if (GuildApi.isDevelopment() || Models.WorldState.onWorld()) {
-            aspectSocket.connect();
             discordSocket.connect();
             GuildApi.LOGGER.info("sockets connecting");
         }
@@ -98,19 +91,11 @@ public class SocketIOClient extends Api {
     private void worldStateChanged(WorldState state) {
         if (!enabled) return;
         if (state == WorldState.WORLD) {
-            if (!aspectSocket.connected()) {
-                aspectSocket.connect();
-                GuildApi.LOGGER.info("aspect socket on");
-            }
             if (!discordSocket.connected()) {
                 discordSocket.connect();
                 GuildApi.LOGGER.info("discord socket on");
             }
         } else {
-            if (aspectSocket.connected()) {
-                aspectSocket.disconnect();
-                GuildApi.LOGGER.info("aspect socket off");
-            }
             if (discordSocket.connected()) {
                 discordSocket.disconnect();
                 GuildApi.LOGGER.info("discord socket off");
@@ -126,7 +111,6 @@ public class SocketIOClient extends Api {
     @Override
     protected void unready() {
         super.unready();
-        aspectSocket.disconnect();
         discordSocket.disconnect();
     }
 }

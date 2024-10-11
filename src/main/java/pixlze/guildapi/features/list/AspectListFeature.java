@@ -17,14 +17,14 @@ import pixlze.guildapi.utils.text.TextUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
 import pixlze.guildapi.utils.type.Prepend;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AspectListFeature extends ListFeature {
-    private final Pattern ASPECT_MESSAGE_PATTERN = Pattern.compile("^§.((\uDAFF\uDFFC\uE001\uDB00\uDC06)|(\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE))§. §.(?<giver>.*?)(§.)? rewarded §.an Aspect§. to §.(?<receiver>.*?)(§.)?$");
+    private final Pattern ASPECT_MESSAGE_PATTERN = Pattern.compile("^§.((\uDAFF\uDFFC\uE001\uDB00\uDC06)|(\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE))§. §.(?<giver>.*?)(§" +
+            ".)? rewarded §.an Aspect§. to §.(?<receiver>.*?)(§.)?$");
 
     public AspectListFeature() {
         super("aspect", "aspects", (listItem) -> Text.literal(listItem.get("username")
@@ -59,7 +59,6 @@ public class AspectListFeature extends ListFeature {
         SocketIOClient socketIOClient = Managers.Net.getApi("socket", SocketIOClient.class);
         if (aspectMatcher.find() && socketIOClient != null) {
             GuildApi.LOGGER.info("{} gave an aspect to {}", aspectMatcher.group("giver"), aspectMatcher.group("receiver"));
-            socketIOClient.emit(socketIOClient.aspectSocket, "give_aspect", Collections.singletonMap("player", aspectMatcher.group("receiver")));
         }
     }
 
