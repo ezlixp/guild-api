@@ -71,14 +71,17 @@ public class SocketIOClient extends Api {
 
     private void initSocket() {
         IO.Options options = IO.Options.builder()
-                .setExtraHeaders(Map.of("authorization", Collections.singletonList("bearer " + guild.getToken()), "from", Collections.singletonList(McUtils.playerName()), "user-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_CONTAINER.getMetadata()
+                .setExtraHeaders(Map.of("authorization", Collections.singletonList("bearer " + guild.getToken()), "from", Collections.singletonList(McUtils.playerName()), "user" +
+                        "-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_CONTAINER.getMetadata()
                         .getVersion().getFriendlyString())))
                 .build();
         aspectSocket = IO.socket(URI.create(guild.getBaseURL() + "aspects"), options);
         discordSocket = IO.socket(URI.create(guild.getBaseURL() + "discord"), options);
-        addDiscordListener("connect_error", (err) -> McUtils.sendLocalMessage(Text.literal("§cCould not connect to chat server."), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.RED))));
+        addDiscordListener("connect_error", (err) -> McUtils.sendLocalMessage(Text.literal("§cCould not connect to chat server."),
+                Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.RED))));
         addDiscordListener("connect", (args) -> {
-            GuildApi.LOGGER.info("{}", args);
+            GuildApi.LOGGER.info("connect: {}", args);
+            GuildApi.LOGGER.info("here");
             McUtils.sendLocalMessage(Text.literal("§aSuccessfully connected to chat server."), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)));
         });
         if (GuildApi.isDevelopment() || Models.WorldState.onWorld()) {

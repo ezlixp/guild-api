@@ -1,7 +1,7 @@
 package pixlze.guildapi.utils.text.type;
 
-public enum TextParseOptions {
-    DEFAULT;
+public class TextParseOptions {
+    public static final TextParseOptions DEFAULT = new TextParseOptions();
 
     public String newline;
     public String formatCode;
@@ -13,18 +13,29 @@ public enum TextParseOptions {
         extractUsernames = false;
     }
 
+    private TextParseOptions copy() {
+        TextParseOptions out = new TextParseOptions();
+        out.newline = this.newline;
+        out.formatCode = this.formatCode;
+        out.extractUsernames = this.extractUsernames;
+        return out;
+    }
+
     public TextParseOptions withNewline(String newline) {
-        this.newline = newline;
-        return this;
+        TextParseOptions out = this.copy();
+        out.newline = newline;
+        return out;
     }
 
     public TextParseOptions withFormatCode(String formatCode) {
-        this.formatCode = formatCode;
-        return this;
+        TextParseOptions out = this.copy();
+        out.formatCode = formatCode;
+        return out;
     }
 
     public TextParseOptions withExtractUsernames(boolean extractUsernames) {
-        this.extractUsernames = extractUsernames;
-        return this;
+        TextParseOptions out = this.copy();
+        out.extractUsernames = extractUsernames;
+        return out;
     }
 }

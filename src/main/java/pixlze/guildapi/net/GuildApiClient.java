@@ -37,7 +37,8 @@ public class GuildApiClient extends Api {
     private final Text successMessage = Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN));
     private final List<String> nonErrors = List.of("User could not be found in tome list.", "duplicate raid",
             "User already in tome list.", "Specified user could not be found in tome list.", "Specified user could not be found in aspect list.");
-    private final List<String> printNonErrors = List.of("Specified user could not be found in tome list.", "User already in tome list.", "Specified user could not be found in aspect list.");
+    private final List<String> printNonErrors = List.of("Specified user could not be found in tome list.", "User already in tome list.", "Specified user could not be found in " +
+            "aspect list.");
     public String guildPrefix = "";
     private String token;
     private JsonElement validationKey;
@@ -329,7 +330,7 @@ public class GuildApiClient extends Api {
                         JsonObject res = JsonUtils.toJsonObject(response.body());
                         baseURL = GuildApi.isDevelopment() ? "http://localhost:3000/":res.get("url").getAsString();
                         validationKey = res.get("validationKey");
-                        GuildApi.LOGGER.info("successfully loaded base url, {} {}", validationKey, res);
+                        GuildApi.LOGGER.info("successfully loaded base url");
                         super.enable();
                     });
         } catch (Exception e) {
