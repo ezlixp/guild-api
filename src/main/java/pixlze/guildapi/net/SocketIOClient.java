@@ -69,6 +69,7 @@ public class SocketIOClient extends Api {
                 .setExtraHeaders(Map.of("authorization", Collections.singletonList("bearer " + guild.getToken()), "from", Collections.singletonList(McUtils.playerName()), "user" +
                         "-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_CONTAINER.getMetadata()
                         .getVersion().getFriendlyString())))
+                .setTimeout(60000)
                 .build();
         discordSocket = IO.socket(URI.create(guild.getBaseURL() + "discord"), options);
         addDiscordListener("connect_error", (err) -> McUtils.sendLocalMessage(Text.literal("§cCould not connect to chat server."),
