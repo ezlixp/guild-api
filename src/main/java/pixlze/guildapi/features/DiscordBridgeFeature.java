@@ -28,31 +28,34 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class DiscordBridgeFeature extends Feature {
-    private final Pattern GUILD_PATTERN = Pattern.compile("^§[b8]((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§[b8] (?<content>.*)$");
-    private final Pattern[] CONFLICT_PATTERNS = Stream.of("Sorry, you can't teleport... Try moving away from blocks.", "^[a-zA-Z0-9_]{2,16}:.*$", "You don't have enough mana to cast that spell!")
+    private final Pattern GUILD_PATTERN = Pattern.compile("^§[b8]((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)" + "|" + "(\uDAFF\uDFFC\uE001\uDB00\uDC06))§[b8] (?<content>" +
+            ".*)$");
+    private final Pattern[] CONFLICT_PATTERNS = Stream.of("Sorry, you can't teleport... Try moving away from blocks.", "^[a-zA-Z0-9_]{2,16}:.*$", "^You .*$",  "To rename a pet, use /renamepet. To rename an item, use " + "/renameitem.", "You need to " +
+                    "be holding a crafted item to rename it!", "/renamepet <pet-name>", "This command is VIP+ only! Buy VIP+ at §cwynncraft.com/store", "This command is HERO " +
+                            "only! Buy HERO at §cwynncraft.com/store", "Invalid command... Type /help for a list of commands", "/toggle [swears/blood/insults/autojoin/music/vet" +
+                    "/war/guildjoin/attacksound/rpwarning/100/sb/autotracking/pouchmsg/combatbar/ghosts/popups/guildpopups/friendpopups/beacon/outlines/bombbell/pouchpickup" +
+                    "/queststartbeacon/publicProfile]", "You must specify a ghost limit to use.", "You're not a vet... Sorry!", "^Did you mean .*$", "Your items are damaged and " +
+                    "have become less effective. Bring them to a Blacksmith to repair them.", "^Party .*$")
             .map(Pattern::compile).toArray(Pattern[]::new);
     private SocketIOClient socketIOClient;
     private boolean loaded = false;
 
+    // TODO add sync for when a socket disconnects
     @Override
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            dispatcher.register(ClientCommandManager.literal("discord")
-                    .then(ClientCommandManager.argument("message", StringArgumentType.greedyString())
-                            .executes((context) -> {
-                                String message = StringArgumentType.getString(context, "message");
-                                message = message.replaceAll("[\u200C\uE087\uE013\u2064\uE071\uE012\uE000\uE089\uE088\uE07F\uE08B\uE07E\uE080ÁÀ֎]", "");
-                                if (message.isBlank()) return 0;
-                                if (socketIOClient != null) {
-                                    socketIOClient.emit(socketIOClient.discordSocket, "discordOnlyWynnMessage", "[Discord Only] " + McUtils.playerName() + ": " + message);
-                                    socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message));
-                                } else {
-                                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...")
-                                            .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get());
-                                }
-                                return 0;
-                            })
-                    ));
+            dispatcher.register(ClientCommandManager.literal("discord").then(ClientCommandManager.argument("message", StringArgumentType.greedyString()).executes((context) -> {
+                String message = StringArgumentType.getString(context, "message");
+                message = message.replaceAll("[\u200C\uE087\uE013\u2064\uE071\uE012\uE000\uE089\uE088" + "\uE07F\uE08B\uE07E\uE080ÁÀ֎]", "");
+                if (message.isBlank()) return 0;
+                if (socketIOClient != null) {
+                    socketIOClient.emit(socketIOClient.discordSocket, "discordOnlyWynnMessage", "[Discord Only] " + McUtils.playerName() + ": " + message);
+                    socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message));
+                } else {
+                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...").setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get());
+                }
+                return 0;
+            })));
             dispatcher.register(ClientCommandManager.literal("dc").redirect(dispatcher.getRoot().getChild("discord")));
 
             dispatcher.register(ClientCommandManager.literal("online").executes((context) -> {
@@ -73,8 +76,7 @@ public class DiscordBridgeFeature extends Feature {
                         }
                     });
                 } else {
-                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...")
-                            .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get());
+                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...").setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get());
                 }
                 return 0;
             }));
@@ -108,13 +110,8 @@ public class DiscordBridgeFeature extends Feature {
             try {
                 GuildApi.LOGGER.info("received discord {}", data.get("Content").toString());
                 if (data.get("Content").toString().isBlank()) return;
-                McUtils.sendLocalMessage(Text.empty()
-                        .append(FontUtils.BannerPillFont.parseStringWithFill("discord")
-                                .fillStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))
-                        .append(" ")
-                        .append(Text.literal(data.get("Author").toString())
-                                .fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))
-                                .append(": "))
+                McUtils.sendLocalMessage(Text.empty().append(FontUtils.BannerPillFont.parseStringWithFill("discord").fillStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))
+                        .append(" ").append(Text.literal(data.get("Author").toString()).fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE)).append(": "))
                         .append(Text.literal(TextUtils.highlightUser(data.get("Content").toString()))
                                 .setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
             } catch (Exception e) {

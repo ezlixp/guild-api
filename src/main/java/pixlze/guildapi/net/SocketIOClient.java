@@ -77,7 +77,10 @@ public class SocketIOClient extends Api {
         aspectSocket = IO.socket(URI.create(guild.getBaseURL() + "aspects"), options);
         discordSocket = IO.socket(URI.create(guild.getBaseURL() + "discord"), options);
         addDiscordListener("connect_error", (err) -> McUtils.sendLocalMessage(Text.literal("§cCould not connect to chat server."), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.RED))));
-        addDiscordListener("connect", (args) -> McUtils.sendLocalMessage(Text.literal("§aSuccessfully connected to chat server."), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN))));
+        addDiscordListener("connect", (args) -> {
+            GuildApi.LOGGER.info("{}", args);
+            McUtils.sendLocalMessage(Text.literal("§aSuccessfully connected to chat server."), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+        });
         if (GuildApi.isDevelopment() || Models.WorldState.onWorld()) {
             aspectSocket.connect();
             discordSocket.connect();
