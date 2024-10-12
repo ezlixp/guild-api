@@ -89,7 +89,7 @@ public class GuildApiClient extends Api {
 
     public CompletableFuture<JsonElement> get(String path) {
         CompletableFuture<JsonElement> out = new CompletableFuture<>();
-        if (!enabled) {
+        if (isDisabled()) {
             GuildApi.LOGGER.warn("skipped api get because api service were crashed");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
                     .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
@@ -173,7 +173,7 @@ public class GuildApiClient extends Api {
     }
 
     public void post(String path, JsonObject body, boolean print) {
-        if (!enabled) {
+        if (isDisabled()) {
             GuildApi.LOGGER.warn("skipped api post because api service were crashed");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
                     .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
@@ -232,7 +232,7 @@ public class GuildApiClient extends Api {
     }
 
     public void delete(String path, boolean print) {
-        if (!enabled) {
+        if (isDisabled()) {
             GuildApi.LOGGER.warn("Skipped api delete because api services weren't enabled");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
                     .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);

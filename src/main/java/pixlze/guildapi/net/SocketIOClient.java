@@ -88,7 +88,7 @@ public class SocketIOClient extends Api {
     }
 
     private void worldStateChanged(WorldState state) {
-        if (!enabled) return;
+        if (isDisabled()) return;
         if (state == WorldState.WORLD) {
             if (!discordSocket.connected()) {
                 discordSocket.connect();

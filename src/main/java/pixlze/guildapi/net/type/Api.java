@@ -8,7 +8,7 @@ import java.util.List;
 public abstract class Api {
     public final String name;
     private final List<Class<? extends Api>> dependencies;
-    public boolean enabled = false;
+    private boolean enabled = false;
     protected String baseURL;
     private int missingDeps;
 
@@ -20,6 +20,10 @@ public abstract class Api {
         missingDeps = dependencies.size();
         NetEvents.LOADED.register(this::onApiLoaded);
         NetEvents.DISABLED.register(this::onApiDisabled);
+    }
+
+    public boolean isDisabled() {
+        return !enabled;
     }
 
     private void onApiLoaded(Api api) {

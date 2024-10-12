@@ -39,15 +39,13 @@ public class WynnApiClient extends Api {
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(
                 ClientCommandManager.literal("reloadWynnInfo").executes(context -> {
-                    if (!enabled && !reloading) {
+                    if (isDisabled() && !reloading) {
                         new Thread(() -> {
                             reloading = true;
                             McUtils.sendLocalMessage(
                                     Text.literal("Reloading...")
                                             .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get(), false);
-                            GuildApi.LOGGER.info("{}", Managers.Net.wynn.enabled);
                             initWynnPlayerInfo(true);
-                            GuildApi.LOGGER.info("{}", Managers.Net.wynn.enabled);
                             reloading = false;
                         }).start();
                     }
