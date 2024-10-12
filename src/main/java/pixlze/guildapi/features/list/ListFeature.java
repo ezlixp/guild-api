@@ -15,7 +15,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.features.Feature;
-import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
@@ -70,14 +69,14 @@ public class ListFeature extends Feature {
 
     private void listItems(int page, boolean reload) {
         CompletableFuture<JsonElement> response = new CompletableFuture<>();
-        if (reload) response = Managers.Net.getApi("guild", GuildApiClient.class).get(endpoint);
+        if (reload) response = Managers.Net.guild.get(endpoint);
         else response.complete(cachedResponse);
         response.whenCompleteAsync((res, exception) -> {
             cachedResponse = res;
             if (res == null) {
                 assert Formatting.YELLOW.getColorValue() != null;
                 if (!reload) McUtils.sendLocalMessage(Text.literal("No list data")
-                        .withColor(Formatting.YELLOW.getColorValue()), Prepend.DEFAULT.get());
+                        .withColor(Formatting.YELLOW.getColorValue()), Prepend.DEFAULT.get(), false);
                 return;
             }
             List<JsonElement> listItems = res.getAsJsonArray().asList();
@@ -103,7 +102,7 @@ public class ListFeature extends Feature {
                             .setStyle(Style.EMPTY.withColor(hasNext ? Formatting.GREEN:Formatting.GRAY).withBold(true)
                                     .withClickEvent(hasNext ? new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + name + "list view " + (page + 2) + " false"):null)));
             listMessage.append("\n");
-            McUtils.sendLocalMessage(listMessage, Prepend.DEFAULT.get());
+            McUtils.sendLocalMessage(listMessage, Prepend.DEFAULT.get(), false);
         });
     }
 }

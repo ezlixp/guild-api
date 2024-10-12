@@ -11,6 +11,7 @@ public class FeatureManager {
         registerFeature(new AspectListFeature());
         registerFeature(new TomeListFeature());
         registerFeature(new DiscordBridgeFeature());
+        registerFeature(new AutoUpdateFeature());
     }
 
     private void registerFeature(Feature feature) {

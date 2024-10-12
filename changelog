@@ -1,0 +1,10 @@
+### Bug Fixes
+- Fixed an issue with guild raid finished requests not being filtered properly
+- Fixed an issue where socket reconnection times out
+- Fixed more messages being incorrectly sent as guild messages
+
+### New Features
+- Added mod update reminder
+
+### Misc Changes
+- Added block indicators to wynncraft style messages

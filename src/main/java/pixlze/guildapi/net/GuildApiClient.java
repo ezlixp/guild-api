@@ -92,7 +92,7 @@ public class GuildApiClient extends Api {
         if (!enabled) {
             GuildApi.LOGGER.warn("skipped api get because api service were crashed");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get());
+                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
             failedPromise = out;
             return out;
         }
@@ -104,9 +104,9 @@ public class GuildApiClient extends Api {
             if (exception != null) {
                 assert Formatting.RED.getColorValue() != null;
                 McUtils.sendLocalMessage(Text.literal("Fatal API error: " + exception + " " + exception.getMessage())
-                        .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT.get());
+                        .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT.get(), false);
                 lastFailed = builder;
-                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get());
+                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get(), false);
                 GuildApi.LOGGER.error("api GET exception {} {} ", exception, exception.getMessage());
                 failedPromise = out;
             } else {
@@ -125,7 +125,7 @@ public class GuildApiClient extends Api {
             if (isError(error)) {
                 lastFailed = builder;
                 GuildApi.LOGGER.error("API error: {}", error);
-                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get());
+                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get(), false);
             } else {
                 if (failedPromise != null) {
                     failedPromise.complete(JsonUtils.toJsonElement(response.body()));
@@ -135,19 +135,18 @@ public class GuildApiClient extends Api {
                 GuildApi.LOGGER.warn("API non error: {}", error);
                 if (printNonError(error))
                     McUtils.sendLocalMessage(Text.literal(error)
-                            .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get());
+                            .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
                 else if (print)
                     successMessage();
 
             }
         } else {
             lastFailed = builder;
-            McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get());
+            McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get(), false);
         }
     }
 
     private String tryExtractError(String body) {
-        GuildApi.LOGGER.info(body);
         String out = null;
         try {
             if (JsonUtils.toJsonObject(body).get("error") != null)
@@ -170,14 +169,14 @@ public class GuildApiClient extends Api {
     }
 
     private void successMessage() {
-        McUtils.sendLocalMessage(successMessage, Prepend.DEFAULT.get());
+        McUtils.sendLocalMessage(successMessage, Prepend.DEFAULT.get(), false);
     }
 
     public void post(String path, JsonObject body, boolean print) {
         if (!enabled) {
             GuildApi.LOGGER.warn("skipped api post because api service were crashed");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get());
+                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
             return;
         }
         HttpRequest.Builder builder = HttpRequest.newBuilder()
@@ -191,9 +190,9 @@ public class GuildApiClient extends Api {
             if (exception != null) {
                 assert Formatting.RED.getColorValue() != null;
                 McUtils.sendLocalMessage(Text.literal("Fatal API error: " + exception + " " + exception.getMessage())
-                        .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT.get());
+                        .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT.get(), false);
                 lastFailed = builder;
-                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get());
+                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get(), false);
                 GuildApi.LOGGER.error("api POST exception: {} {}", exception, exception.getMessage());
             } else {
                 if (res.statusCode() / 100 == 2) {
@@ -236,7 +235,7 @@ public class GuildApiClient extends Api {
         if (!enabled) {
             GuildApi.LOGGER.warn("Skipped api delete because api services weren't enabled");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get());
+                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
             return;
         }
         HttpRequest.Builder builder = HttpRequest.newBuilder()
@@ -249,9 +248,9 @@ public class GuildApiClient extends Api {
             if (exception != null) {
                 assert Formatting.RED.getColorValue() != null;
                 McUtils.sendLocalMessage(Text.literal("Fatal API error: " + exception + " " + exception.getMessage())
-                        .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT.get());
+                        .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT.get(), false);
                 lastFailed = builder;
-                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get());
+                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get(), false);
                 GuildApi.LOGGER.error("api delete error: {} {}", exception, exception.getMessage());
             } else {
                 if (res.statusCode() / 100 == 2) {
@@ -276,16 +275,16 @@ public class GuildApiClient extends Api {
                         retrying = true;
                         McUtils.sendLocalMessage(
                                 Text.literal("Retrying...")
-                                        .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get());
+                                        .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get(), false);
                         CompletableFuture<HttpResponse<String>> response = tryToken(lastFailed);
                         response.whenCompleteAsync((res, exception) -> {
                             GuildApi.LOGGER.info("retrying {} {}", res, exception);
                             if (exception != null) {
                                 GuildApi.LOGGER.error("Retry exception: {} {}", exception, exception.getMessage());
-                                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get());
+                                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get(), false);
                             } else {
                                 if (res.statusCode() / 100 == 2) {
-                                    McUtils.sendLocalMessage(successMessage, Prepend.DEFAULT.get());
+                                    McUtils.sendLocalMessage(successMessage, Prepend.DEFAULT.get(), false);
                                     if (failedPromise != null) {
                                         failedPromise.complete(JsonUtils.toJsonElement(res.body()));
                                         failedPromise = null;
@@ -309,7 +308,7 @@ public class GuildApiClient extends Api {
 
     @Override
     protected void ready() {
-        wynnPlayerInfo = Managers.Net.getApi("wynn", WynnApiClient.class).wynnPlayerInfo;
+        wynnPlayerInfo = Managers.Net.guild.wynnPlayerInfo;
         try {
             guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
             HttpRequest request = HttpRequest.newBuilder()

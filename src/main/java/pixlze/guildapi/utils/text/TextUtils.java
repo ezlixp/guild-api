@@ -1,11 +1,15 @@
 package pixlze.guildapi.utils.text;
 
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextHandler;
+import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.mc.mixin.accessors.ChatHudAccessorInvoker;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
 
@@ -34,18 +38,43 @@ public class TextUtils {
     }
 
 
-    public static String parseStyled(Text text, TextParseOptions options) {
+    public static String parseStyled(StringVisitable text, TextParseOptions options) {
         TextVisitors.first = true;
         TextVisitors.options = options;
         TextVisitors.currentVisit = new StringBuilder();
-        text.visit(TextVisitors.STYLED_VISITOR, text.getStyle());
+        text.visit(TextVisitors.STYLED_VISITOR, Style.EMPTY);
         return TextVisitors.currentVisit.toString();
     }
 
-    public static String parsePlain(Text text) {
+    public static String parsePlain(StringVisitable text) {
         TextVisitors.currentVisit = new StringBuilder();
-        text.visit(TextVisitors.PLAIN_VISITOR, text.getStyle());
+        text.visit(TextVisitors.PLAIN_VISITOR, Style.EMPTY);
         return TextVisitors.currentVisit.toString();
+    }
+
+    public static Text stringVisitableToText(StringVisitable visitable) {
+        MutableText out = Text.empty();
+        visitable.visit((style, asString) -> {
+            out.append(Text.literal(asString).setStyle(style));
+            return Optional.empty();
+        }, Style.EMPTY);
+        return out;
+    }
+
+    public static Text toBlockMessage(Text text, Style prependStyle) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        ChatHud chatHud = client.inGameHud.getChatHud();
+        ChatHudAccessorInvoker chatHudAccessorInvoker = (ChatHudAccessorInvoker) chatHud;
+        TextHandler textHandler = client.textRenderer.getTextHandler();
+        List<StringVisitable> lines = textHandler.wrapLines(text, chatHudAccessorInvoker.invokeGetWidth(), text.getStyle(), Text.literal("\uDAFF\uDFFC\uE001\uDB00\uDC06")
+                .append(" ").setStyle(prependStyle));
+        MutableText out = (MutableText) stringVisitableToText(lines.getFirst());
+        for (int i = 1; i < lines.size(); ++i) {
+            out.append("\n");
+            out.append(stringVisitableToText(lines.get(i)));
+        }
+
+        return out;
     }
 
     public static String highlightUser(String message) {

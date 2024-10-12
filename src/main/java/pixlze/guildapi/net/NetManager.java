@@ -13,12 +13,16 @@ import java.util.Map;
 public class NetManager {
     public static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
     private final Map<String, Api> apis = new HashMap<>();
+    public WynnApiClient wynn = new WynnApiClient();
+    public GuildApiClient guild = new GuildApiClient();
+    public SocketIOClient socket = new SocketIOClient();
 
     public void apiCrash(Text message, Api api) {
-        McUtils.sendLocalMessage(message, Prepend.DEFAULT.get());
+        McUtils.sendLocalMessage(message, Prepend.DEFAULT.get(), false);
         api.disable();
     }
-
+    
+    @Deprecated
     public <T extends Api> T getApi(String name, Class<T> apiClass) {
         Api api = apis.get(name);
         if (apiClass.isInstance(api)) return apiClass.cast(api);
@@ -27,9 +31,9 @@ public class NetManager {
     }
 
     public void init() {
-        registerApi(new WynnApiClient());
-        registerApi(new GuildApiClient());
-        registerApi(new SocketIOClient());
+        registerApi(wynn);
+        registerApi(guild);
+        registerApi(socket);
         initApis();
     }
 

@@ -13,6 +13,7 @@ import pixlze.guildapi.mc.event.PlayerInfoChangedEvents;
 import pixlze.guildapi.mc.event.PlayerTeleport;
 import pixlze.guildapi.mc.event.ScreenOpen;
 import pixlze.guildapi.mc.event.WynnChatMessage;
+import pixlze.guildapi.utils.type.Prepend;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public class ClientPacketListenerMixin {
@@ -20,6 +21,7 @@ public class ClientPacketListenerMixin {
     private void onGameMessage(GameMessageS2CPacket packet, CallbackInfo ci) {
         if (!MinecraftClient.getInstance().isOnThread()) return;
         if (!packet.overlay() && Managers.Connection.onWynncraft()) {
+            Prepend.lastBadge = "";
             WynnChatMessage.EVENT.invoker().interact(packet.content());
         }
     }

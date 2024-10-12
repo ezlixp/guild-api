@@ -44,7 +44,7 @@ public class WynnApiClient extends Api {
                             reloading = true;
                             McUtils.sendLocalMessage(
                                     Text.literal("Reloading...")
-                                            .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get());
+                                            .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get(), false);
                             enabled = true;
                             initWynnPlayerInfo(true);
                             reloading = false;
@@ -59,7 +59,8 @@ public class WynnApiClient extends Api {
         new Thread(() -> {
             if (McUtils.mc().player != null) {
                 try {
-                    URI uri = URI.create(GuildApi.isDevelopment() ? "https://api.wynncraft.com/v3/player/doggc":"https://api.wynncraft.com/v3/player/" + McUtils.mc().player.getUuidAsString());
+                    URI uri = URI.create(GuildApi.isDevelopment() ? "https://api.wynncraft.com/v3/player/doggc":
+                            "https://api.wynncraft.com/v3/player/" + McUtils.mc().player.getUuidAsString());
                     HttpRequest request = HttpRequest.newBuilder()
                             .uri(uri)
                             .build();
@@ -76,7 +77,7 @@ public class WynnApiClient extends Api {
                     if (print)
                         McUtils.sendLocalMessage(
                                 Text.literal("Success!")
-                                        .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get());
+                                        .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get(), false);
                     super.enable();
                 } catch (Exception e) {
                     GuildApi.LOGGER.error("wynn player load error: {} {}", e, e.getMessage());

@@ -60,23 +60,21 @@ public class SocketIOClient extends Api {
 
     @Override
     protected void ready() {
-        guild = Managers.Net.getApi("guild", GuildApiClient.class);
+        guild = Managers.Net.guild;
         initSocket();
     }
 
     private void initSocket() {
         IO.Options options = IO.Options.builder()
                 .setExtraHeaders(Map.of("authorization", Collections.singletonList("bearer " + guild.getToken()), "from", Collections.singletonList(McUtils.playerName()), "user" +
-                        "-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_CONTAINER.getMetadata()
-                        .getVersion().getFriendlyString())))
+                        "-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_VERSION)))
                 .setTimeout(60000)
                 .build();
         discordSocket = IO.socket(URI.create(guild.getBaseURL() + "discord"), options);
         addDiscordListener("connect_error", (err) -> McUtils.sendLocalMessage(Text.literal("§cCould not connect to chat server."),
-                Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.RED))));
-        addDiscordListener("connect", (args) -> {
-            McUtils.sendLocalMessage(Text.literal("§aSuccessfully connected to chat server."), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)));
-        });
+                Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.RED)), true));
+        addDiscordListener("connect", (args) -> McUtils.sendLocalMessage(Text.literal("§aSuccessfully connected to chat server."),
+                Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)), true));
         if (GuildApi.isDevelopment() || Models.WorldState.onWorld()) {
             discordSocket.connect();
             GuildApi.LOGGER.info("sockets connecting");

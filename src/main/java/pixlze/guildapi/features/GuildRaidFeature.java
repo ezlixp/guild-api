@@ -29,7 +29,7 @@ public class GuildRaidFeature extends Feature {
         Matcher raidMatcher = RAID_PATTERN.matcher(TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true)));
         if (raidMatcher.find()) {
             GuildApi.LOGGER.info("guild raid {} finished", raidMatcher.group("raid"));
-            McUtils.sendLocalMessage(Text.literal("Guild raid finished.").withColor(0x00FF00), Prepend.DEFAULT.get());
+            McUtils.sendLocalMessage(Text.literal("Guild raid finished.").withColor(0x00FF00), Prepend.DEFAULT.get(), false);
         }
     }
 }

@@ -53,7 +53,7 @@ public class DiscordBridgeFeature extends Feature {
                     socketIOClient.emit(socketIOClient.discordSocket, "discordOnlyWynnMessage", "[Discord Only] " + McUtils.playerName() + ": " + message);
                     socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message));
                 } else {
-                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...").setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get());
+                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...").setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
                 }
                 return 0;
             })));
@@ -70,14 +70,14 @@ public class DiscordBridgeFeature extends Feature {
                                     if (i != data.length() - 1) message.append(", ");
                                 }
                                 message.setStyle(Style.EMPTY.withColor(Formatting.GREEN));
-                                McUtils.sendLocalMessage(message, Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)));
+                                McUtils.sendLocalMessage(message, Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)), true);
                             } catch (Exception e) {
                                 GuildApi.LOGGER.error("error parsing online users: {} {}", e, e.getMessage());
                             }
                         }
                     });
                 } else {
-                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...").setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get());
+                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...").setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
                 }
                 return 0;
             }));
@@ -89,7 +89,7 @@ public class DiscordBridgeFeature extends Feature {
         if (api.getClass().equals(SocketIOClient.class) && !loaded) {
             loaded = true;
             ChatMessageReceived.EVENT.register(this::onWynnMessage);
-            socketIOClient = Managers.Net.getApi("socket", SocketIOClient.class);
+            socketIOClient = Managers.Net.socket;
             socketIOClient.addDiscordListener("discordMessage", this::onDiscordMessage);
         }
     }
@@ -118,7 +118,7 @@ public class DiscordBridgeFeature extends Feature {
                 McUtils.sendLocalMessage(Text.empty().append(FontUtils.BannerPillFont.parseStringWithFill("discord").fillStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))
                         .append(" ").append(Text.literal(data.get("Author").toString()).fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE)).append(": "))
                         .append(Text.literal(TextUtils.highlightUser(data.get("Content").toString()))
-                                .setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)));
+                                .setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), true);
             } catch (Exception e) {
                 GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
             }

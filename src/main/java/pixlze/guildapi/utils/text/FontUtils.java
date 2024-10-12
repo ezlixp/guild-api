@@ -4,7 +4,6 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import pixlze.guildapi.GuildApi;
 
 public class FontUtils {
     public static class BannerPillFont {
@@ -16,7 +15,6 @@ public class FontUtils {
                 finalText.append("\uDAFF\uDFFF");
             }
             finalText.append("\uE062");
-            GuildApi.LOGGER.info("{}", finalText);
             return Text.literal(finalText.toString()).setStyle(Style.EMPTY.withFont(Identifier.of("banner/pill")));
         }
     }

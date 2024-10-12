@@ -10,8 +10,6 @@ import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
-import pixlze.guildapi.net.GuildApiClient;
-import pixlze.guildapi.net.SocketIOClient;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.TextUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
@@ -56,20 +54,18 @@ public class AspectListFeature extends ListFeature {
         }
         String aspectMessage = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));
         Matcher aspectMatcher = ASPECT_MESSAGE_PATTERN.matcher(aspectMessage);
-        SocketIOClient socketIOClient = Managers.Net.getApi("socket", SocketIOClient.class);
-        if (aspectMatcher.find() && socketIOClient != null) {
+        if (aspectMatcher.find()) {
             GuildApi.LOGGER.info("{} gave an aspect to {}", aspectMatcher.group("giver"), aspectMatcher.group("receiver"));
         }
     }
 
     private void search(String username) {
-        CompletableFuture<JsonElement> response = Managers.Net.getApi("guild", GuildApiClient.class)
-                .get("aspects/" + username);
+        CompletableFuture<JsonElement> response = Managers.Net.guild.get("aspects/" + username);
         response.whenCompleteAsync((res, exception) -> {
             if (exception == null && res != null) {
                 McUtils.sendLocalMessage(Text.literal(res.getAsJsonObject()
                         .get("username").getAsString() + " is owed " + res.getAsJsonObject()
-                        .get("aspects").getAsString() + " aspects.").withColor(0xFFFFFF), Prepend.DEFAULT.get());
+                        .get("aspects").getAsString() + " aspects.").withColor(0xFFFFFF), Prepend.DEFAULT.get(), false);
             }
         });
     }
