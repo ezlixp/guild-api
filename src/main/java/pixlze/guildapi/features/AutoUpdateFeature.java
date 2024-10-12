@@ -35,7 +35,7 @@ public class AutoUpdateFeature extends Feature {
                     GuildApi.LOGGER.error("get update error: {} {}", err, err.getMessage());
                     return;
                 }
-                GuildApi.LOGGER.info("{}", res);
+                GuildApi.LOGGER.info("auto update result: {}", res);
                 try {
                     String latestVersion = res.getAsJsonObject().get("versionNumber").getAsString();
                     if (!GuildApi.MOD_VERSION.equals(latestVersion)) {

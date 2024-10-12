@@ -27,7 +27,6 @@ public abstract class Api {
     }
 
     private void onApiLoaded(Api api) {
-        GuildApi.LOGGER.info("{} says {} was loaded", name, api.name);
         if (this.depends(api)) dependencyLoaded();
     }
 
@@ -42,7 +41,6 @@ public abstract class Api {
     private void dependencyLoaded() {
         --missingDeps;
         if (missingDeps == 0) {
-            GuildApi.LOGGER.info("{} ready", name);
             ready();
         }
     }
