@@ -1,5 +1,6 @@
 package pixlze.guildapi.features;
 
+import com.google.gson.JsonElement;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.text.Text;
@@ -10,6 +11,8 @@ import pixlze.guildapi.net.event.NetEvents;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
+
+import java.util.concurrent.CompletableFuture;
 
 public class AutoUpdateFeature extends Feature {
     private boolean completed = false;
@@ -30,7 +33,8 @@ public class AutoUpdateFeature extends Feature {
 
     private void onApiLoaded(Api loaded) {
         if (!completed && loaded.getClass().equals(GuildApiClient.class)) {
-            Managers.Net.guild.get("update").whenCompleteAsync((res, err) -> {
+            CompletableFuture<JsonElement> response = Managers.Net.guild.get("update");
+            response.whenCompleteAsync((res, err) -> {
                 if (err != null) {
                     GuildApi.LOGGER.error("get update error: {} {}", err, err.getMessage());
                     return;
