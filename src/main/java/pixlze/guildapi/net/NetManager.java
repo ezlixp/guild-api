@@ -13,15 +13,15 @@ import java.util.Map;
 public class NetManager {
     public static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
     private final Map<String, Api> apis = new HashMap<>();
-    public WynnApiClient wynn = new WynnApiClient();
-    public GuildApiClient guild = new GuildApiClient();
     public SocketIOClient socket = new SocketIOClient();
+    public GuildApiClient guild = new GuildApiClient();
+    public WynnApiClient wynn = new WynnApiClient();
 
     public void apiCrash(Text message, Api api) {
         McUtils.sendLocalMessage(message, Prepend.DEFAULT.get(), false);
         api.disable();
     }
-    
+
     @Deprecated
     public <T extends Api> T getApi(String name, Class<T> apiClass) {
         Api api = apis.get(name);

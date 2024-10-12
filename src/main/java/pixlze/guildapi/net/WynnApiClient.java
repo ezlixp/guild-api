@@ -39,14 +39,15 @@ public class WynnApiClient extends Api {
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(
                 ClientCommandManager.literal("reloadWynnInfo").executes(context -> {
-                    if (!reloading) {
+                    if (!enabled && !reloading) {
                         new Thread(() -> {
                             reloading = true;
                             McUtils.sendLocalMessage(
                                     Text.literal("Reloading...")
                                             .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get(), false);
-                            enabled = true;
+                            GuildApi.LOGGER.info("{}", Managers.Net.wynn.enabled);
                             initWynnPlayerInfo(true);
+                            GuildApi.LOGGER.info("{}", Managers.Net.wynn.enabled);
                             reloading = false;
                         }).start();
                     }
@@ -56,46 +57,44 @@ public class WynnApiClient extends Api {
     }
 
     public void initWynnPlayerInfo(boolean print) {
-        new Thread(() -> {
-            if (McUtils.mc().player != null) {
-                try {
-                    URI uri = URI.create(GuildApi.isDevelopment() ? "https://api.wynncraft.com/v3/player/doggc":
-                            "https://api.wynncraft.com/v3/player/" + McUtils.mc().player.getUuidAsString());
-                    HttpRequest request = HttpRequest.newBuilder()
-                            .uri(uri)
-                            .build();
-                    HttpResponse<String> response = NetManager.HTTP_CLIENT.send(request,
-                            HttpResponse.BodyHandlers.ofString());
-                    GuildApi.LOGGER.info("wynn response: {}", response.body());
-                    wynnPlayerInfo = JsonUtils.toJsonObject(response.body());
-                    if (wynnPlayerInfo.get("Error") != null) {
-                        String message = wynnPlayerInfo.get("Error").getAsString();
-                        wynnPlayerInfo = null;
-                        throw new Exception(message);
-                    }
-                    GuildApi.LOGGER.info("successfully loaded wynn player info");
-                    if (print)
-                        McUtils.sendLocalMessage(
-                                Text.literal("Success!")
-                                        .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get(), false);
-                    super.enable();
-                } catch (Exception e) {
-                    GuildApi.LOGGER.error("wynn player load error: {} {}", e, e.getMessage());
-                    Managers.Net.apiCrash(
-                            Text.literal("Wynn api fetch for " + McUtils.playerName() + " failed. Click ")
-                                    .setStyle(Style.EMPTY.withColor(Formatting.RED))
-                                    .append(Text.literal("here")
-                                            .setStyle(Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
-                                                    .withClickEvent(
-                                                            new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                                                    "/reloadWynnInfo"))))
-                                    .append(Text.literal(" to retry.").setStyle(Style.EMPTY.withColor(Formatting.RED))),
-                            this);
+        if (McUtils.mc().player != null) {
+            try {
+                URI uri = URI.create(GuildApi.isDevelopment() ? "https://api.wynncraft.com/v3/player/doggc":
+                        "https://api.wynncraft.com/v3/player/" + McUtils.mc().player.getUuidAsString());
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(uri)
+                        .build();
+                HttpResponse<String> response = NetManager.HTTP_CLIENT.send(request,
+                        HttpResponse.BodyHandlers.ofString());
+                wynnPlayerInfo = JsonUtils.toJsonObject(response.body());
+                GuildApi.LOGGER.info("wynn response: {}", wynnPlayerInfo);
+                if (wynnPlayerInfo.get("Error") != null) {
+                    String message = wynnPlayerInfo.get("Error").getAsString();
+                    wynnPlayerInfo = null;
+                    throw new Exception(message);
                 }
-            } else {
-                GuildApi.LOGGER.warn("null player found when initializing wynn api");
+                GuildApi.LOGGER.info("successfully loaded wynn player info");
+                if (print)
+                    McUtils.sendLocalMessage(
+                            Text.literal("Success!")
+                                    .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get(), false);
+                super.enable();
+            } catch (Exception e) {
+                GuildApi.LOGGER.error("wynn player load error: {} {}", e, e.getMessage());
+                Managers.Net.apiCrash(
+                        Text.literal("Wynncraft api fetch for " + McUtils.playerName() + " failed. Click ")
+                                .setStyle(Style.EMPTY.withColor(Formatting.RED))
+                                .append(Text.literal("here")
+                                        .setStyle(Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
+                                                .withClickEvent(
+                                                        new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                                                "/reloadWynnInfo"))))
+                                .append(Text.literal(" to retry.").setStyle(Style.EMPTY.withColor(Formatting.RED))),
+                        this);
             }
-        }).start();
+        } else {
+            GuildApi.LOGGER.warn("null player found when initializing wynn api");
+        }
     }
 
     private void onWynnJoin() {

@@ -308,7 +308,8 @@ public class GuildApiClient extends Api {
 
     @Override
     protected void ready() {
-        wynnPlayerInfo = Managers.Net.guild.wynnPlayerInfo;
+        wynnPlayerInfo = Managers.Net.wynn.wynnPlayerInfo;
+        GuildApi.LOGGER.info("guild wynnplayerinfo {}", wynnPlayerInfo);
         try {
             guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
             HttpRequest request = HttpRequest.newBuilder()
