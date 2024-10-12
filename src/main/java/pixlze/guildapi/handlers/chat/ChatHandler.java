@@ -34,7 +34,7 @@ public final class ChatHandler {
     }
 
     private void onWynnMessage(Text message) {
-        assert McUtils.mc().world != null;
+        assert McUtils.mc().world!=null;
         long currentTicks = McUtils.mc().world.getTime();
 
         List<Text> lines = TextUtils.splitLines(message);
@@ -42,14 +42,14 @@ public final class ChatHandler {
             if (currentTicks <= chatScreenTicks + 1) {
                 collectedLines.addAll(lines);
             } else {
-                if (chatScreenTicks != 0) {
+                if (chatScreenTicks!=0) {
                     processCollected();
                 }
                 collectedLines = new ArrayList<>(lines);
                 chatScreenTicks = currentTicks;
             }
         } else {
-            if (chatScreenTicks != 0) {
+            if (chatScreenTicks!=0) {
                 processCollected();
             }
             postChatLine(message);
@@ -78,7 +78,7 @@ public final class ChatHandler {
         Collections.reverse(lines);
 
         LinkedList<Text> newLines = new LinkedList<>();
-        if (lastRealChat == null) {
+        if (lastRealChat==null) {
             lines.forEach(newLines::addLast);
         } else {
             for (Text line : lines) {
@@ -100,14 +100,14 @@ public final class ChatHandler {
         boolean expectedConfirmationlessDialogue = false;
 
         if (newLines.getLast().getString().isEmpty()) {
-            if (newLines.size() == 2) {
+            if (newLines.size()==2) {
                 if (EMPTY_LINE_PATTERN.matcher(newLines.getFirst().getString()).matches()) {
                     return;
                 }
 
                 expectedConfirmationlessDialogue = true;
                 GuildApi.LOGGER.info("expecting confirmationless dialogue [#1]");
-            } else if (newLines.size() == 4) {
+            } else if (newLines.size()==4) {
                 if (EMPTY_LINE_PATTERN.matcher(newLines.get(0).getString()).matches() &&
                         EMPTY_LINE_PATTERN.matcher(newLines.get(1).getString()).matches() &&
                         EMPTY_LINE_PATTERN.matcher(newLines.get(2).getString()).matches() &&
@@ -133,12 +133,12 @@ public final class ChatHandler {
     }
 
     private void processNewLines(LinkedList<Text> newLines, boolean expectedConfirmationlessDialogue) {
-        for (Text line : newLines) {
-            if (!TextUtils.parseStyled(line, TextParseOptions.DEFAULT).isBlank()) {
-                GuildApi.LOGGER.info("newline: {}", TextUtils.parseStyled(line, TextParseOptions.DEFAULT));
-            }
-        }
-        GuildApi.LOGGER.info("newline spacer: \n\n\n");
+//        for (Text line : newLines) {
+//            if (!TextUtils.parseStyled(line, TextParseOptions.DEFAULT).isBlank()) {
+//                GuildApi.LOGGER.info("newline: {}", TextUtils.parseStyled(line, TextParseOptions.DEFAULT));
+//            }
+//        }
+//        GuildApi.LOGGER.info("newline spacer: \n\n\n");
         LinkedList<Text> newChatLines = new LinkedList<>();
 
         Text firstText = newLines.getFirst();
@@ -177,7 +177,7 @@ public final class ChatHandler {
                 }
             }
         } else if (expectedConfirmationlessDialogue) {
-            if (newLines.size() != 1) {
+            if (newLines.size()!=1) {
                 GuildApi.LOGGER.warn("New lines has an unexpected dialogue count [#1]: {}", newLines);
             }
             lastConfirmationlessDialogue = TextUtils.parsePlain(newLines.getFirst());
