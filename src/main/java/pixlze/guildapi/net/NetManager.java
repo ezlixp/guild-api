@@ -43,7 +43,7 @@ public class NetManager {
 
     private void initApis() {
         for (Api a : apis.values()) {
-            if (!a.enabled) a.init();
+            if (a.isDisabled()) a.init();
         }
     }
 }
