@@ -29,14 +29,13 @@ import java.util.stream.Stream;
 
 public class DiscordBridgeFeature extends Feature {
     private final Pattern GUILD_PATTERN = Pattern.compile("^§[b8]((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§[b8] (?<content>.*)$");
-    private final Pattern[] CONFLICT_PATTERNS = Stream.of("^[a-zA-Z0-9_]{2,16}:.*$", "^You .*$", "^To rename a pet, use /renamepet. To rename an item, use /renameitem" +
-                            ".$", "^You need to be holding a crafted item to rename it!$", "^/renamepet <pet-name>$", "^This " + "command is" + " VIP+ only! Buy VIP+ at §cwynncraft" +
-                            ".com/store$", "^This command is HERO only! Buy HERO at §cwynncraft.com/store$", "Invalid command... Type /help for a list of commands", "/toggle " +
-                            "[swears/blood/insults/autojoin/music/vet" + "/war/guildjoin/attacksound/rpwarning/100/sb/autotracking/pouchmsg/combatbar/ghosts/popups/guildpopups/friendpopups/beacon/outlines/bombbell/pouchpickup/queststartbeacon/publicProfile]",
-                    "^You're .*$", "^Did you mean .*$", "^You .*$", "^Your .*$", "^Party" + " .*$", "^Sorry, .*$", "^[a-zA-Z0-9_]{2,16} is not online",
-                    "^§.Be sure to use exact names, prediction does not work if the user is on a separate server$", "is active for .* §. seconds.$", "^[a-zA-Z0-9_]{2,16} has left the party!$",
-                    "\uE003", "^The provided player is not online on the Wynncraft Network!$")
-            .map(Pattern::compile).toArray(Pattern[]::new);
+    private final Pattern[] CONFLICT_PATTERNS = Stream.of("^[a-zA-Z0-9_]{2,16}:.*$", "^You .*$",
+            "^To rename a pet, use /renamepet. To rename an item, use /renameitem\\.$", "^You need to be holding a crafted item to rename it!$", "^/renamepet <pet-name>$",
+            "^This  command is .*$", "^Invalid command... Type /help for a list of commands$", "^/toggle [swears/blood/insults/autojoin/music/vet/war/guildjoin/attacksound/rpwarning/100/sb/autotracking/pouchmsg/combatbar/ghosts/popups/guildpopups/friendpopups/beacon/outlines/bombbell/pouchpickup/queststartbeacon/publicProfile]",
+            "^You're .*$", "^Did you mean .*$", "^You .*$", "^Your .*$", "^Party .*$", "^Sorry, .*$",
+            "^[a-zA-Z0-9_]{2,16} is not online", "^§.Be sure to use exact names, prediction does not work if the user is on a separate server$",
+            "^.+? is active for .* §. seconds.$", "^[a-zA-Z0-9_]{2,16} has left the party!$", "\uE003",
+            "^The provided player is not online on the Wynncraft Network!$").map(Pattern::compile).toArray(Pattern[]::new);
     private SocketIOClient socketIOClient;
     private boolean loaded = false;
 
@@ -113,10 +112,7 @@ public class DiscordBridgeFeature extends Feature {
             try {
                 GuildApi.LOGGER.info("received discord {}", data.get("Content").toString());
                 if (data.get("Content").toString().isBlank()) return;
-                McUtils.sendLocalMessage(Text.empty().append(FontUtils.BannerPillFont.parseStringWithFill("discord").fillStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)))
-                        .append(" ").append(Text.literal(data.get("Author").toString()).fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE)).append(": "))
-                        .append(Text.literal(TextUtils.highlightUser(data.get("Content").toString()))
-                                .setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), true);
+                McUtils.sendLocalMessage(Text.empty().append(FontUtils.BannerPillFont.parseStringWithFill("discord").fillStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE))).append(" ").append(Text.literal(data.get("Author").toString()).fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE)).append(": ")).append(Text.literal(TextUtils.highlightUser(data.get("Content").toString())).setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), true);
             } catch (Exception e) {
                 GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
             }
