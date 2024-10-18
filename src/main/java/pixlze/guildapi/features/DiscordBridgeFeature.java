@@ -35,7 +35,7 @@ public class DiscordBridgeFeature extends Feature {
             "^You're .*$", "^Did you mean .*$", "^You .*$", "^Your .*$", "^Party .*$", "^Sorry, .*$",
             "^[a-zA-Z0-9_]{2,16} is not online", "^§.Be sure to use exact names, prediction does not work if the user is on a separate server$",
             "^.+? is active for .* §. seconds\\.$", "^[a-zA-Z0-9_]{2,16} has left the party!$", "\uE003",
-            "^The provided player is not online on the Wynncraft Network!$").map(Pattern::compile).toArray(Pattern[]::new);
+            "^The provided player is not online on the Wynncraft Network!$", "^This player is already in your party$").map(Pattern::compile).toArray(Pattern[]::new);
     private SocketIOClient socketIOClient;
     private boolean loaded = false;
 
