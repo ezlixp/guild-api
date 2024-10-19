@@ -61,7 +61,7 @@ public class DiscordBridgeFeature extends Feature {
                 String message = StringArgumentType.getString(context, "message");
                 message = message.replaceAll("[\u200C\uE087\uE013\u2064\uE071\uE012\uE000\uE089\uE088\uE07F\uE08B\uE07E\uE080ÁÀ֎]", "");
                 if (message.isBlank()) return 0;
-                if (socketIOClient!=null) {
+                if (socketIOClient != null) {
                     socketIOClient.emit(socketIOClient.discordSocket, "discordOnlyWynnMessage", McUtils.playerName() + ": " + message);
                     socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message));
                 } else {
@@ -72,14 +72,14 @@ public class DiscordBridgeFeature extends Feature {
             dispatcher.register(ClientCommandManager.literal("dc").redirect(dispatcher.getRoot().getChild("discord")));
 
             dispatcher.register(ClientCommandManager.literal("online").executes((context) -> {
-                if (socketIOClient!=null) {
+                if (socketIOClient != null) {
                     socketIOClient.emit(socketIOClient.discordSocket, "listOnline", (Ack) args -> {
                         if (args[0] instanceof JSONArray data) {
                             try {
                                 MutableText message = Text.literal("Online mod users: ");
                                 for (int i = 0; i < data.length(); i++) {
                                     message.append(data.getString(i));
-                                    if (i!=data.length() - 1) message.append(", ");
+                                    if (i != data.length() - 1) message.append(", ");
                                 }
                                 message.setStyle(Style.EMPTY.withColor(Formatting.GREEN));
                                 McUtils.sendLocalMessage(message, Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)), true);
@@ -142,6 +142,8 @@ public class DiscordBridgeFeature extends Feature {
             } catch (Exception e) {
                 GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
             }
+        } else {
+            GuildApi.LOGGER.info("malformed discord message: {}", args);
         }
     }
 }

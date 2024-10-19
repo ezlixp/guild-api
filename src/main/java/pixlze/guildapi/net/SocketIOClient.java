@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Pair;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.components.Models;
@@ -18,9 +19,7 @@ import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 
@@ -28,6 +27,8 @@ public class SocketIOClient extends Api {
     private static SocketIOClient instance;
     public Socket discordSocket;
     private GuildApiClient guild;
+    private String guildPrefix;
+    private final ArrayList<Pair<String, Consumer<Object[]>>> listeners = new ArrayList<>();
 
     public SocketIOClient() {
         super("socket", List.of(GuildApiClient.class));
@@ -61,20 +62,30 @@ public class SocketIOClient extends Api {
     @Override
     protected void ready() {
         guild = Managers.Net.guild;
-        initSocket();
+        boolean reloadSocket = false;
+        if (!Objects.equals(guild.guildPrefix, guildPrefix)) {
+            guildPrefix = guild.guildPrefix;
+            reloadSocket = true;
+        }
+        initSocket(reloadSocket);
     }
 
-    private void initSocket() {
-        IO.Options options = IO.Options.builder()
-                .setExtraHeaders(Map.of("authorization", Collections.singletonList("bearer " + guild.getToken()), "from", Collections.singletonList(McUtils.playerName()), "user" +
-                        "-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_VERSION)))
-                .setTimeout(60000)
-                .build();
-        discordSocket = IO.socket(URI.create(guild.getBaseURL() + "discord"), options);
-        addDiscordListener("connect_error", (err) -> McUtils.sendLocalMessage(Text.literal("§cCould not connect to chat server."),
-                Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.RED)), true));
-        addDiscordListener("connect", (args) -> McUtils.sendLocalMessage(Text.literal("§aSuccessfully connected to chat server."),
-                Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)), true));
+    private void initSocket(boolean reloadSocket) {
+        if (reloadSocket) {
+            IO.Options options = IO.Options.builder()
+                    .setExtraHeaders(Map.of("authorization", Collections.singletonList("bearer " + guild.getToken()), "from", Collections.singletonList(McUtils.playerName()), "user" +
+                            "-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_VERSION)))
+                    .setTimeout(60000)
+                    .build();
+            discordSocket = IO.socket(URI.create(guild.getBaseURL() + "discord"), options);
+            addDiscordListener("connect_error", (err) -> McUtils.sendLocalMessage(Text.literal("§cCould not connect to chat server."),
+                    Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.RED)), true));
+            addDiscordListener("connect", (args) -> McUtils.sendLocalMessage(Text.literal("§aSuccessfully connected to chat server."),
+                    Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)), true));
+            for (Pair<String, Consumer<Object[]>> listener : listeners) {
+                addDiscordListener(listener.getLeft(), listener.getRight());
+            }
+        }
         if (GuildApi.isDevelopment() || Models.WorldState.onWorld()) {
             discordSocket.connect();
             GuildApi.LOGGER.info("sockets connecting");
@@ -84,6 +95,7 @@ public class SocketIOClient extends Api {
     }
 
     public void addDiscordListener(String name, Consumer<Object[]> listener) {
+        listeners.add(new Pair<>(name, listener));
         discordSocket.on(name, listener::accept);
     }
 

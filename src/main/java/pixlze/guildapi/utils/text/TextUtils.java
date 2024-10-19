@@ -8,7 +8,6 @@ import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.mc.mixin.accessors.ChatHudAccessorInvoker;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
@@ -91,7 +90,7 @@ public class TextUtils {
         static boolean afterBlockMarker;
         static TextParseOptions options;
         public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = (style, asString) -> {
-            if (options.extractUsernames && style.getHoverEvent()!=null) {
+            if (options.extractUsernames && style.getHoverEvent() != null) {
                 handleStylesWithHover(style, asString);
             } else {
                 handleStyles(style, asString);
@@ -100,23 +99,20 @@ public class TextUtils {
         };
 
         private static void handleStylesWithHover(Style style, String asString) {
-            assert style.getHoverEvent()!=null;
+            assert style.getHoverEvent() != null;
             if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text) {
                 List<Text> onHover = ((Text) Objects.requireNonNull(
                         style.getHoverEvent().getValue(style.getHoverEvent().getAction()))).getSiblings();
-                if (asString.indexOf('/')==-1) {
-                    if (onHover!=null) {
-                        if (onHover.size() > 2 && onHover.get(1).getString()!=null && Objects.requireNonNull(
+                if (asString.indexOf('/') == -1) {
+                    if (onHover != null) {
+                        if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(
                                 onHover.get(1).getString()).contains("nickname is")) {
-                            GuildApi.LOGGER.info("wynntils username found: {} {}", style, asString);
                             handleStyles(style.withItalic(false), onHover.getFirst().getString());
-                        } else if (!onHover.isEmpty() && onHover.getFirst().getString()!=null && onHover.getFirst()
+                        } else if (!onHover.isEmpty() && onHover.getFirst().getString() != null && onHover.getFirst()
                                 .getString().contains("real username is")) {
                             if (onHover.size() > 1) {
-                                GuildApi.LOGGER.info("username found multi part: {} {}", style, asString);
                                 handleStyles(style.withItalic(false), onHover.get(1).getString());
                             } else {
-                                GuildApi.LOGGER.info("username found sibling: {} {}", style, asString);
                                 handleStyles(style.withItalic(false), onHover.getFirst().getSiblings().getFirst()
                                         .getString());
                             }
@@ -134,10 +130,10 @@ public class TextUtils {
                 return;
             }
             if (!afterBlockMarker) {
-                if (style.getColor()!=null) {
+                if (style.getColor() != null) {
                     int colorIndex = 0;
                     for (Formatting format : Formatting.values()) {
-                        if (format.getColorValue()!=null && format.getColorValue()
+                        if (format.getColorValue() != null && format.getColorValue()
                                 .equals(style.getColor().getRgb())) {
                             colorIndex = format.getColorIndex();
                             break;
