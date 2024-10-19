@@ -40,7 +40,7 @@ public class DiscordBridgeFeature extends Feature {
             "^(?<recruit>.+?) has joined the guild, say hello!$",
             "^(?<username>.+?) has left the guild$",
             "^§.(?<kicker>.+?)§. has kicked §.(?<kicked>.+?)§. from the guild$",
-            "^(?<setter>.+?) has set (?<set>.+?) guild rank from (?<original>\\w+) to (?<new>\\w+)$",
+            "^(?<setter>.+?) has set (?<set>.+?) guild rank from §.(?<original>\\w+)§. to §.(?<new>\\w+)$",
             "^Only (?<time>.+?) left to complete the Weekly Guild Objectives!$").map(Pattern::compile).toArray(Pattern[]::new);
     private final Pattern[] HR_WHITELIST_PATTERNS = Stream.of("^§.(?<username>.+?)§. set §.(?<bonus>.+?)§. to level §.(?<level>.+?)§. on §.(?<territory>.*)$",
             "^§.(?<username>.+?)§. removed §.(?<changed>.+?)§. from §.(?<territory>.*)$",
