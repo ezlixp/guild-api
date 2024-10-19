@@ -28,14 +28,29 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class DiscordBridgeFeature extends Feature {
-    private final Pattern GUILD_PATTERN = Pattern.compile("^§[b8]((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§[b8] (?<content>.*)$");
-    private final Pattern[] CONFLICT_PATTERNS = Stream.of("^[a-zA-Z0-9_]{2,16}:.*$", "^You .*$",
-            "^To rename a pet, use /renamepet\\. To rename an item, use /renameitem\\.$", "^You need to be holding a crafted item to rename it!$", "^/renamepet <pet-name>$",
-            "^This  command is .*$", "^Invalid command\\.\\.\\. Type /help for a list of commands$", "^/toggle [swears/blood/insults/autojoin/music/vet/war/guildjoin/attacksound/rpwarning/100/sb/autotracking/pouchmsg/combatbar/ghosts/popups/guildpopups/friendpopups/beacon/outlines/bombbell/pouchpickup/queststartbeacon/publicProfile]",
-            "^You're .*$", "^Did you mean .*$", "^You .*$", "^Your .*$", "^Party .*$", "^Sorry, .*$",
-            "^[a-zA-Z0-9_]{2,16} is not online", "^§.Be sure to use exact names, prediction does not work if the user is on a separate server$",
-            "^.+? is active for .* §. seconds\\.$", "^[a-zA-Z0-9_]{2,16} has left the party!$", "\uE003",
-            "^The provided player is not online on the Wynncraft Network!$", "^This player is already in your party$").map(Pattern::compile).toArray(Pattern[]::new);
+    private final Pattern GUILD_PATTERN = Pattern.compile("^§[b8c]((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§[b8c] (?<content>.*)$");
+    private final Pattern[] GUILD_WHITELIST_PATTERNS = Stream.of("^.*§[38](?<header>.+?)(§[38])?:§[b8] (?<content>.*)$",
+            "^§[e8](?<player1>.*?)§[b8], §[e8](?<player2>.*?)§[b8], §[e8](?<player3>.*?)§[b8], and §[e8](?<player4>.*?)§[b8] finished §[38](?<raid>.*?)§[b8].*$",
+            "^§.(?<giver>.*?)(§.)? rewarded §.an Aspect§. to §.(?<receiver>.*?)(§.)?$",
+            "^§.(?<giver>.*?)(§.)? rewarded §.a Guild Tome§. to §.(?<receiver>.*?)(§.)?$",
+            "^§.(?<giver>.*?)(§.)? rewarded §.1024 Emeralds§. to §.(?<receiver>.*?)(§.)?$",
+            "^§.(?<username>.+?)§. (?<action>\\w+) §.(?<item>.+?)§. to the Guild Bank \\(§.Everyone§.\\)",
+            "^(?<username>.+?) has finished their weekly objective.$",
+            "^§.(?<recruiter>.+?)§. has invited (?<recruit>.+?) to the guild$",
+            "^(?<recruit>.+?) has joined the guild, say hello!$",
+            "^(?username.+?) has left the guild$",
+            "^§.(?<kicker>.+?)§. has kicked §.(?<kicked>.+?)§. from the guild$",
+            "^(?<setter>.+?) has set (?<set>.+?) guild rank from (?<original>\\w+) to (?<new>\\w+)$",
+            "^Only (?<time>.+?) left to complete the Weekly Guild Objectives!$").map(Pattern::compile).toArray(Pattern[]::new);
+    private final Pattern[] HR_WHITELIST_PATTERNS = Stream.of("^§.(?<username>.+?)§. set §.(?<bonus>.+?)§. to level §.(?<level>.+?)§. on §.(?<territory>.*)$",
+            "^§.(?<username>.+?)§. removed §.(?<changed>.+?)§. from §.(?<territory>.*)$",
+            "^§.(?<username>.+?)§. changed §.(?<amount>\\d+) (?<changed>\\w+)§. on §3(?<territory>.*)$",
+            "^§.(?<username>.+?)§. applied the loadout §(?<loadout>..+?)§. on §.(?<territory>.*)$",
+            "^Territory §.(?<territory>.+?)§. is \\w+ more resources than it can store!$",
+            "^Territory §.(?<territory>.+?)§. production has stabilised$",
+            "^§.(?<username>.+?)§. applied the loadout §(?<loadout>..+?)§. on §.(?<territory>.*)$",
+            "^§.(?<username>.+?)§. (?<action>\\w+) §.(?<item>.+?)§. to the Guild Bank \\(§.High Ranked§.\\)$",
+            "^§.A Guild Tome§. has been found and added to the Guild Rewards$").map(Pattern::compile).toArray(Pattern[]::new);
     private SocketIOClient socketIOClient;
     private boolean loaded = false;
 
@@ -44,10 +59,10 @@ public class DiscordBridgeFeature extends Feature {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(ClientCommandManager.literal("discord").then(ClientCommandManager.argument("message", StringArgumentType.greedyString()).executes((context) -> {
                 String message = StringArgumentType.getString(context, "message");
-                message = message.replaceAll("[\u200C\uE087\uE013\u2064\uE071\uE012\uE000\uE089\uE088" + "\uE07F\uE08B\uE07E\uE080ÁÀ֎]", "");
+                message = message.replaceAll("[\u200C\uE087\uE013\u2064\uE071\uE012\uE000\uE089\uE088\uE07F\uE08B\uE07E\uE080ÁÀ֎]", "");
                 if (message.isBlank()) return 0;
                 if (socketIOClient!=null) {
-                    socketIOClient.emit(socketIOClient.discordSocket, "discordOnlyWynnMessage", "[Discord Only] " + McUtils.playerName() + ": " + message);
+                    socketIOClient.emit(socketIOClient.discordSocket, "discordOnlyWynnMessage", McUtils.playerName() + ": " + message);
                     socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message));
                 } else {
                     McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...").setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
@@ -91,19 +106,30 @@ public class DiscordBridgeFeature extends Feature {
         }
     }
 
+    private boolean isGuildMessage(String message) {
+        for (Pattern guildMessagePattern : GUILD_WHITELIST_PATTERNS) {
+            if (guildMessagePattern.matcher(message).find()) return true;
+        }
+        return false;
+    }
+
+    private boolean isHRMessage(String message) {
+        for (Pattern hrMessagePatter : HR_WHITELIST_PATTERNS) {
+            if (hrMessagePatter.matcher(message).find()) return true;
+        }
+        return false;
+    }
+
     private void onWynnMessage(Text message) {
         String m = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));
         if (GuildApi.isDevelopment()) m = m.replaceAll("&", "§");
         GuildApi.LOGGER.info("received: {}", m);
         Matcher guildMatcher = GUILD_PATTERN.matcher(m);
         if (guildMatcher.find()) {
-            for (Pattern conflict : CONFLICT_PATTERNS) {
-                if (conflict.matcher(guildMatcher.group("content")).find()) {
-                    GuildApi.LOGGER.warn("cancelled emit for conflicting message: {}", m);
-                    return;
-                }
-            }
-            socketIOClient.emit(socketIOClient.discordSocket, "wynnMessage", guildMatcher.group("content"));
+            if (isGuildMessage(m))
+                socketIOClient.emit(socketIOClient.discordSocket, "wynnMessage", guildMatcher.group("content"));
+            else if (isHRMessage(m))
+                socketIOClient.emit(socketIOClient.discordSocket, "hrMessage", guildMatcher.group("content"));
         }
     }
 
