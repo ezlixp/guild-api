@@ -65,7 +65,6 @@ public class WynnApiClient extends Api {
                 HttpResponse<String> response = NetManager.HTTP_CLIENT.send(request,
                         HttpResponse.BodyHandlers.ofString());
                 wynnPlayerInfo = JsonUtils.toJsonObject(response.body());
-                GuildApi.LOGGER.info("wynn response: {}", wynnPlayerInfo);
                 if (wynnPlayerInfo.get("Error") != null) {
                     String message = wynnPlayerInfo.get("Error").getAsString();
                     wynnPlayerInfo = null;
