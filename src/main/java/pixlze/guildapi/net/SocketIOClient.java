@@ -1,5 +1,6 @@
 package pixlze.guildapi.net;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -41,7 +42,7 @@ public class SocketIOClient extends Api {
                         .then(ClientCommandManager.argument("message", StringArgumentType.greedyString())
                                 .executes((context) -> {
                                     emit(discordSocket, "wynnMessage", StringArgumentType.getString(context, "message").replaceAll("&", "§"));
-                                    return 0;
+                                    return Command.SINGLE_SUCCESS;
                                 })));
             });
         }

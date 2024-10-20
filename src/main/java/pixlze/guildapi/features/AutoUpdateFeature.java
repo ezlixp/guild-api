@@ -1,6 +1,7 @@
 package pixlze.guildapi.features;
 
 import com.google.gson.JsonElement;
+import com.mojang.brigadier.Command;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.text.Text;
@@ -25,7 +26,7 @@ public class AutoUpdateFeature extends Feature {
             dispatcher.register(GuildApi.BASE_COMMAND.then(ClientCommandManager.literal("update").executes((context) -> {
                 GuildApi.LOGGER.info("guild update");
                 // do some md5 verification stuff on downloaded file
-                return 0;
+                return Command.SINGLE_SUCCESS;
             })));
         });
         NetEvents.LOADED.register(this::onApiLoaded);

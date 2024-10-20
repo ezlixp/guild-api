@@ -1,6 +1,7 @@
 package pixlze.guildapi.net;
 
 import com.google.gson.JsonObject;
+import com.mojang.brigadier.Command;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.text.ClickEvent;
@@ -39,17 +40,16 @@ public class WynnApiClient extends Api {
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(
                 ClientCommandManager.literal("reloadWynnInfo").executes(context -> {
-                    if (isDisabled() && !reloading) {
-                        new Thread(() -> {
-                            reloading = true;
-                            McUtils.sendLocalMessage(
-                                    Text.literal("Reloading...")
-                                            .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get(), false);
-                            initWynnPlayerInfo(true);
-                            reloading = false;
-                        }).start();
-                    }
-                    return 0;
+                    if (!isDisabled() || reloading) return 0;
+                    new Thread(() -> {
+                        reloading = true;
+                        McUtils.sendLocalMessage(
+                                Text.literal("Reloading...")
+                                        .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get(), false);
+                        initWynnPlayerInfo(true);
+                        reloading = false;
+                    }).start();
+                    return Command.SINGLE_SUCCESS;
                 })));
         WynncraftConnectionEvents.JOIN.register(this::onWynnJoin);
     }

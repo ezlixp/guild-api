@@ -7,6 +7,7 @@ public class FeatureManager {
 //    private static final Map<Feature, FeatureState> FEATURES = new LinkedHashMap<>();
 
     public void init() {
+        registerFeature(new CommandHelpFeature());
         registerFeature(new GuildRaidFeature());
         registerFeature(new AspectListFeature());
         registerFeature(new TomeListFeature());

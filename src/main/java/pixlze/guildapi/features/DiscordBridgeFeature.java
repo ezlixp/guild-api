@@ -1,5 +1,6 @@
 package pixlze.guildapi.features;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import io.socket.client.Ack;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -81,37 +82,37 @@ public class DiscordBridgeFeature extends Feature {
                 String message = StringArgumentType.getString(context, "message");
                 message = message.replaceAll("[\u200C\uE087\uE013\u2064\uE071\uE012\uE000\uE089\uE088\uE07F\uE08B\uE07E\uE080ÁÀ֎]", "");
                 if (message.isBlank()) return 0;
-                if (socketIOClient != null) {
-                    socketIOClient.emit(socketIOClient.discordSocket, "discordOnlyWynnMessage", McUtils.playerName() + ": " + message);
-                    socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message));
-                } else {
+                if (socketIOClient == null || socketIOClient.discordSocket == null) {
                     McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...").setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
+                    return 0;
                 }
-                return 0;
+                socketIOClient.emit(socketIOClient.discordSocket, "discordOnlyWynnMessage", McUtils.playerName() + ": " + message);
+                socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message));
+                return Command.SINGLE_SUCCESS;
             })));
             dispatcher.register(ClientCommandManager.literal("dc").redirect(dispatcher.getRoot().getChild("discord")));
 
             dispatcher.register(ClientCommandManager.literal("online").executes((context) -> {
-                if (socketIOClient != null) {
-                    socketIOClient.emit(socketIOClient.discordSocket, "listOnline", (Ack) args -> {
-                        if (args[0] instanceof JSONArray data) {
-                            try {
-                                MutableText message = Text.literal("Online mod users: ");
-                                for (int i = 0; i < data.length(); i++) {
-                                    message.append(data.getString(i));
-                                    if (i != data.length() - 1) message.append(", ");
-                                }
-                                message.setStyle(Style.EMPTY.withColor(Formatting.GREEN));
-                                McUtils.sendLocalMessage(message, Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)), true);
-                            } catch (Exception e) {
-                                GuildApi.LOGGER.error("error parsing online users: {} {}", e, e.getMessage());
-                            }
-                        }
-                    });
-                } else {
+                if (socketIOClient == null || socketIOClient.discordSocket == null) {
                     McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...").setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
+                    return 0;
                 }
-                return 0;
+                socketIOClient.emit(socketIOClient.discordSocket, "listOnline", (Ack) args -> {
+                    if (args[0] instanceof JSONArray data) {
+                        try {
+                            MutableText message = Text.literal("Online mod users: ");
+                            for (int i = 0; i < data.length(); i++) {
+                                message.append(data.getString(i));
+                                if (i != data.length() - 1) message.append(", ");
+                            }
+                            message.setStyle(Style.EMPTY.withColor(Formatting.GREEN));
+                            McUtils.sendLocalMessage(message, Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)), true);
+                        } catch (Exception e) {
+                            GuildApi.LOGGER.error("error parsing online users: {} {}", e, e.getMessage());
+                        }
+                    }
+                });
+                return Command.SINGLE_SUCCESS;
             }));
         });
         NetEvents.LOADED.register(this::onApiLoaded);

@@ -3,6 +3,7 @@ package pixlze.guildapi.net;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.mojang.brigadier.Command;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.text.ClickEvent;
@@ -270,34 +271,32 @@ public class GuildApiClient extends Api {
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registry) -> dispatcher.register(
                 ClientCommandManager.literal("retryLastFailed").executes((context) -> {
-                    if (lastFailed == null) return 0;
-                    if (!retrying) {
-                        retrying = true;
-                        McUtils.sendLocalMessage(
-                                Text.literal("Retrying...")
-                                        .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get(), false);
-                        CompletableFuture<HttpResponse<String>> response = tryToken(lastFailed);
-                        response.whenCompleteAsync((res, exception) -> {
-                            GuildApi.LOGGER.info("retrying {} {}", res, exception);
-                            if (exception != null) {
-                                GuildApi.LOGGER.error("Retry exception: {} {}", exception, exception.getMessage());
-                                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get(), false);
-                            } else {
-                                if (res.statusCode() / 100 == 2) {
-                                    McUtils.sendLocalMessage(successMessage, Prepend.DEFAULT.get(), false);
-                                    if (failedPromise != null) {
-                                        failedPromise.complete(JsonUtils.toJsonElement(res.body()));
-                                        failedPromise = null;
-                                    }
-                                    lastFailed = null;
-                                } else {
-                                    checkError(res, lastFailed, true);
+                    if (lastFailed == null || retrying) return 0;
+                    retrying = true;
+                    McUtils.sendLocalMessage(
+                            Text.literal("Retrying...")
+                                    .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get(), false);
+                    CompletableFuture<HttpResponse<String>> response = tryToken(lastFailed);
+                    response.whenCompleteAsync((res, exception) -> {
+                        GuildApi.LOGGER.info("retrying {} {}", res, exception);
+                        if (exception != null) {
+                            GuildApi.LOGGER.error("Retry exception: {} {}", exception, exception.getMessage());
+                            McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get(), false);
+                        } else {
+                            if (res.statusCode() / 100 == 2) {
+                                McUtils.sendLocalMessage(successMessage, Prepend.DEFAULT.get(), false);
+                                if (failedPromise != null) {
+                                    failedPromise.complete(JsonUtils.toJsonElement(res.body()));
+                                    failedPromise = null;
                                 }
+                                lastFailed = null;
+                            } else {
+                                checkError(res, lastFailed, true);
                             }
-                            retrying = false;
-                        });
-                    }
-                    return 0;
+                        }
+                        retrying = false;
+                    });
+                    return Command.SINGLE_SUCCESS;
                 })));
     }
 

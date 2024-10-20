@@ -2,6 +2,7 @@ package pixlze.guildapi.features.list;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -44,19 +45,19 @@ public class ListFeature extends Feature {
                     LiteralArgumentBuilder<FabricClientCommandSource> builder = ClientCommandManager.literal(name + "list")
                             .executes(context -> {
                                 listItems(0, true);
-                                return 0;
+                                return Command.SINGLE_SUCCESS;
                             }).then(ClientCommandManager.literal("view")
                                     .then(ClientCommandManager.argument("page", IntegerArgumentType.integer(1))
                                             .executes(context -> {
                                                 int page = IntegerArgumentType.getInteger(context, "page");
                                                 listItems(page - 1, true);
-                                                return 0;
+                                                return Command.SINGLE_SUCCESS;
                                             }).then(ClientCommandManager.argument("reload", BoolArgumentType.bool())
                                                     .executes(context -> {
                                                         int page = IntegerArgumentType.getInteger(context, "page");
                                                         boolean reload = BoolArgumentType.getBool(context, "reload");
                                                         listItems(page - 1, reload);
-                                                        return 0;
+                                                        return Command.SINGLE_SUCCESS;
                                                     })
                                             )));
                     for (LiteralArgumentBuilder<FabricClientCommandSource> subCommand : subCommands) {

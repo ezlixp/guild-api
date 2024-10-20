@@ -1,6 +1,7 @@
 package pixlze.guildapi.features.list;
 
 import com.google.gson.JsonElement;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.minecraft.client.MinecraftClient;
@@ -37,17 +38,17 @@ public class TomeListFeature extends ListFeature {
         super.registerCommands(
                 List.of(ClientCommandManager.literal("add").executes((context) -> {
                                     Managers.Net.guild.post("tomes", JsonUtils.toJsonObject("{\"username\":\"" + McUtils.playerName() + "\"}"), true);
-                                    return 0;
+                                    return Command.SINGLE_SUCCESS;
 
                                 }
                         ), ClientCommandManager.literal("search").executes((context) -> {
                                     search(McUtils.playerName());
-                                    return 0;
+                                    return Command.SINGLE_SUCCESS;
                                 })
                                 .then(ClientCommandManager.argument("username", StringArgumentType.word())
                                         .executes((context) -> {
                                             search(StringArgumentType.getString(context, "username"));
-                                            return 0;
+                                            return Command.SINGLE_SUCCESS;
                                         })
                                 )
                 )

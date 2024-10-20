@@ -1,6 +1,7 @@
 package pixlze.guildapi.features.list;
 
 import com.google.gson.JsonElement;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.minecraft.client.MinecraftClient;
@@ -36,12 +37,12 @@ public class AspectListFeature extends ListFeature {
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
         super.registerCommands(List.of(ClientCommandManager.literal("search").executes((context) -> {
                     search(McUtils.playerName());
-                    return 0;
+                    return Command.SINGLE_SUCCESS;
                 })
                 .then(ClientCommandManager.argument("username", StringArgumentType.word())
                         .executes((context) -> {
                             search(StringArgumentType.getString(context, "username"));
-                            return 0;
+                            return Command.SINGLE_SUCCESS;
                         })
                 )));
 
