@@ -29,32 +29,48 @@ import java.util.stream.Stream;
 
 public class DiscordBridgeFeature extends Feature {
     private final Pattern GUILD_PATTERN = Pattern.compile("^§[b8c]((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§[b8c] (?<content>.*)$");
-    private final Pattern[] GUILD_WHITELIST_PATTERNS = Stream.of("^.*§[38](?<header>.+?)(§[38])?:§[b8] (?<content>.*)$",
+    private final Pattern[] GUILD_WHITELIST_PATTERNS = Stream.of(
+            // Basic guild chat message
+            "^.*§[38](?<header>.+?)(§[38])?:§[b8] (?<content>.*)$",
+            // Guild raid finished
             "^§[e8](?<player1>.*?)§[b8], §[e8](?<player2>.*?)§[b8], §[e8](?<player3>.*?)§[b8], and §[e8](?<player4>.*?)§[b8] finished §[38](?<raid>.*?)§[b8].*$",
+            // Giving out resources
             "^§.(?<giver>.*?)(§.)? rewarded §.an Aspect§. to §.(?<receiver>.*?)(§.)?$",
             "^§.(?<giver>.*?)(§.)? rewarded §.a Guild Tome§. to §.(?<receiver>.*?)(§.)?$",
             "^§.(?<giver>.*?)(§.)? rewarded §.1024 Emeralds§. to §.(?<receiver>.*?)(§.)?$",
+            // Guild bank
             "^§.(?<username>.+?)§. (?<action>\\w+) §.(?<item>.+?)§. to the Guild Bank \\(§.Everyone§.\\)",
+            // Weekly objective
             "^(?<username>.+?) has finished their weekly objective\\.$",
+            "^Only (?<time>.+?) left to complete the Weekly Guild Objectives!$",
+            // Guild member management
             "^§.(?<recruiter>.+?)§. has invited (?<recruit>.+?) to the guild$",
             "^(?<recruit>.+?) has joined the guild, say hello!$",
             "^(?<username>.+?) has left the guild$",
             "^§.(?<kicker>.+?)§. has kicked §.(?<kicked>.+?)§. from the guild$",
             "^(?<setter>.+?) has set (?<set>.+?) guild rank from §.(?<original>\\w+)§. to §.(?<new>\\w+)$",
-            "^Only (?<time>.+?) left to complete the Weekly Guild Objectives!$",
+            // War
             "^The war for (?<territory>.+?) will start in .*$",
             "^Your guild has lost the war for .*$",
             "^The battle has begun!$",
-            "^You have taken control of .*$").map(Pattern::compile).toArray(Pattern[]::new);
-    private final Pattern[] HR_WHITELIST_PATTERNS = Stream.of("^§.(?<username>.+?)§. set §.(?<bonus>.+?)§. to level §.(?<level>.+?)§. on §.(?<territory>.*)$",
+            "^You have taken control of .*$",
+            "^\\[\\w+\\] has lost the war!.*$",
+            "^\\[\\w+\\] has taken control of .*$"
+    ).map(Pattern::compile).toArray(Pattern[]::new);
+    private final Pattern[] HR_WHITELIST_PATTERNS = Stream.of(
+            // Eco
+            "^§.(?<username>.+?)§. set §.(?<bonus>.+?)§. to level §.(?<level>.+?)§. on §.(?<territory>.*)$",
             "^§.(?<username>.+?)§. removed §.(?<changed>.+?)§. from §.(?<territory>.*)$",
             "^§.(?<username>.+?)§. changed §.(?<amount>\\d+) (?<changed>\\w+)§. on §3(?<territory>.*)$",
             "^§.(?<username>.+?)§. applied the loadout §(?<loadout>..+?)§. on §.(?<territory>.*)$",
             "^Territory §.(?<territory>.+?)§. is \\w+ more resources than it can store!$",
             "^Territory §.(?<territory>.+?)§. production has stabilised$",
             "^§.(?<username>.+?)§. applied the loadout §(?<loadout>..+?)§. on §.(?<territory>.*)$",
+            // Guild bank
             "^§.(?<username>.+?)§. (?<action>\\w+) §.(?<item>.+?)§. to the Guild Bank \\(§.High Ranked§.\\)$",
-            "^§.A Guild Tome§. has been found and added to the Guild Rewards$").map(Pattern::compile).toArray(Pattern[]::new);
+            // Guild tome found
+            "^§.A Guild Tome§. has been found and added to the Guild Rewards$"
+    ).map(Pattern::compile).toArray(Pattern[]::new);
     private SocketIOClient socketIOClient;
     private boolean loaded = false;
 
