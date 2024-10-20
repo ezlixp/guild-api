@@ -130,9 +130,9 @@ public class DiscordBridgeFeature extends Feature {
         GuildApi.LOGGER.info("received: {}", m);
         Matcher guildMatcher = GUILD_PATTERN.matcher(m);
         if (guildMatcher.find()) {
-            if (isGuildMessage(m))
+            if (isGuildMessage(guildMatcher.group("content")))
                 socketIOClient.emit(socketIOClient.discordSocket, "wynnMessage", guildMatcher.group("content"));
-            else if (isHRMessage(m))
+            else if (isHRMessage(guildMatcher.group("content")))
                 socketIOClient.emit(socketIOClient.discordSocket, "hrMessage", guildMatcher.group("content"));
         }
     }
