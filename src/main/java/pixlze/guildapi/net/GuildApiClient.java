@@ -47,7 +47,7 @@ public class GuildApiClient extends Api {
     private HttpRequest.Builder lastFailed = null;
     private CompletableFuture<JsonElement> failedPromise = null;
     private boolean retrying = false;
-    private String apiBasePath = "api/v1/";
+    private final String apiBasePath = "api/v1/";
 
     public GuildApiClient() {
         super("guild", List.of(WynnApiClient.class));
@@ -65,7 +65,7 @@ public class GuildApiClient extends Api {
                 JsonObject requestBody = new JsonObject();
                 requestBody.add("validationKey", validationKey);
                 HttpRequest.Builder builder = HttpRequest.newBuilder()
-                        .uri(URI.create(baseURL + "auth/get-token"))
+                        .uri(URI.create(baseURL + apiBasePath + "auth/get-token"))
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()));
                 if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
