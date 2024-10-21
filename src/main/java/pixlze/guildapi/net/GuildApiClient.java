@@ -64,7 +64,7 @@ public class GuildApiClient extends Api {
                 JsonObject requestBody = new JsonObject();
                 requestBody.add("validationKey", validationKey);
                 HttpRequest.Builder builder = HttpRequest.newBuilder()
-                        .uri(URI.create(baseURL + "auth/getToken"))
+                        .uri(URI.create(baseURL + "auth/get-token"))
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()));
                 if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
