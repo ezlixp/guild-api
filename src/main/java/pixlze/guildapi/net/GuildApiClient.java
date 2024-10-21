@@ -47,6 +47,7 @@ public class GuildApiClient extends Api {
     private HttpRequest.Builder lastFailed = null;
     private CompletableFuture<JsonElement> failedPromise = null;
     private boolean retrying = false;
+    private String apiBasePath = "api/v1/";
 
     public GuildApiClient() {
         super("guild", List.of(WynnApiClient.class));
@@ -89,6 +90,7 @@ public class GuildApiClient extends Api {
     }
 
     public CompletableFuture<JsonElement> get(String path) {
+        path = apiBasePath + path;
         CompletableFuture<JsonElement> out = new CompletableFuture<>();
         if (isDisabled()) {
             GuildApi.LOGGER.warn("skipped api get because api service were crashed");
@@ -174,6 +176,7 @@ public class GuildApiClient extends Api {
     }
 
     public void post(String path, JsonObject body, boolean print) {
+        path = apiBasePath + path;
         if (isDisabled()) {
             GuildApi.LOGGER.warn("skipped api post because api service were crashed");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
@@ -233,6 +236,7 @@ public class GuildApiClient extends Api {
     }
 
     public void delete(String path, boolean print) {
+        path = apiBasePath + path;
         if (isDisabled()) {
             GuildApi.LOGGER.warn("Skipped api delete because api services weren't enabled");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
