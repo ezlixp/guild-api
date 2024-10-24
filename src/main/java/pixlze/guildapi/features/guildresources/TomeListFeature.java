@@ -1,4 +1,4 @@
-package pixlze.guildapi.features.list;
+package pixlze.guildapi.features.guildresources;
 
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.Command;
@@ -10,6 +10,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
+import pixlze.guildapi.features.type.ListFeature;
 import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.utils.JsonUtils;
 import pixlze.guildapi.utils.McUtils;
@@ -28,7 +29,7 @@ public class TomeListFeature extends ListFeature {
 
     public TomeListFeature() {
         super("tome", "tomes", (listItem) ->
-                Text.literal(listItem.get("username")
+                Text.literal(listItem.getAsJsonObject().get("username")
                         .getAsString()).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
     }
 

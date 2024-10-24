@@ -1,4 +1,4 @@
-package pixlze.guildapi.features.list;
+package pixlze.guildapi.features.guildresources;
 
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.Command;
@@ -10,6 +10,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
+import pixlze.guildapi.features.type.ListFeature;
 import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.TextUtils;
@@ -26,9 +27,9 @@ public class AspectListFeature extends ListFeature {
             ".)? rewarded §.an Aspect§. to §.(?<receiver>.*?)(§.)?$");
 
     public AspectListFeature() {
-        super("aspect", "aspects", (listItem) -> Text.literal(listItem.get("username")
+        super("aspect", "aspects", (listItem) -> Text.literal(listItem.getAsJsonObject().get("username")
                         .getAsString()).append(": ")
-                .append(listItem.get("aspects").getAsString())
+                .append(listItem.getAsJsonObject().get("aspects").getAsString())
                 .setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
     }
 

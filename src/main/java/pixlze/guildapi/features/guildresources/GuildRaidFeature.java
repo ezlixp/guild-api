@@ -1,4 +1,4 @@
-package pixlze.guildapi.features;
+package pixlze.guildapi.features.guildresources;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;

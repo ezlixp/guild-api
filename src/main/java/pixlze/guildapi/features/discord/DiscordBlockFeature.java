@@ -9,9 +9,9 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.components.Feature;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.components.Models;
+import pixlze.guildapi.features.type.ListFeature;
 import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.net.event.NetEvents;
 import pixlze.guildapi.net.type.Api;
@@ -21,8 +21,12 @@ import pixlze.guildapi.utils.type.Prepend;
 
 import java.util.HashSet;
 
-public class DiscordBlockFeature extends Feature {
+public class DiscordBlockFeature extends ListFeature {
     private final GuildApiClient guildApiClient = Managers.Net.guild;
+
+    public DiscordBlockFeature() {
+        super("block", "user/blocked/" + McUtils.playerUUID(), (listItem) -> Text.literal(listItem.getAsString()));
+    }
 
     @Override
     public void init() {

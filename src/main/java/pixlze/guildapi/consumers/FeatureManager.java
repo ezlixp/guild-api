@@ -3,11 +3,11 @@ package pixlze.guildapi.consumers;
 import pixlze.guildapi.components.Feature;
 import pixlze.guildapi.features.AutoUpdateFeature;
 import pixlze.guildapi.features.CommandHelpFeature;
-import pixlze.guildapi.features.GuildRaidFeature;
 import pixlze.guildapi.features.discord.DiscordBlockFeature;
 import pixlze.guildapi.features.discord.DiscordBridgeFeature;
-import pixlze.guildapi.features.list.AspectListFeature;
-import pixlze.guildapi.features.list.TomeListFeature;
+import pixlze.guildapi.features.guildresources.AspectListFeature;
+import pixlze.guildapi.features.guildresources.GuildRaidFeature;
+import pixlze.guildapi.features.guildresources.TomeListFeature;
 
 public class FeatureManager {
 //    private static final Map<Feature, FeatureState> FEATURES = new LinkedHashMap<>();

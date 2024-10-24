@@ -1,7 +1,6 @@
-package pixlze.guildapi.features.list;
+package pixlze.guildapi.features.type;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -26,10 +25,10 @@ import java.util.function.Function;
 public class ListFeature extends Feature {
     private final String name;
     private final String endpoint;
-    private final Function<JsonObject, MutableText> lineParser;
+    private final Function<JsonElement, MutableText> lineParser;
     private JsonElement cachedResponse;
 
-    public ListFeature(String name, String endpoint, Function<JsonObject, MutableText> lineParser) {
+    public ListFeature(String name, String endpoint, Function<JsonElement, MutableText> lineParser) {
         this.name = name;
         this.endpoint = endpoint;
         this.lineParser = lineParser;
