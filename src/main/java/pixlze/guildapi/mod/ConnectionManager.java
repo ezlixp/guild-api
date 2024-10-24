@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 public class ConnectionManager {
     private static final Pattern WYNNCRAFT_SERVER_PATTERN =
-            Pattern.compile("^(?:(.*)\\.)?wynncraft\\.(?:com|net|org)$");
+            Pattern.compile("^(?:(.*)\\.)?wynncraft\\.(?:com|net|org)\\.$");
     private boolean isConnected = false;
 
     public boolean onWynncraft() {
