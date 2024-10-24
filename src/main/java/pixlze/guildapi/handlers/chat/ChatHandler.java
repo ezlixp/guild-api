@@ -2,10 +2,11 @@ package pixlze.guildapi.handlers.chat;
 
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.components.Handler;
 import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.mc.event.WynnChatMessage;
-import pixlze.guildapi.models.event.WorldStateEvents;
-import pixlze.guildapi.models.type.WorldState;
+import pixlze.guildapi.models.worldState.event.WorldStateEvents;
+import pixlze.guildapi.models.worldState.type.WorldState;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.TextUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
@@ -16,7 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public final class ChatHandler {
+public final class ChatHandler extends Handler {
     private static final Pattern EMPTY_LINE_PATTERN = Pattern.compile("^\\s*(§r|À+)?\\s*$");
     private static final Pattern NPC_CONFIRM_PATTERN =
             Pattern.compile("^ *§[47]Press §[cf](SNEAK|SHIFT) §[47]to continue$");
@@ -28,13 +29,14 @@ public final class ChatHandler {
     private String oneBeforeLastRealChat = null;
     private String lastConfirmationlessDialogue = null;
 
+    @Override
     public void init() {
         WynnChatMessage.EVENT.register(this::onWynnMessage);
         WorldStateEvents.CHANGE.register(this::onConnectionChange);
     }
 
     private void onWynnMessage(Text message) {
-        assert McUtils.mc().world!=null;
+        assert McUtils.mc().world != null;
         long currentTicks = McUtils.mc().world.getTime();
 
         List<Text> lines = TextUtils.splitLines(message);
@@ -42,14 +44,14 @@ public final class ChatHandler {
             if (currentTicks <= chatScreenTicks + 1) {
                 collectedLines.addAll(lines);
             } else {
-                if (chatScreenTicks!=0) {
+                if (chatScreenTicks != 0) {
                     processCollected();
                 }
                 collectedLines = new ArrayList<>(lines);
                 chatScreenTicks = currentTicks;
             }
         } else {
-            if (chatScreenTicks!=0) {
+            if (chatScreenTicks != 0) {
                 processCollected();
             }
             postChatLine(message);
@@ -78,7 +80,7 @@ public final class ChatHandler {
         Collections.reverse(lines);
 
         LinkedList<Text> newLines = new LinkedList<>();
-        if (lastRealChat==null) {
+        if (lastRealChat == null) {
             lines.forEach(newLines::addLast);
         } else {
             for (Text line : lines) {
@@ -100,14 +102,14 @@ public final class ChatHandler {
         boolean expectedConfirmationlessDialogue = false;
 
         if (newLines.getLast().getString().isEmpty()) {
-            if (newLines.size()==2) {
+            if (newLines.size() == 2) {
                 if (EMPTY_LINE_PATTERN.matcher(newLines.getFirst().getString()).matches()) {
                     return;
                 }
 
                 expectedConfirmationlessDialogue = true;
                 GuildApi.LOGGER.info("expecting confirmationless dialogue [#1]");
-            } else if (newLines.size()==4) {
+            } else if (newLines.size() == 4) {
                 if (EMPTY_LINE_PATTERN.matcher(newLines.get(0).getString()).matches() &&
                         EMPTY_LINE_PATTERN.matcher(newLines.get(1).getString()).matches() &&
                         EMPTY_LINE_PATTERN.matcher(newLines.get(2).getString()).matches() &&
@@ -177,7 +179,7 @@ public final class ChatHandler {
                 }
             }
         } else if (expectedConfirmationlessDialogue) {
-            if (newLines.size()!=1) {
+            if (newLines.size() != 1) {
                 GuildApi.LOGGER.warn("New lines has an unexpected dialogue count [#1]: {}", newLines);
             }
             lastConfirmationlessDialogue = TextUtils.parsePlain(newLines.getFirst());

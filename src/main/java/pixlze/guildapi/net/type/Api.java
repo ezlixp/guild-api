@@ -8,8 +8,8 @@ import java.util.List;
 public abstract class Api {
     public final String name;
     private final List<Class<? extends Api>> dependencies;
-    private boolean enabled = false;
     protected String baseURL;
+    private boolean enabled = false;
     private int missingDeps;
 
     // TODO move api get posts here
@@ -20,10 +20,6 @@ public abstract class Api {
         missingDeps = dependencies.size();
         NetEvents.LOADED.register(this::onApiLoaded);
         NetEvents.DISABLED.register(this::onApiDisabled);
-    }
-
-    public boolean isDisabled() {
-        return !enabled;
     }
 
     private void onApiLoaded(Api api) {
@@ -74,7 +70,9 @@ public abstract class Api {
         }
     }
 
-    public abstract void init();
+    public boolean isDisabled() {
+        return !enabled;
+    }
 
-    public abstract Api getInstance();
+    public abstract void init();
 }

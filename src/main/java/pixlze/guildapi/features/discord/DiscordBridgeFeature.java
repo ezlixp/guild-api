@@ -1,4 +1,4 @@
-package pixlze.guildapi.features;
+package pixlze.guildapi.features.discord;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -12,11 +12,11 @@ import net.minecraft.util.Formatting;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.components.Feature;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
+import pixlze.guildapi.handlers.discord.event.S2CDiscordEvents;
 import pixlze.guildapi.net.SocketIOClient;
-import pixlze.guildapi.net.event.NetEvents;
-import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.FontUtils;
 import pixlze.guildapi.utils.text.TextUtils;
@@ -73,28 +73,33 @@ public class DiscordBridgeFeature extends Feature {
             "^§.A Guild Tome§. has been found and added to the Guild Rewards$"
     ).map(Pattern::compile).toArray(Pattern[]::new);
     private SocketIOClient socketIOClient;
-    private boolean loaded = false;
 
     @Override
     public void init() {
+        socketIOClient = Managers.Net.socket;
+
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            dispatcher.register(ClientCommandManager.literal("discord").then(ClientCommandManager.argument("message", StringArgumentType.greedyString()).executes((context) -> {
-                String message = StringArgumentType.getString(context, "message");
-                message = message.replaceAll("[\u200C\uE087\uE013\u2064\uE071\uE012\uE000\uE089\uE088\uE07F\uE08B\uE07E\uE080ÁÀ֎]", "");
-                if (message.isBlank()) return 0;
-                if (socketIOClient == null || socketIOClient.discordSocket == null) {
-                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...").setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
-                    return 0;
-                }
-                socketIOClient.emit(socketIOClient.discordSocket, "discordOnlyWynnMessage", McUtils.playerName() + ": " + message);
-                socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message));
-                return Command.SINGLE_SUCCESS;
-            })));
+            dispatcher.register(ClientCommandManager.literal("discord")
+                    .then(ClientCommandManager.argument("message", StringArgumentType.greedyString())
+                            .executes((context) -> {
+                                String message = StringArgumentType.getString(context, "message");
+                                message = message.replaceAll("[\u200C\uE087\uE013\u2064\uE071\uE012\uE000\uE089\uE088\uE07F\uE08B\uE07E\uE080ÁÀ֎]", "");
+                                if (message.isBlank()) return 0;
+                                if (socketIOClient == null || socketIOClient.discordSocket == null) {
+                                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...")
+                                            .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
+                                    return 0;
+                                }
+                                socketIOClient.emit(socketIOClient.discordSocket, "discordOnlyWynnMessage", McUtils.playerName() + ": " + message);
+                                socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message));
+                                return Command.SINGLE_SUCCESS;
+                            })));
             dispatcher.register(ClientCommandManager.literal("dc").redirect(dispatcher.getRoot().getChild("discord")));
 
             dispatcher.register(ClientCommandManager.literal("online").executes((context) -> {
                 if (socketIOClient == null || socketIOClient.discordSocket == null) {
-                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...").setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
+                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...")
+                            .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
                     return 0;
                 }
                 socketIOClient.emit(socketIOClient.discordSocket, "listOnline", (Ack) args -> {
@@ -115,30 +120,9 @@ public class DiscordBridgeFeature extends Feature {
                 return Command.SINGLE_SUCCESS;
             }));
         });
-        NetEvents.LOADED.register(this::onApiLoaded);
-    }
 
-    private void onApiLoaded(Api api) {
-        if (api.getClass().equals(SocketIOClient.class) && !loaded) {
-            loaded = true;
-            ChatMessageReceived.EVENT.register(this::onWynnMessage);
-            socketIOClient = Managers.Net.socket;
-            socketIOClient.addDiscordListener("discordMessage", this::onDiscordMessage);
-        }
-    }
-
-    private boolean isGuildMessage(String message) {
-        for (Pattern guildMessagePattern : GUILD_WHITELIST_PATTERNS) {
-            if (guildMessagePattern.matcher(message).find()) return true;
-        }
-        return false;
-    }
-
-    private boolean isHRMessage(String message) {
-        for (Pattern hrMessagePatter : HR_WHITELIST_PATTERNS) {
-            if (hrMessagePatter.matcher(message).find()) return true;
-        }
-        return false;
+        ChatMessageReceived.EVENT.register(this::onWynnMessage);
+        S2CDiscordEvents.MESSAGE.register(this::onDiscordMessage);
     }
 
     private void onWynnMessage(Text message) {
@@ -154,17 +138,31 @@ public class DiscordBridgeFeature extends Feature {
         }
     }
 
-    private void onDiscordMessage(Object[] args) {
-        if (args[0] instanceof JSONObject data) {
-            try {
-                GuildApi.LOGGER.info("received discord {}", data.get("Content").toString());
-                if (data.get("Content").toString().isBlank()) return;
-                McUtils.sendLocalMessage(Text.empty().append(FontUtils.BannerPillFont.parseStringWithFill("discord").fillStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE))).append(" ").append(Text.literal(data.get("Author").toString()).fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE)).append(": ")).append(Text.literal(TextUtils.highlightUser(data.get("Content").toString())).setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), true);
-            } catch (Exception e) {
-                GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
-            }
-        } else {
-            GuildApi.LOGGER.info("malformed discord message: {}", args);
+    private void onDiscordMessage(JSONObject message) {
+        try {
+            GuildApi.LOGGER.info("received discord {}", message.get("Content").toString());
+            McUtils.sendLocalMessage(Text.empty().append(FontUtils.BannerPillFont.parseStringWithFill("discord")
+                            .fillStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE))).append(" ")
+                    .append(Text.literal(message.get("Author").toString())
+                            .fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE)).append(": "))
+                    .append(Text.literal(TextUtils.highlightUser(message.get("Content").toString()))
+                            .setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), true);
+        } catch (Exception e) {
+            GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
         }
+    }
+
+    private boolean isGuildMessage(String message) {
+        for (Pattern guildMessagePattern : GUILD_WHITELIST_PATTERNS) {
+            if (guildMessagePattern.matcher(message).find()) return true;
+        }
+        return false;
+    }
+
+    private boolean isHRMessage(String message) {
+        for (Pattern hrMessagePatter : HR_WHITELIST_PATTERNS) {
+            if (hrMessagePatter.matcher(message).find()) return true;
+        }
+        return false;
     }
 }

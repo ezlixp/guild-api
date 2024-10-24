@@ -28,14 +28,15 @@ import java.io.InputStreamReader;
 public class GuildApi implements ClientModInitializer {
     public static final String MOD_ID = "guildapi";
     public static final String MOD_STORAGE_ROOT = "guildapi";
+    public static final Logger LOGGER = LoggerFactory.getLogger("guildapi");
     public static ModContainer MOD_CONTAINER;
     public static String MOD_VERSION;
-    public static final Logger LOGGER = LoggerFactory.getLogger("guildapi");
     public static JsonObject secrets;
-    public static LiteralArgumentBuilder<FabricClientCommandSource> BASE_COMMAND = ClientCommandManager.literal("guildapi").executes((context) -> {
-        McUtils.sendLocalMessage(Text.of("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands."), Prepend.DEFAULT.get(), false);
-        return Command.SINGLE_SUCCESS;
-    });
+    public static LiteralArgumentBuilder<FabricClientCommandSource> BASE_COMMAND = ClientCommandManager.literal("guildapi")
+            .executes((context) -> {
+                McUtils.sendLocalMessage(Text.of("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands."), Prepend.DEFAULT.get(), false);
+                return Command.SINGLE_SUCCESS;
+            });
     private static boolean development;
 
     public static File getModStorageDir(String dirName) {
@@ -56,7 +57,8 @@ public class GuildApi implements ClientModInitializer {
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             final LiteralCommandNode<FabricClientCommandSource> baseCommandNode = dispatcher.register(BASE_COMMAND);
-            dispatcher.register(ClientCommandManager.literal("gapi").executes(baseCommandNode.getCommand()).redirect(baseCommandNode));
+            dispatcher.register(ClientCommandManager.literal("gapi").executes(baseCommandNode.getCommand())
+                    .redirect(baseCommandNode));
         });
 
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("secrets.json");
@@ -67,7 +69,7 @@ public class GuildApi implements ClientModInitializer {
         }
 
 
-        Handlers.Chat.init();
+        Handlers.init();
         Managers.Connection.init();
         Managers.Net.init();
         Managers.Feature.init();

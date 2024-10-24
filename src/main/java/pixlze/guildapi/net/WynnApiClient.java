@@ -32,8 +32,7 @@ public class WynnApiClient extends Api {
         instance = this;
     }
 
-    @Override
-    public WynnApiClient getInstance() {
+    public static WynnApiClient getInstance() {
         return instance;
     }
 

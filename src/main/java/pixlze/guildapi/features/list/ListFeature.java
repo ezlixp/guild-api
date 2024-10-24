@@ -14,8 +14,8 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import pixlze.guildapi.components.Feature;
 import pixlze.guildapi.components.Managers;
-import pixlze.guildapi.features.Feature;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 

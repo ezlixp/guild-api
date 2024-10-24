@@ -40,6 +40,7 @@ public class GuildApiClient extends Api {
             "User already in tome list.", "Specified user could not be found in tome list.", "Specified user could not be found in aspect list.");
     private final List<String> printNonErrors = List.of("Specified user could not be found in tome list.", "User already in tome list.", "Specified user could not be found in " +
             "aspect list.");
+    private final String apiBasePath = "api/v1/";
     public String guildPrefix = "";
     private String token;
     private JsonElement validationKey;
@@ -47,11 +48,14 @@ public class GuildApiClient extends Api {
     private HttpRequest.Builder lastFailed = null;
     private CompletableFuture<JsonElement> failedPromise = null;
     private boolean retrying = false;
-    private final String apiBasePath = "api/v1/";
 
     public GuildApiClient() {
         super("guild", List.of(WynnApiClient.class));
         instance = this;
+    }
+
+    public static GuildApiClient getInstance() {
+        return instance;
     }
 
     public String getToken() {
@@ -91,6 +95,7 @@ public class GuildApiClient extends Api {
 
     public CompletableFuture<JsonElement> get(String path) {
         path = apiBasePath + path;
+        GuildApi.LOGGER.info("received get request for: {}", path);
         CompletableFuture<JsonElement> out = new CompletableFuture<>();
         if (isDisabled()) {
             GuildApi.LOGGER.warn("skipped api get because api service were crashed");
@@ -99,10 +104,43 @@ public class GuildApiClient extends Api {
             failedPromise = out;
             return out;
         }
-        HttpRequest.Builder builder = HttpRequest.newBuilder().uri(URI.create(baseURL + path)).GET();
+        HttpRequest.Builder builder = HttpRequest.newBuilder().uri(URI.create(baseURL + path))
+                .header("Authorization", "bearer " + token).GET();
         if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
-        CompletableFuture<HttpResponse<String>> response = NetManager.HTTP_CLIENT.sendAsync(builder.build(),
-                HttpResponse.BodyHandlers.ofString());
+        CompletableFuture<HttpResponse<String>> response = tryToken(builder);
+        response.whenCompleteAsync((res, exception) -> {
+            if (exception != null) {
+                assert Formatting.RED.getColorValue() != null;
+                McUtils.sendLocalMessage(Text.literal("Fatal API error: " + exception + " " + exception.getMessage())
+                        .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT.get(), false);
+                lastFailed = builder;
+                failedPromise = out;
+                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get(), false);
+                GuildApi.LOGGER.error("api GET exception {} {} ", exception, exception.getMessage());
+            } else {
+                if (res.statusCode() / 100 == 2)
+                    out.complete(JsonUtils.toJsonElement(res.body()));
+                else checkError(res, builder, false);
+            }
+        });
+        return out;
+    }
+
+    public void post(String path, JsonObject body, boolean print) {
+        path = apiBasePath + path;
+        if (isDisabled()) {
+            GuildApi.LOGGER.warn("skipped api post because api service were crashed");
+            McUtils.sendLocalMessage(Text.literal("A request was skipped.")
+                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
+            return;
+        }
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create(baseURL + path))
+                .headers("Content-Type", "application/json", "Authorization",
+                        "bearer " + token)
+                .POST(HttpRequest.BodyPublishers.ofString(body.toString()));
+        if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
+        CompletableFuture<HttpResponse<String>> response = tryToken(builder);
         response.whenCompleteAsync((res, exception) -> {
             if (exception != null) {
                 assert Formatting.RED.getColorValue() != null;
@@ -110,12 +148,74 @@ public class GuildApiClient extends Api {
                         .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT.get(), false);
                 lastFailed = builder;
                 McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get(), false);
-                GuildApi.LOGGER.error("api GET exception {} {} ", exception, exception.getMessage());
-                failedPromise = out;
+                GuildApi.LOGGER.error("api POST exception: {} {}", exception, exception.getMessage());
             } else {
-                if (res.statusCode() / 100 == 2)
-                    out.complete(JsonUtils.toJsonElement(res.body()));
-                else checkError(res, builder, false);
+                if (res.statusCode() / 100 == 2) {
+                    GuildApi.LOGGER.info("api POST successful with response {}", res.body());
+                    if (print) successMessage();
+                } else {
+                    checkError(res, builder, print);
+                }
+            }
+        });
+    }
+
+    public void delete(String path, boolean print) {
+        path = apiBasePath + path;
+        if (isDisabled()) {
+            GuildApi.LOGGER.warn("Skipped api delete because api services weren't enabled");
+            McUtils.sendLocalMessage(Text.literal("A request was skipped.")
+                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
+            return;
+        }
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create(baseURL + path))
+                .header("Authorization", "bearer " + token)
+                .DELETE();
+        if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
+        CompletableFuture<HttpResponse<String>> response = tryToken(builder);
+        response.whenCompleteAsync((res, exception) -> {
+            if (exception != null) {
+                assert Formatting.RED.getColorValue() != null;
+                McUtils.sendLocalMessage(Text.literal("Fatal API error: " + exception + " " + exception.getMessage())
+                        .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT.get(), false);
+                lastFailed = builder;
+                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get(), false);
+                GuildApi.LOGGER.error("api delete error: {} {}", exception, exception.getMessage());
+            } else {
+                if (res.statusCode() / 100 == 2) {
+                    GuildApi.LOGGER.info("api delete successful");
+                    if (print) successMessage();
+                } else {
+                    checkError(res, builder, print);
+                }
+            }
+        });
+    }
+
+    private CompletableFuture<HttpResponse<String>> tryToken(HttpRequest.Builder builder) {
+        CompletableFuture<HttpResponse<String>> response = NetManager.HTTP_CLIENT.sendAsync(builder.build(), HttpResponse.BodyHandlers.ofString());
+        CompletableFuture<HttpResponse<String>> out = new CompletableFuture<>();
+        response.whenCompleteAsync((res, exception) -> {
+            if (exception != null) {
+                out.completeExceptionally(exception);
+            } else {
+                if (res.statusCode() == 401) {
+                    GuildApi.LOGGER.info("Refreshing api token");
+                    if (!getGuildServerToken()) {
+                        out.complete(res);
+                        return;
+                    }
+                    builder.setHeader("Authorization", "bearer " + token);
+                    try {
+                        HttpResponse<String> res2 = NetManager.HTTP_CLIENT.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+                        out.complete(res2);
+                    } catch (Exception e) {
+                        out.completeExceptionally(e);
+                    }
+                } else {
+                    out.complete(res);
+                }
             }
         });
         return out;
@@ -175,98 +275,6 @@ public class GuildApiClient extends Api {
         McUtils.sendLocalMessage(successMessage, Prepend.DEFAULT.get(), false);
     }
 
-    public void post(String path, JsonObject body, boolean print) {
-        path = apiBasePath + path;
-        if (isDisabled()) {
-            GuildApi.LOGGER.warn("skipped api post because api service were crashed");
-            McUtils.sendLocalMessage(Text.literal("A request was skipped.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
-            return;
-        }
-        HttpRequest.Builder builder = HttpRequest.newBuilder()
-                .uri(URI.create(baseURL + path))
-                .headers("Content-Type", "application/json", "Authorization",
-                        "bearer " + token)
-                .POST(HttpRequest.BodyPublishers.ofString(body.toString()));
-        if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
-        CompletableFuture<HttpResponse<String>> response = tryToken(builder);
-        response.whenCompleteAsync((res, exception) -> {
-            if (exception != null) {
-                assert Formatting.RED.getColorValue() != null;
-                McUtils.sendLocalMessage(Text.literal("Fatal API error: " + exception + " " + exception.getMessage())
-                        .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT.get(), false);
-                lastFailed = builder;
-                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get(), false);
-                GuildApi.LOGGER.error("api POST exception: {} {}", exception, exception.getMessage());
-            } else {
-                if (res.statusCode() / 100 == 2) {
-                    GuildApi.LOGGER.info("api POST successful with response {}", res.body());
-                    if (print) successMessage();
-                } else {
-                    checkError(res, builder, print);
-                }
-            }
-        });
-    }
-
-    private CompletableFuture<HttpResponse<String>> tryToken(HttpRequest.Builder builder) {
-        CompletableFuture<HttpResponse<String>> response = NetManager.HTTP_CLIENT.sendAsync(builder.build(), HttpResponse.BodyHandlers.ofString());
-        CompletableFuture<HttpResponse<String>> out = new CompletableFuture<>();
-        response.whenCompleteAsync((res, exception) -> {
-            if (exception != null) {
-                out.completeExceptionally(exception);
-            } else {
-                if (res.statusCode() == 401) {
-                    GuildApi.LOGGER.info("Refreshing api token");
-                    if (!getGuildServerToken()) {
-                        out.complete(res);
-                        return;
-                    }
-                }
-                builder.setHeader("Authorization", "bearer " + token);
-                try {
-                    HttpResponse<String> res2 = NetManager.HTTP_CLIENT.send(builder.build(), HttpResponse.BodyHandlers.ofString());
-                    out.complete(res2);
-                } catch (Exception e) {
-                    out.completeExceptionally(e);
-                }
-            }
-        });
-        return out;
-    }
-
-    public void delete(String path, boolean print) {
-        path = apiBasePath + path;
-        if (isDisabled()) {
-            GuildApi.LOGGER.warn("Skipped api delete because api services weren't enabled");
-            McUtils.sendLocalMessage(Text.literal("A request was skipped.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
-            return;
-        }
-        HttpRequest.Builder builder = HttpRequest.newBuilder()
-                .uri(URI.create(baseURL + path))
-                .header("Authorization", "bearer " + token)
-                .DELETE();
-        if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
-        CompletableFuture<HttpResponse<String>> response = tryToken(builder);
-        response.whenCompleteAsync((res, exception) -> {
-            if (exception != null) {
-                assert Formatting.RED.getColorValue() != null;
-                McUtils.sendLocalMessage(Text.literal("Fatal API error: " + exception + " " + exception.getMessage())
-                        .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT.get(), false);
-                lastFailed = builder;
-                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get(), false);
-                GuildApi.LOGGER.error("api delete error: {} {}", exception, exception.getMessage());
-            } else {
-                if (res.statusCode() / 100 == 2) {
-                    GuildApi.LOGGER.info("api delete successful");
-                    if (print) successMessage();
-                } else {
-                    checkError(res, builder, print);
-                }
-            }
-        });
-    }
 
     public String getBaseURL() {
         return baseURL;
@@ -302,11 +310,6 @@ public class GuildApiClient extends Api {
                     });
                     return Command.SINGLE_SUCCESS;
                 })));
-    }
-
-    @Override
-    public GuildApiClient getInstance() {
-        return instance;
     }
 
     @Override

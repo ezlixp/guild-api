@@ -13,8 +13,8 @@ import net.minecraft.util.Pair;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.components.Models;
-import pixlze.guildapi.models.event.WorldStateEvents;
-import pixlze.guildapi.models.type.WorldState;
+import pixlze.guildapi.models.worldState.event.WorldStateEvents;
+import pixlze.guildapi.models.worldState.type.WorldState;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
@@ -29,11 +29,12 @@ import java.util.function.Consumer;
 
 public class SocketIOClient extends Api {
     private static SocketIOClient instance;
+    private final HashSet<Pair<String, Consumer<Object[]>>> listeners = new HashSet<>();
     public Socket discordSocket;
     private GuildApiClient guild;
     private String guildPrefix;
-    private final HashSet<Pair<String, Consumer<Object[]>>> listeners = new HashSet<>();
 
+    // TODO if add multiple sockets, create wrapper class for each socket with add listeners, etc.
     public SocketIOClient() {
         super("socket", List.of(GuildApiClient.class));
         if (GuildApi.isDevelopment()) {
@@ -41,7 +42,8 @@ public class SocketIOClient extends Api {
                 dispatcher.register(ClientCommandManager.literal("testmessage")
                         .then(ClientCommandManager.argument("message", StringArgumentType.greedyString())
                                 .executes((context) -> {
-                                    emit(discordSocket, "wynnMessage", StringArgumentType.getString(context, "message").replaceAll("&", "§"));
+                                    emit(discordSocket, "wynnMessage", StringArgumentType.getString(context, "message")
+                                            .replaceAll("&", "§"));
                                     return Command.SINGLE_SUCCESS;
                                 })));
             });
@@ -58,8 +60,7 @@ public class SocketIOClient extends Api {
         }
     }
 
-    @Override
-    public SocketIOClient getInstance() {
+    public static SocketIOClient getInstance() {
         return instance;
     }
 
@@ -75,12 +76,12 @@ public class SocketIOClient extends Api {
     }
 
     private void initSocket(boolean reloadSocket) {
-        IO.Options options = IO.Options.builder()
-                .setExtraHeaders(Map.of("authorization", Collections.singletonList("bearer " + guild.getToken()), "from", Collections.singletonList(McUtils.playerName()), "user" +
-                        "-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_VERSION)))
-                .setTimeout(60000)
-                .build();
         if (reloadSocket) {
+            IO.Options options = IO.Options.builder()
+                    .setExtraHeaders(Map.of("authorization", Collections.singletonList("bearer " + guild.getToken()), "from", Collections.singletonList(McUtils.playerName()), "user" +
+                            "-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_VERSION)))
+                    .setTimeout(60000)
+                    .build();
             discordSocket = IO.socket(URI.create(guild.getBaseURL() + "discord"), options);
             for (Pair<String, Consumer<Object[]>> listener : listeners) {
                 addDiscordListener(listener.getLeft(), listener.getRight());
@@ -100,7 +101,8 @@ public class SocketIOClient extends Api {
 
     public void addDiscordListener(String name, Consumer<Object[]> listener) {
         listeners.add(new Pair<>(name, listener));
-        discordSocket.on(name, listener::accept);
+        if (discordSocket != null)
+            discordSocket.on(name, listener::accept);
     }
 
     private void worldStateChanged(WorldState state) {

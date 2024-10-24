@@ -1,5 +1,11 @@
-package pixlze.guildapi.features;
+package pixlze.guildapi.consumers;
 
+import pixlze.guildapi.components.Feature;
+import pixlze.guildapi.features.AutoUpdateFeature;
+import pixlze.guildapi.features.CommandHelpFeature;
+import pixlze.guildapi.features.GuildRaidFeature;
+import pixlze.guildapi.features.discord.DiscordBlockFeature;
+import pixlze.guildapi.features.discord.DiscordBridgeFeature;
 import pixlze.guildapi.features.list.AspectListFeature;
 import pixlze.guildapi.features.list.TomeListFeature;
 
@@ -8,10 +14,14 @@ public class FeatureManager {
 
     public void init() {
         registerFeature(new CommandHelpFeature());
+
         registerFeature(new GuildRaidFeature());
         registerFeature(new AspectListFeature());
         registerFeature(new TomeListFeature());
+
         registerFeature(new DiscordBridgeFeature());
+        registerFeature(new DiscordBlockFeature());
+
         registerFeature(new AutoUpdateFeature());
     }
 

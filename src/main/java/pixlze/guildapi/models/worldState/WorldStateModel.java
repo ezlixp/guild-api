@@ -1,4 +1,4 @@
-package pixlze.guildapi.models;
+package pixlze.guildapi.models.worldState;
 
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.text.Text;
@@ -7,8 +7,8 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.mc.event.PlayerInfoChangedEvents;
 import pixlze.guildapi.mc.event.ScreenOpen;
 import pixlze.guildapi.mod.event.WynncraftConnectionEvents;
-import pixlze.guildapi.models.event.WorldStateEvents;
-import pixlze.guildapi.models.type.WorldState;
+import pixlze.guildapi.models.worldState.event.WorldStateEvents;
+import pixlze.guildapi.models.worldState.type.WorldState;
 
 import java.util.Objects;
 import java.util.UUID;

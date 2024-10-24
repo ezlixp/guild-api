@@ -3,6 +3,7 @@ package pixlze.guildapi.features;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.components.Feature;
 import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.TextUtils;
@@ -29,7 +30,8 @@ public class GuildRaidFeature extends Feature {
         Matcher raidMatcher = RAID_PATTERN.matcher(TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true)));
         if (raidMatcher.find()) {
             GuildApi.LOGGER.info("guild raid {} finished", raidMatcher.group("raid"));
-            McUtils.sendLocalMessage(Text.literal("Guild raid finished.").withColor(0x00FF00), Prepend.DEFAULT.get(), false);
+            McUtils.sendLocalMessage(Text.literal("Guild raid finished.")
+                    .withColor(0x00FF00), Prepend.DEFAULT.get(), false);
         }
     }
 }

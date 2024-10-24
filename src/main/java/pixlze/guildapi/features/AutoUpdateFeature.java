@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.components.Feature;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.net.event.NetEvents;
@@ -23,11 +24,12 @@ public class AutoUpdateFeature extends Feature {
     @Override
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            dispatcher.register(GuildApi.BASE_COMMAND.then(ClientCommandManager.literal("update").executes((context) -> {
-                GuildApi.LOGGER.info("guild update");
-                // do some md5 verification stuff on downloaded file
-                return Command.SINGLE_SUCCESS;
-            })));
+            dispatcher.register(GuildApi.BASE_COMMAND.then(ClientCommandManager.literal("update")
+                    .executes((context) -> {
+                        GuildApi.LOGGER.info("guild update");
+                        // do some md5 verification stuff on downloaded file
+                        return Command.SINGLE_SUCCESS;
+                    })));
         });
         NetEvents.LOADED.register(this::onApiLoaded);
     }

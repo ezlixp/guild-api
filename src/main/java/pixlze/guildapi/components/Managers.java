@@ -1,7 +1,7 @@
 package pixlze.guildapi.components;
 
 
-import pixlze.guildapi.features.FeatureManager;
+import pixlze.guildapi.consumers.FeatureManager;
 import pixlze.guildapi.mod.ConnectionManager;
 import pixlze.guildapi.net.NetManager;
 
