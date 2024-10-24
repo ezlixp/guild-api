@@ -20,7 +20,6 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.LinkedList;
-import java.util.UUID;
 
 public class WynnApiClient extends Api {
     private static WynnApiClient instance;
@@ -94,8 +93,7 @@ public class WynnApiClient extends Api {
     }
 
     private void onWynnJoin() {
-        if (wynnPlayerInfo == null || !McUtils.player().getUuid()
-                .equals(UUID.fromString(wynnPlayerInfo.get("uuid").getAsString()))) {
+        if (wynnPlayerInfo == null || !McUtils.playerUUID().equals(wynnPlayerInfo.get("uuid").getAsString())) {
             this.disable();
             initWynnPlayerInfo(false);
         } else {

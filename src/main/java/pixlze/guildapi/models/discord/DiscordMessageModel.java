@@ -13,4 +13,8 @@ public class DiscordMessageModel {
     public void block(String username) {
         blocked.add(username.toLowerCase(Locale.ROOT));
     }
+
+    public HashSet<String> getBlocked() {
+        return blocked;
+    }
 }

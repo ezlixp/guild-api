@@ -13,7 +13,13 @@ import pixlze.guildapi.utils.type.Prepend;
 
 public class McUtils {
     public static String playerName() {
+        if (GuildApi.isDevelopment()) return "pixlze";
         return player().getName().getString();
+    }
+
+    public static String playerUUID() {
+        if (GuildApi.isDevelopment()) return "39365bd45c7841de8901c7dc5b7c64c4";
+        return player().getUuidAsString();
     }
 
     public static PlayerEntity player() {
