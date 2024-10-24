@@ -49,6 +49,9 @@ public class GuildApiClient extends Api {
     private CompletableFuture<JsonElement> failedPromise = null;
     private boolean retrying = false;
 
+    // TODO improve error handling
+    // add optional callback to each request so i can handle non errors natively
+    // phase out checkerror
     public GuildApiClient() {
         super("guild", List.of(WynnApiClient.class));
         instance = this;
@@ -93,9 +96,8 @@ public class GuildApiClient extends Api {
         return false;
     }
 
-    public CompletableFuture<JsonElement> get(String path) {
+    public CompletableFuture<JsonElement> get(String path, boolean handleError) {
         path = apiBasePath + path;
-        GuildApi.LOGGER.info("received get request for: {}", path);
         CompletableFuture<JsonElement> out = new CompletableFuture<>();
         if (isDisabled()) {
             GuildApi.LOGGER.warn("skipped api get because api service were crashed");
@@ -109,20 +111,29 @@ public class GuildApiClient extends Api {
         if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
         CompletableFuture<HttpResponse<String>> response = tryToken(builder);
         response.whenCompleteAsync((res, exception) -> {
-            if (exception != null) {
-                assert Formatting.RED.getColorValue() != null;
-                McUtils.sendLocalMessage(Text.literal("Fatal API error: " + exception + " " + exception.getMessage())
-                        .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT.get(), false);
-                lastFailed = builder;
-                failedPromise = out;
-                McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get(), false);
-                GuildApi.LOGGER.error("api GET exception {} {} ", exception, exception.getMessage());
-            } else {
-                if (res.statusCode() / 100 == 2)
-                    out.complete(JsonUtils.toJsonElement(res.body()));
-                else checkError(res, builder, false);
-            }
-        });
+                    if (exception != null) {
+                        if (handleError) {
+                            assert Formatting.RED.getColorValue() != null;
+                            McUtils.sendLocalMessage(Text.literal("Fatal API error: " + exception + " " + exception.getMessage())
+                                    .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT.get(), false);
+                            lastFailed = builder;
+                            failedPromise = out;
+                            McUtils.sendLocalMessage(retryMessage, Prepend.DEFAULT.get(), false);
+                        } else {
+                            out.completeExceptionally(exception);
+                        }
+                        GuildApi.LOGGER.error("api GET exception {} {} ", exception, exception.getMessage());
+                    } else {
+                        if (res.statusCode() / 100 == 2)
+                            out.complete(JsonUtils.toJsonElement(res.body()));
+                        else {
+                            if (handleError)
+                                checkError(res, builder, false);
+                            else out.complete(JsonUtils.toJsonElement(res.body()));
+                        }
+                    }
+                }
+        );
         return out;
     }
 
@@ -152,6 +163,8 @@ public class GuildApiClient extends Api {
             } else {
                 if (res.statusCode() / 100 == 2) {
                     GuildApi.LOGGER.info("api POST successful with response {}", res.body());
+                    lastFailed = null;
+                    failedPromise = null;
                     if (print) successMessage();
                 } else {
                     checkError(res, builder, print);
@@ -185,6 +198,8 @@ public class GuildApiClient extends Api {
             } else {
                 if (res.statusCode() / 100 == 2) {
                     GuildApi.LOGGER.info("api delete successful");
+                    lastFailed = null;
+                    failedPromise = null;
                     if (print) successMessage();
                 } else {
                     checkError(res, builder, print);

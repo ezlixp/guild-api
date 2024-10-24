@@ -36,7 +36,7 @@ public class AutoUpdateFeature extends Feature {
 
     private void onApiLoaded(Api loaded) {
         if (!completed && loaded.getClass().equals(GuildApiClient.class)) {
-            CompletableFuture<JsonElement> response = Managers.Net.guild.get("mod/update");
+            CompletableFuture<JsonElement> response = Managers.Net.guild.get("mod/update", true);
             response.whenCompleteAsync((res, err) -> {
                 if (err != null) {
                     GuildApi.LOGGER.error("get update error: {} {}", err, err.getMessage());

@@ -70,7 +70,7 @@ public class TomeListFeature extends ListFeature {
     }
 
     private void search(String username) {
-        CompletableFuture<JsonElement> response = Managers.Net.guild.get("tomes/" + username);
+        CompletableFuture<JsonElement> response = Managers.Net.guild.get("tomes/" + username, true);
         response.whenCompleteAsync((res, exception) -> {
             if (exception == null && res != null) {
                 McUtils.sendLocalMessage(Text.literal(res.getAsJsonObject()

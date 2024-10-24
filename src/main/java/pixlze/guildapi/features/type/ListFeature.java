@@ -13,6 +13,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Feature;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.utils.McUtils;
@@ -69,7 +70,7 @@ public class ListFeature extends Feature {
 
     private void listItems(int page, boolean reload) {
         CompletableFuture<JsonElement> response = new CompletableFuture<>();
-        if (reload) response = Managers.Net.guild.get(endpoint);
+        if (reload) response = Managers.Net.guild.get(endpoint, true);
         else response.complete(cachedResponse);
         response.whenCompleteAsync((res, exception) -> {
             cachedResponse = res;
@@ -80,14 +81,18 @@ public class ListFeature extends Feature {
                 return;
             }
             List<JsonElement> listItems = res.getAsJsonArray().asList();
+            GuildApi.LOGGER.info("{} listitems {} {}", listItems, listItems.size(), page);
             MutableText listMessage = Text.literal(name.substring(0, 1)
                             .toUpperCase() + name.substring(1) + " list page " + (page + 1) + ":\n")
                     .setStyle(Style.EMPTY.withColor(Formatting.WHITE));
             for (int i = 5 * page; i < 5 * (page + 1); i++) {
-                if (i >= listItems.size())
+                GuildApi.LOGGER.info("{}", i);
+                if (i >= listItems.size()) {
+                    GuildApi.LOGGER.info("breaking early: {} {}", i, listItems.size());
                     break;
+                }
                 listMessage.append(Text.literal(i + 1 + ". ")).withColor(0xFFFFFF);
-                listMessage.append(lineParser.apply(listItems.get(i).getAsJsonObject()));
+                listMessage.append(lineParser.apply(listItems.get(i)));
                 if (i != Math.min(page, listItems.size()) - 1) {
                     listMessage.append(Text.literal("\n"));
                 }
@@ -102,6 +107,7 @@ public class ListFeature extends Feature {
                             .setStyle(Style.EMPTY.withColor(hasNext ? Formatting.GREEN:Formatting.GRAY).withBold(true)
                                     .withClickEvent(hasNext ? new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + name + "list view " + (page + 2) + " false"):null)));
             listMessage.append("\n");
+            GuildApi.LOGGER.info("{} listmessage", listMessage);
             McUtils.sendLocalMessage(listMessage, Prepend.DEFAULT.get(), false);
         });
     }
