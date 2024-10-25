@@ -45,11 +45,11 @@ public class DiscordBridgeFeature extends Feature {
             "^(?<username>.+?) has finished their weekly objective\\.$",
             "^Only (?<time>.+?) left to complete the Weekly Guild Objectives!$",
             // Guild member management
-            "^§.(?<recruiter>.+?)§. has invited (?<recruit>.+?) to the guild$",
-            "^§.(?<recruiter>.+?)§. has uninvited (?<recruit>.+?) from the guild$",
+            "^(?<recruiter>.+?) has invited (?<recruit>.+?) to the guild$",
+            "^(?<recruiter>.+?) has uninvited (?<recruit>.+?) from the guild$",
             "^(?<recruit>.+?) has joined the guild, say hello!$",
             "^(?<username>.+?) has left the guild$",
-            "^(§.)?(?<kicker>.+?)(§.)? has kicked (§.)?(?<kicked>.+?)(§.)? from the guild$",
+            "^(?<kicker>.+?) has kicked (?<kicked>.+?) from the guild$",
             "^(?<setter>.+?) has set (?<set>.+?) guild rank from §.(?<original>\\w+)§. to §.(?<new>\\w+)$",
             // War
             "^The war for (?<territory>.+?) will start in .*$",
