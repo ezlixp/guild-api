@@ -19,7 +19,9 @@ public class McUtils {
 
     public static String playerUUID() {
         if (GuildApi.isDevelopment()) return "39365bd45c7841de8901c7dc5b7c64c4";
-        return player().getUuidAsString();
+        if (player() != null)
+            return player().getUuidAsString();
+        return null;
     }
 
     public static PlayerEntity player() {

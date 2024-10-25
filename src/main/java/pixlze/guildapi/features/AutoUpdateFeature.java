@@ -1,6 +1,5 @@
 package pixlze.guildapi.features;
 
-import com.google.gson.JsonElement;
 import com.mojang.brigadier.Command;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -12,9 +11,8 @@ import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.net.event.NetEvents;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.NetUtils;
 import pixlze.guildapi.utils.type.Prepend;
-
-import java.util.concurrent.CompletableFuture;
 
 public class AutoUpdateFeature extends Feature {
     private boolean completed = false;
@@ -36,22 +34,20 @@ public class AutoUpdateFeature extends Feature {
 
     private void onApiLoaded(Api loaded) {
         if (!completed && loaded.getClass().equals(GuildApiClient.class)) {
-            CompletableFuture<JsonElement> response = Managers.Net.guild.get("mod/update", true);
-            response.whenCompleteAsync((res, err) -> {
-                if (err != null) {
-                    GuildApi.LOGGER.error("get update error: {} {}", err, err.getMessage());
-                    return;
-                }
-                GuildApi.LOGGER.info("auto update result: {}", res);
+            Managers.Net.guild.get("mod/update").whenCompleteAsync((res, err) -> {
                 try {
-                    String latestVersion = res.getAsJsonObject().get("versionNumber").getAsString();
-                    if (!GuildApi.MOD_VERSION.equals(latestVersion)) {
-                        GuildApi.LOGGER.info("outdated version: {}", GuildApi.MOD_VERSION);
-                        McUtils.sendLocalMessage(Text.literal("§a[Guild Api] You are running build v" + GuildApi.MOD_VERSION + ", but the latest build is v" + latestVersion + "." +
-                                " " +
-                                "Please consider updating through modrinth."), Prepend.EMPTY.get(), false);
-                    }
+                    NetUtils.applyDefaultCallback(res, err, (resOK) -> {
+                        GuildApi.LOGGER.info("auto update result: {}", resOK);
+                        String latestVersion = resOK.getAsJsonObject().get("versionNumber").getAsString();
+                        if (!GuildApi.MOD_VERSION.equals(latestVersion)) {
+                            GuildApi.LOGGER.info("outdated version: {}", GuildApi.MOD_VERSION);
+                            McUtils.sendLocalMessage(Text.literal("§a[Guild Api] You are running build v" + GuildApi.MOD_VERSION + ", but the latest build is v" + latestVersion + "." +
+                                    " " +
+                                    "Please consider updating through modrinth."), Prepend.EMPTY.get(), false);
+                        }
+                    }, NetUtils.defaultFailed("mod update check", false));
                 } catch (Exception e) {
+                    McUtils.sendLocalMessage(Text.literal("§cSomething went wrong. Check logs for more details."), Prepend.DEFAULT.get(), false);
                     GuildApi.LOGGER.error("auto update error: {} {}", e, e.getMessage());
                 }
             });

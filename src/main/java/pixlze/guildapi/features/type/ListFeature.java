@@ -17,6 +17,7 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Feature;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.NetUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.util.List;
@@ -70,9 +71,21 @@ public class ListFeature extends Feature {
 
     private void listItems(int page, boolean reload) {
         CompletableFuture<JsonElement> response = new CompletableFuture<>();
-        if (reload) response = Managers.Net.guild.get(endpoint, true);
-        else response.complete(cachedResponse);
+        if (reload) {
+            Managers.Net.guild.get(endpoint).whenCompleteAsync((res, exception) -> {
+                try {
+                    NetUtils.applyDefaultCallback(res, exception, response::complete, (error) -> response.completeExceptionally(null));
+                } catch (Exception e) {
+                    response.completeExceptionally(e);
+                }
+            });
+        } else response.complete(cachedResponse);
         response.whenCompleteAsync((res, exception) -> {
+            if (exception != null) {
+                McUtils.sendLocalMessage(Text.literal("§cSomething went wrong. Check logs for more details."), Prepend.DEFAULT.get(), false);
+                GuildApi.LOGGER.error("List feature error: {} {}", exception, exception.getMessage());
+                return;
+            }
             cachedResponse = res;
             if (res == null) {
                 assert Formatting.YELLOW.getColorValue() != null;
@@ -81,7 +94,6 @@ public class ListFeature extends Feature {
                 return;
             }
             List<JsonElement> listItems = res.getAsJsonArray().asList();
-            GuildApi.LOGGER.info("{} listitems {} {}", listItems, listItems.size(), page);
             MutableText listMessage = Text.literal(name.substring(0, 1)
                             .toUpperCase() + name.substring(1) + " list page " + (page + 1) + ":\n")
                     .setStyle(Style.EMPTY.withColor(Formatting.WHITE));

@@ -1,3 +1,6 @@
 ### Bug Fixes
 - more incorrect messages
-- issue with reinitializing discord socket
+
+### New Features
+- blocklist
+- improved user response and error handling
