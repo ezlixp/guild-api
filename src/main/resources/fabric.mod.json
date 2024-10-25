@@ -3,7 +3,7 @@
   "id": "guildapi",
   "version": "${version}",
   "name": "Guild Api",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "API integration for certain guild features in Wynncraft.",
   "authors": [
     "pixlze"
   ],
