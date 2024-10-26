@@ -10,6 +10,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
+import org.json.JSONObject;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.components.Models;
@@ -33,6 +34,12 @@ public class SocketIOClient extends Api {
     public Socket discordSocket;
     private GuildApiClient guild;
     private String guildPrefix;
+    private final IO.Options options = IO.Options.builder()
+            .setExtraHeaders(Map.of("from", Collections.singletonList(McUtils.playerName()), "user" +
+                    "-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_VERSION)))
+            .setTimeout(60000)
+            .setReconnection(false)
+            .build();
 
     // TODO if add multiple sockets, create wrapper class for each socket with add listeners, etc.
     public SocketIOClient() {
@@ -77,17 +84,26 @@ public class SocketIOClient extends Api {
 
     private void initSocket(boolean reloadSocket) {
         if (reloadSocket) {
-            IO.Options options = IO.Options.builder()
-                    .setExtraHeaders(Map.of("authorization", Collections.singletonList("bearer " + guild.getToken()), "from", Collections.singletonList(McUtils.playerName()), "user" +
-                            "-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_VERSION)))
-                    .setTimeout(60000)
-                    .build();
+            options.extraHeaders.put("Authorization", Collections.singletonList("bearer " + guild.getToken(true)));
             discordSocket = IO.socket(URI.create(guild.getBaseURL() + "discord"), options);
             for (Pair<String, Consumer<Object[]>> listener : listeners) {
                 addDiscordListener(listener.getLeft(), listener.getRight());
             }
-            addDiscordListener("connect_error", (err) -> McUtils.sendLocalMessage(Text.literal("§cCould not connect to chat server."),
-                    Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.RED)), true));
+            addDiscordListener("connect_error", (err) -> {
+                McUtils.sendLocalMessage(Text.literal("§cCould not connect to chat server."),
+                        Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.RED)), true);
+                GuildApi.LOGGER.info("{} reconnect error", err);
+                if (err[0] instanceof JSONObject error) {
+                    try {
+                        String message = error.getString("message");
+                        if (message.equals("Invalid token provided") || message.equals("No token provided"))
+                            options.extraHeaders.put("Authorization", Collections.singletonList("bearer " + guild.getToken(true)));
+                    } catch (Exception e) {
+                        GuildApi.LOGGER.error("reconnect error: {} {}", e, e.getMessage());
+                    }
+                }
+                discordSocket.connect();
+            });
             addDiscordListener("connect", (args) -> McUtils.sendLocalMessage(Text.literal("§aSuccessfully connected to chat server."),
                     Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)), true));
         }

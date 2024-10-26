@@ -51,8 +51,8 @@ public class GuildApiClient extends Api {
         return instance;
     }
 
-    public String getToken() {
-        if (token == null) getGuildServerToken();
+    public String getToken(boolean refresh) {
+        if (token == null || refresh) getGuildServerToken();
         return token;
     }
 
