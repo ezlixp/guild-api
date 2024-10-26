@@ -35,7 +35,7 @@ public class SocketIOClient extends Api {
     private GuildApiClient guild;
     private String guildPrefix;
     private final IO.Options options = IO.Options.builder()
-            .setExtraHeaders(Map.of("from", Collections.singletonList(McUtils.playerName()), "user" +
+            .setExtraHeaders(Map.of("user" +
                     "-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_VERSION)))
             .setTimeout(60000)
             .setReconnection(false)
@@ -74,6 +74,8 @@ public class SocketIOClient extends Api {
     @Override
     protected void ready() {
         guild = Managers.Net.guild;
+
+        options.extraHeaders.put("from", Collections.singletonList(McUtils.playerName()));
         boolean reloadSocket = false;
         if (!guild.guildPrefix.equals(guildPrefix)) {
             guildPrefix = guild.guildPrefix;
