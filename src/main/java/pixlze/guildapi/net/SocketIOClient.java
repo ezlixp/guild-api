@@ -21,10 +21,7 @@ import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 
@@ -35,8 +32,8 @@ public class SocketIOClient extends Api {
     private GuildApiClient guild;
     private String guildPrefix;
     private final IO.Options options = IO.Options.builder()
-            .setExtraHeaders(Map.of("user" +
-                    "-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_VERSION)))
+            .setExtraHeaders(new HashMap<>(Map.of("user" +
+                    "-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_VERSION))))
             .setTimeout(60000)
             .setReconnection(false)
             .build();
@@ -75,7 +72,7 @@ public class SocketIOClient extends Api {
     protected void ready() {
         guild = Managers.Net.guild;
 
-        options.extraHeaders.put("from", Collections.singletonList(McUtils.playerName()));
+//        options.extraHeaders.put("from", Collections.singletonList(McUtils.playerName()));
         boolean reloadSocket = false;
         if (!guild.guildPrefix.equals(guildPrefix)) {
             guildPrefix = guild.guildPrefix;
@@ -85,6 +82,7 @@ public class SocketIOClient extends Api {
     }
 
     private void initSocket(boolean reloadSocket) {
+        GuildApi.LOGGER.info("initializing sockets");
         if (reloadSocket) {
             options.extraHeaders.put("Authorization", Collections.singletonList("bearer " + guild.getToken(true)));
             discordSocket = IO.socket(URI.create(guild.getBaseURL() + "discord"), options);
