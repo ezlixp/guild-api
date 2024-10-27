@@ -98,9 +98,7 @@ public class ListFeature extends Feature {
                             .toUpperCase() + name.substring(1) + " list page " + (page + 1) + ":\n")
                     .setStyle(Style.EMPTY.withColor(Formatting.WHITE));
             for (int i = 5 * page; i < 5 * (page + 1); i++) {
-                GuildApi.LOGGER.info("{}", i);
                 if (i >= listItems.size()) {
-                    GuildApi.LOGGER.info("breaking early: {} {}", i, listItems.size());
                     break;
                 }
                 listMessage.append(Text.literal(i + 1 + ". ")).withColor(0xFFFFFF);
