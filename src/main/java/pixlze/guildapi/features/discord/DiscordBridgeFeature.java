@@ -57,7 +57,10 @@ public class DiscordBridgeFeature extends Feature {
             "^The battle has begun!$",
             "^You have taken control of .*$",
             "^\\[\\w+\\] has lost the war!.*$",
-            "^\\[\\w+\\] has taken control of .*$"
+            "^\\[\\w+\\] has taken control of .*$",
+            // Guild season
+            "^The current guild season will end in .*$",
+            "^The last standing territories you control once it ends will grant you 2048² each!$"
     ).map(Pattern::compile).toArray(Pattern[]::new);
     private final Pattern[] HR_WHITELIST_PATTERNS = Stream.of(
             // Eco
