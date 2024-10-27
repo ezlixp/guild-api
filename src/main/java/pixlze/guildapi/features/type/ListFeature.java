@@ -26,7 +26,7 @@ import java.util.function.Function;
 
 public class ListFeature extends Feature {
     private final String name;
-    private final String endpoint;
+    protected String endpoint;
     private final Function<JsonElement, MutableText> lineParser;
     private JsonElement cachedResponse;
 

@@ -24,7 +24,7 @@ public class DiscordBlockFeature extends ListFeature {
     private final GuildApiClient guildApiClient = Managers.Net.guild;
 
     public DiscordBlockFeature() {
-        super("block", "user/blocked/" + McUtils.playerUUID(), (listItem) -> {
+        super("block", "", (listItem) -> {
             Models.DiscordMessage.block(listItem.getAsString());
             return Text.literal(listItem.getAsString());
         });
@@ -90,6 +90,7 @@ public class DiscordBlockFeature extends ListFeature {
 
     private void onApiLoaded(Api api) {
         if (api.getClass().equals(GuildApiClient.class)) {
+            super.endpoint = "user/blocked/" + McUtils.playerUUID();
             guildApiClient.get("user/blocked/" + McUtils.playerUUID()).whenCompleteAsync((res, error) -> {
                 try {
                     NetUtils.applyDefaultCallback(res, error, (resOK) -> {
