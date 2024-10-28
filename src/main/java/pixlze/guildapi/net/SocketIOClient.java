@@ -45,34 +45,6 @@ public class SocketIOClient extends Api {
     public SocketIOClient() {
         super("socket", List.of(GuildApiClient.class));
         instance = this;
-
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            dispatcher.register(ClientCommandManager.literal("connect").executes((context) -> {
-                if (!discordSocket.connected()) {
-                    McUtils.sendLocalMessage(Text.literal("§eConnecting to chat server..."),
-                            Prepend.GUILD.getWithStyle(ColourUtils.YELLOW), true);
-                    connectAttempt = 1;
-                    discordSocket.connect();
-                    return Command.SINGLE_SUCCESS;
-                } else {
-                    McUtils.sendLocalMessage(Text.literal("§aYou are already connected to the chat server!"),
-                            Prepend.GUILD.getWithStyle(ColourUtils.GREEN), true);
-                    return 0;
-                }
-            }));
-        });
-
-        if (GuildApi.isDevelopment()) {
-            ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-                dispatcher.register(ClientCommandManager.literal("testmessage")
-                        .then(ClientCommandManager.argument("message", StringArgumentType.greedyString())
-                                .executes((context) -> {
-                                    emit(discordSocket, "wynnMessage", StringArgumentType.getString(context, "message")
-                                            .replaceAll("&", "§"));
-                                    return Command.SINGLE_SUCCESS;
-                                })));
-            });
-        }
     }
 
     public void emit(Socket socket, String event, Object data) {
@@ -196,7 +168,30 @@ public class SocketIOClient extends Api {
 
     @Override
     public void init() {
-
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+            dispatcher.register(ClientCommandManager.literal("connect").executes((context) -> {
+                if (!discordSocket.connected()) {
+                    McUtils.sendLocalMessage(Text.literal("§eConnecting to chat server..."),
+                            Prepend.GUILD.getWithStyle(ColourUtils.YELLOW), true);
+                    connectAttempt = 1;
+                    discordSocket.connect();
+                    return Command.SINGLE_SUCCESS;
+                } else {
+                    McUtils.sendLocalMessage(Text.literal("§aYou are already connected to the chat server!"),
+                            Prepend.GUILD.getWithStyle(ColourUtils.GREEN), true);
+                    return 0;
+                }
+            }));
+            if (GuildApi.isDevelopment()) {
+                dispatcher.register(ClientCommandManager.literal("testmessage")
+                        .then(ClientCommandManager.argument("message", StringArgumentType.greedyString())
+                                .executes((context) -> {
+                                    emit(discordSocket, "wynnMessage", StringArgumentType.getString(context, "message")
+                                            .replaceAll("&", "§"));
+                                    return Command.SINGLE_SUCCESS;
+                                })));
+            }
+        });
     }
 
     @Override
