@@ -17,6 +17,7 @@ import pixlze.guildapi.components.Models;
 import pixlze.guildapi.models.worldState.event.WorldStateEvents;
 import pixlze.guildapi.models.worldState.type.WorldState;
 import pixlze.guildapi.net.type.Api;
+import pixlze.guildapi.utils.ColourUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
@@ -29,6 +30,8 @@ public class SocketIOClient extends Api {
     private static SocketIOClient instance;
     private final HashSet<Pair<String, Consumer<Object[]>>> listeners = new HashSet<>();
     public Socket discordSocket;
+    private boolean firstConnect = true;
+    private int connectAttempt = 0;
     private GuildApiClient guild;
     private String guildPrefix;
     private final IO.Options options = IO.Options.builder()
@@ -41,6 +44,24 @@ public class SocketIOClient extends Api {
     // TODO if add multiple sockets, create wrapper class for each socket with add listeners, etc.
     public SocketIOClient() {
         super("socket", List.of(GuildApiClient.class));
+        instance = this;
+
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+            dispatcher.register(ClientCommandManager.literal("connect").executes((context) -> {
+                if (!discordSocket.connected()) {
+                    McUtils.sendLocalMessage(Text.literal("§eConnecting to chat server..."),
+                            Prepend.GUILD.getWithStyle(ColourUtils.YELLOW), true);
+                    connectAttempt = 1;
+                    discordSocket.connect();
+                    return Command.SINGLE_SUCCESS;
+                } else {
+                    McUtils.sendLocalMessage(Text.literal("§aYou are already connected to the chat server!"),
+                            Prepend.GUILD.getWithStyle(ColourUtils.GREEN), true);
+                    return 0;
+                }
+            }));
+        });
+
         if (GuildApi.isDevelopment()) {
             ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
                 dispatcher.register(ClientCommandManager.literal("testmessage")
@@ -52,7 +73,6 @@ public class SocketIOClient extends Api {
                                 })));
             });
         }
-        instance = this;
     }
 
     public void emit(Socket socket, String event, Object data) {
@@ -72,7 +92,7 @@ public class SocketIOClient extends Api {
     protected void ready() {
         guild = Managers.Net.guild;
 
-//        options.extraHeaders.put("from", Collections.singletonList(McUtils.playerName()));
+        options.extraHeaders.put("from", Collections.singletonList(McUtils.playerName()));
         boolean reloadSocket = false;
         if (!guild.guildPrefix.equals(guildPrefix)) {
             guildPrefix = guild.guildPrefix;
@@ -84,28 +104,66 @@ public class SocketIOClient extends Api {
     private void initSocket(boolean reloadSocket) {
         GuildApi.LOGGER.info("initializing sockets");
         if (reloadSocket) {
+            firstConnect = true;
             options.extraHeaders.put("Authorization", Collections.singletonList("bearer " + guild.getToken(true)));
             discordSocket = IO.socket(URI.create(guild.getBaseURL() + "discord"), options);
             for (Pair<String, Consumer<Object[]>> listener : listeners) {
                 addDiscordListener(listener.getLeft(), listener.getRight());
             }
-            addDiscordListener("connect_error", (err) -> {
-                McUtils.sendLocalMessage(Text.literal("§cCould not connect to chat server."),
+
+            addDiscordListener(Socket.EVENT_DISCONNECT, (reason) -> {
+                if (!discordSocket.connected()) return;
+
+                connectAttempt = 0;
+
+                McUtils.sendLocalMessage(Text.literal("§cDisconnected from chat server."),
                         Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.RED)), true);
+                GuildApi.LOGGER.info("{} disconnected", reason);
+
+                try {
+                    Thread.sleep(1000);
+                    discordSocket.connect();
+                } catch (InterruptedException e) {
+                    GuildApi.LOGGER.error("thread sleep error: {} {}", e, e.getMessage());
+                }
+            });
+
+            addDiscordListener(Socket.EVENT_CONNECT_ERROR, (err) -> {
+                if (connectAttempt % 5 == 0) {
+                    if (firstConnect) McUtils.sendLocalMessage(Text.literal("§eConnecting to chat server..."),
+                            Prepend.GUILD.getWithStyle(ColourUtils.YELLOW), true);
+                    else McUtils.sendLocalMessage(Text.literal("§eReconnecting..."),
+                            Prepend.GUILD.getWithStyle(ColourUtils.YELLOW), true);
+                }
                 GuildApi.LOGGER.info("{} reconnect error", err);
+
                 if (err[0] instanceof JSONObject error) {
                     try {
                         String message = error.getString("message");
                         if (message.equals("Invalid token provided") || message.equals("No token provided"))
                             options.extraHeaders.put("Authorization", Collections.singletonList("bearer " + guild.getToken(true)));
                     } catch (Exception e) {
-                        GuildApi.LOGGER.error("reconnect error: {} {}", e, e.getMessage());
+                        GuildApi.LOGGER.error("connect error: {} {}", e, e.getMessage());
                     }
                 }
-                discordSocket.connect();
+
+                try {
+                    Thread.sleep(1000);
+                    if (++connectAttempt < 10)
+                        discordSocket.connect();
+                    else
+                        McUtils.sendLocalMessage(Text.literal("§cCould not connect to chat server. Type /connect to try again."),
+                                Prepend.GUILD.getWithStyle(ColourUtils.RED), true);
+                } catch (Exception e) {
+                    GuildApi.LOGGER.error("reconnect discord error: {} {}", e, e.getMessage());
+                }
             });
-            addDiscordListener("connect", (args) -> McUtils.sendLocalMessage(Text.literal("§aSuccessfully connected to chat server."),
-                    Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)), true));
+
+            addDiscordListener(Socket.EVENT_CONNECT, (args) -> {
+                McUtils.sendLocalMessage(Text.literal("§aSuccessfully connected to chat server."),
+                        Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)), true);
+                firstConnect = false;
+            });
         }
         if (GuildApi.isDevelopment() || Models.WorldState.onWorld()) {
             discordSocket.connect();
