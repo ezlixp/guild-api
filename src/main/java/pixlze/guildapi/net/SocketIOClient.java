@@ -169,7 +169,7 @@ public class SocketIOClient extends Api {
     @Override
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            dispatcher.register(ClientCommandManager.literal("connect").executes((context) -> {
+            dispatcher.register(ClientCommandManager.literal("reconnect").executes((context) -> {
                 if (!discordSocket.connected()) {
                     McUtils.sendLocalMessage(Text.literal("§eConnecting to chat server..."),
                             Prepend.GUILD.getWithStyle(ColourUtils.YELLOW), true);
