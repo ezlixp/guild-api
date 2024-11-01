@@ -17,7 +17,7 @@ public class CommandHelpFeature extends Feature {
     private final List<Pair<String, String>> commands = List.of(
             new Pair<>("/guildapi (/gapi) help", "Displays this list of commands.\n"),
             new Pair<>("/discord (/dc) <message>", "Sends a guild chat message that is only visible to other mod users and the discord.\n"),
-            new Pair<>("/connect", "Tries to connect to the chat server if it isn't already connected.\n"),
+            new Pair<>("/reconnect", "Tries to connect to the chat server if it isn't already connected.\n"),
             new Pair<>("/blocklist", "Lists all blocked usernames.\n"),
             new Pair<>("/blocklist add <username>", "Blocks all discord type messages from a specified discord/minecraft username.\n"),
             new Pair<>("/blocklist remove <username>", "Unblocks a specified discord/minecraft username.\n"),
