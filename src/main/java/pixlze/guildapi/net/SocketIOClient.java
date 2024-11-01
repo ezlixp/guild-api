@@ -124,7 +124,7 @@ public class SocketIOClient extends Api {
                     if (++connectAttempt < 10)
                         discordSocket.connect();
                     else
-                        McUtils.sendLocalMessage(Text.literal("§cCould not connect to chat server. Type /connect to try again."),
+                        McUtils.sendLocalMessage(Text.literal("§cCould not connect to chat server. Type /reconnect to try again."),
                                 Prepend.GUILD.getWithStyle(ColourUtils.RED), true);
                 } catch (Exception e) {
                     GuildApi.LOGGER.error("reconnect discord error: {} {}", e, e.getMessage());
