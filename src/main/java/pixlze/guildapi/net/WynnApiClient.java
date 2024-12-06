@@ -10,21 +10,26 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Managers;
+import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.mod.event.WynncraftConnectionEvents;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.JsonUtils;
 import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.text.TextUtils;
+import pixlze.guildapi.utils.text.type.TextParseOptions;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.LinkedList;
+import java.util.regex.Pattern;
 
 public class WynnApiClient extends Api {
     private static WynnApiClient instance;
     public JsonObject wynnPlayerInfo;
     private boolean reloading = false;
+    private final Pattern GUILD_JOIN_PATTERN = Pattern.compile("^§.You have joined §.(?<guild>.+)§.!$");
 
     protected WynnApiClient() {
         super("wynn", new LinkedList<>());
@@ -49,7 +54,14 @@ public class WynnApiClient extends Api {
                     }).start();
                     return Command.SINGLE_SUCCESS;
                 })));
+        WynnChatMessage.EVENT.register(this::onWynnMessage);
         WynncraftConnectionEvents.JOIN.register(this::onWynnJoin);
+    }
+
+    private void onWynnMessage(Text message) {
+        if (GUILD_JOIN_PATTERN.matcher(TextUtils.parseStyled(message, TextParseOptions.DEFAULT)).find()) {
+            reloadWynnInfo();
+        }
     }
 
     public void initWynnPlayerInfo(boolean print) {
@@ -92,10 +104,14 @@ public class WynnApiClient extends Api {
         }
     }
 
+    private void reloadWynnInfo() {
+        this.disable();
+        initWynnPlayerInfo(false);
+    }
+
     private void onWynnJoin() {
         if (wynnPlayerInfo == null || !McUtils.playerUUID().equals(wynnPlayerInfo.get("uuid").getAsString())) {
-            this.disable();
-            initWynnPlayerInfo(false);
+            reloadWynnInfo();
         } else {
             GuildApi.LOGGER.warn("wynn player already initialized");
         }
