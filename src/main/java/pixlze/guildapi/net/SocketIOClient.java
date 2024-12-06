@@ -170,6 +170,10 @@ public class SocketIOClient extends Api {
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(ClientCommandManager.literal("reconnect").executes((context) -> {
+                if (discordSocket == null) {
+                    McUtils.sendLocalMessage(Text.literal("§cCould not find chat server."), Prepend.GUILD.getWithStyle(ColourUtils.RED), true);
+                    return 0;
+                }
                 if (!discordSocket.connected()) {
                     McUtils.sendLocalMessage(Text.literal("§eConnecting to chat server..."),
                             Prepend.GUILD.getWithStyle(ColourUtils.YELLOW), true);
