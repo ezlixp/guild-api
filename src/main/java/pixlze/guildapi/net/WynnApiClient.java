@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class WynnApiClient extends Api {
@@ -110,7 +111,7 @@ public class WynnApiClient extends Api {
     }
 
     private void onWynnJoin() {
-        if (wynnPlayerInfo == null || !McUtils.playerUUID().equals(wynnPlayerInfo.get("uuid").getAsString())) {
+        if (wynnPlayerInfo == null || !Objects.equals(McUtils.playerUUID(), wynnPlayerInfo.get("uuid").getAsString())) {
             reloadWynnInfo();
         } else {
             GuildApi.LOGGER.warn("wynn player already initialized");
