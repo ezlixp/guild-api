@@ -40,7 +40,7 @@ public class DiscordBridgeFeature extends Feature {
             "^§.(?<giver>.*?)(§.)? rewarded §.a Guild Tome§. to §.(?<receiver>.*?)(§.)?$",
             "^§.(?<giver>.*?)(§.)? rewarded §.1024 Emeralds§. to §.(?<receiver>.*?)(§.)?$",
             // Guild bank
-            "^§.(?<username>.+?)§. (?<action>\\w+) §.(?<item>.+?)§. to the Guild Bank \\(§.Everyone§.\\)",
+            "^§.(?<username>.+?)§. (?<action>\\w+) §.(?<item>.+?)§. (?:to|from) the Guild Bank \\(§.Everyone§.\\)",
             // Weekly objective
             "^(?<username>.+?) has finished their weekly objective\\.$",
             "^Only (?<time>.+?) left to complete the Weekly Guild Objectives!$",
@@ -60,7 +60,9 @@ public class DiscordBridgeFeature extends Feature {
             "^\\[\\w+\\] has taken control of .*$",
             // Guild season
             "^The current guild season will end in .*$",
-            "^The last standing territories you control once it ends will grant you 2048² each!$"
+            "^The last standing territories you control once it ends will grant you 2048² each!$",
+            // Misc
+            "^§.(?<username>.+?) has started boosting the guild$"
     ).map(Pattern::compile).toArray(Pattern[]::new);
     private final Pattern[] HR_WHITELIST_PATTERNS = Stream.of(
             // Eco
@@ -72,9 +74,17 @@ public class DiscordBridgeFeature extends Feature {
             "^Territory §.(?<territory>.+?)§. production has stabilised$",
             "^§.(?<username>.+?)§. applied the loadout §(?<loadout>..+?)§. on §.(?<territory>.*)$",
             // Guild bank
-            "^§.(?<username>.+?)§. (?<action>\\w+) §.(?<item>.+?)§. to the Guild Bank \\(§.High Ranked§.\\)$",
+            "^§.(?<username>.+?)§. (?<action>\\w+) §.(?<item>.+?)§. (?:to|from) the Guild Bank \\(§.High Ranked§.\\)$",
             // Guild tome found
-            "^§.A Guild Tome§. has been found and added to the Guild Rewards$"
+            "^§.A Guild Tome§. has been found and added to the Guild Rewards$",
+
+            // Unsure
+            "^(?<username>.+?) from (?<guild>.+?) is requesting to be allied$",
+            "^(?<username>.+?) sent (?<guild>.+?) a request to be allied$",
+            "^(?<username>.+?) rejected (?<guild>.+?) alliance request$",
+
+            "^(?<guild1>.+?) formed an alliance with (?<guild2>.?)$",
+            "^(?<username>.+?) revoked the alliance with (?<guild>.*?)$"
     ).map(Pattern::compile).toArray(Pattern[]::new);
     private SocketIOClient socketIOClient;
 
