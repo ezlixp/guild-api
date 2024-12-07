@@ -84,8 +84,6 @@ public class SocketIOClient extends Api {
             }
 
             addDiscordListener(Socket.EVENT_DISCONNECT, (reason) -> {
-                if (!discordSocket.connected()) return;
-
                 connectAttempt = 0;
 
                 McUtils.sendLocalMessage(Text.literal("§cDisconnected from chat server."),
