@@ -1,2 +1,4 @@
 ### Bug Fixes
 - more incorrect messages
+- fixed an issue with changing guilds
+- fixed an issue with reconnection logging
