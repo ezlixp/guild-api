@@ -104,6 +104,12 @@ public class DiscordBridgeFeature extends Feature {
                                             .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
                                     return 0;
                                 }
+                                if (!socketIOClient.discordSocket.connected()) {
+                                    McUtils.sendLocalMessage(Text.literal("Chat server not connected. Type /reconnect to try to connect.")
+                                            .setStyle(Style.EMPTY.withColor(Formatting.RED)), Prepend.DEFAULT.get(), false);
+                                    return 0;
+
+                                }
                                 socketIOClient.emit(socketIOClient.discordSocket, "discordOnlyWynnMessage", McUtils.playerName() + ": " + message);
                                 socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message));
                                 return Command.SINGLE_SUCCESS;
