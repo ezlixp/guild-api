@@ -33,8 +33,9 @@ public class GuildApiClient extends Api {
             append(Text.literal(" to retry.")
                     .setStyle(Style.EMPTY.withColor(Formatting.RED)));
     private final Text successMessage = Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN));
-    private final String apiBasePath = "api/v1/";
+    private String apiBasePath = "api/v2/";
     public String guildPrefix = "";
+    public String guildId = "";
     private String token;
     private JsonElement validationKey;
     private JsonObject wynnPlayerInfo;
@@ -235,6 +236,8 @@ public class GuildApiClient extends Api {
                         }
                         JsonObject res = JsonUtils.toJsonObject(response.body());
                         baseURL = GuildApi.isDevelopment() ? "http://localhost:3000/":res.get("url").getAsString();
+                        guildId = wynnPlayerInfo.get("guild").getAsJsonObject().get("uuid").getAsString();
+                        apiBasePath += guildId + "/";
                         validationKey = res.get("validationKey");
                         GuildApi.LOGGER.info("successfully loaded base url");
                         super.enable();

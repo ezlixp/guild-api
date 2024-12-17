@@ -34,6 +34,7 @@ public class SocketIOClient extends Api {
     private int connectAttempt = 0;
     private GuildApiClient guild;
     private String guildPrefix;
+    public String guildId;
     private final IO.Options options = IO.Options.builder()
             .setExtraHeaders(new HashMap<>(Map.of("user" +
                     "-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_VERSION))))
@@ -68,6 +69,7 @@ public class SocketIOClient extends Api {
         boolean reloadSocket = false;
         if (!guild.guildPrefix.equals(guildPrefix)) {
             guildPrefix = guild.guildPrefix;
+            guildId = guild.guildId;
             reloadSocket = true;
         }
         initSocket(reloadSocket);
