@@ -111,7 +111,7 @@ public class DiscordBridgeFeature extends Feature {
 
                                 }
                                 socketIOClient.emit(socketIOClient.discordSocket, "discordOnlyWynnMessage", McUtils.playerName() + ": " + message);
-                                socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message));
+                                socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message, "GuildId", socketIOClient.guildId));
                                 return Command.SINGLE_SUCCESS;
                             })));
             dispatcher.register(ClientCommandManager.literal("dc").redirect(dispatcher.getRoot().getChild("discord")));
@@ -150,7 +150,7 @@ public class DiscordBridgeFeature extends Feature {
         if (GuildApi.isDevelopment()) m = m.replaceAll("&", "§");
         GuildApi.LOGGER.info("received: {}", m);
         Matcher guildMatcher = GUILD_PATTERN.matcher(m);
-        if (guildMatcher.find()) {
+        if (!m.contains("\uE003") && guildMatcher.find()) {
             if (isGuildMessage(guildMatcher.group("content")))
                 socketIOClient.emit(socketIOClient.discordSocket, "wynnMessage", guildMatcher.group("content"));
             else if (isHRMessage(guildMatcher.group("content")))
