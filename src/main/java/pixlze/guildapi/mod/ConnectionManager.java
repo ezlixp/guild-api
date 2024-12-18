@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 public class ConnectionManager {
     private static final Pattern WYNNCRAFT_SERVER_PATTERN =
-            Pattern.compile("^(?:(.*)\\.)?wynncraft\\.(?:com|net|org)\\.$");
+            Pattern.compile("^(?:(.*)\\.)?wynncraft\\.(?:com|net|org)$");
     private boolean isConnected = false;
 
     public boolean onWynncraft() {
@@ -30,6 +30,7 @@ public class ConnectionManager {
             return;
         }
         if (handler.getConnection().getAddress() instanceof InetSocketAddress address) {
+            GuildApi.LOGGER.info("ip: {}", address.getHostName());
             if (!isConnected && WYNNCRAFT_SERVER_PATTERN.matcher(address.getHostName()).matches()) {
                 connect();
             } else if (WYNNCRAFT_SERVER_PATTERN.matcher(address.getHostName()).matches()) {
