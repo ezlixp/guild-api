@@ -73,6 +73,7 @@ public class SocketIOClient extends Api {
             reloadSocket = true;
         }
         initSocket(reloadSocket);
+        super.enable();
     }
 
     private void initSocket(boolean reloadSocket) {
@@ -86,11 +87,15 @@ public class SocketIOClient extends Api {
             }
 
             addDiscordListener(Socket.EVENT_DISCONNECT, (reason) -> {
+                GuildApi.LOGGER.info("{} disconnected", reason);
+                if (reason[0].equals("io client disconnect") || reason[0].equals("forced close")) {
+                    GuildApi.LOGGER.info("{} skip", reason);
+                    return;
+                }
                 connectAttempt = 0;
 
                 McUtils.sendLocalMessage(Text.literal("§cDisconnected from chat server."),
                         Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.RED)), true);
-                GuildApi.LOGGER.info("{} disconnected", reason);
 
                 try {
                     Thread.sleep(1000);
@@ -118,12 +123,14 @@ public class SocketIOClient extends Api {
                         GuildApi.LOGGER.error("connect error: {} {}", e, e.getMessage());
                     }
                 }
-
+                GuildApi.LOGGER.info("here, {}", connectAttempt);
                 try {
                     Thread.sleep(1000);
-                    if (++connectAttempt < 10)
+                    if (++connectAttempt < 10) {
+                        discordSocket.disconnect();
                         discordSocket.connect();
-                    else
+                        GuildApi.LOGGER.info("connect");
+                    } else
                         McUtils.sendLocalMessage(Text.literal("§cCould not connect to chat server. Type /reconnect to try again."),
                                 Prepend.GUILD.getWithStyle(ColourUtils.RED), true);
                 } catch (Exception e) {
@@ -142,7 +149,6 @@ public class SocketIOClient extends Api {
             GuildApi.LOGGER.info("sockets connecting");
         }
         WorldStateEvents.CHANGE.register(this::worldStateChanged);
-        super.enable();
     }
 
     public void addDiscordListener(String name, Consumer<Object[]> listener) {
@@ -202,5 +208,6 @@ public class SocketIOClient extends Api {
     protected void unready() {
         super.unready();
         discordSocket.disconnect();
+        options.extraHeaders.clear();
     }
 }

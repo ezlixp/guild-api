@@ -5,8 +5,8 @@ import pixlze.guildapi.features.AutoUpdateFeature;
 import pixlze.guildapi.features.CommandHelpFeature;
 import pixlze.guildapi.features.discord.DiscordBlockFeature;
 import pixlze.guildapi.features.discord.DiscordBridgeFeature;
-import pixlze.guildapi.features.guildresources.AspectListFeature;
 import pixlze.guildapi.features.guildresources.GuildRaidFeature;
+import pixlze.guildapi.features.guildresources.RaidRewardsListFeature;
 import pixlze.guildapi.features.guildresources.TomeListFeature;
 
 public class FeatureManager {
@@ -16,7 +16,7 @@ public class FeatureManager {
         registerFeature(new CommandHelpFeature());
 
         registerFeature(new GuildRaidFeature());
-        registerFeature(new AspectListFeature());
+        registerFeature(new RaidRewardsListFeature());
         registerFeature(new TomeListFeature());
 
         registerFeature(new DiscordBridgeFeature());

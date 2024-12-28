@@ -22,14 +22,17 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class AspectListFeature extends ListFeature {
-    private final Pattern ASPECT_MESSAGE_PATTERN = Pattern.compile("^§.((\uDAFF\uDFFC\uE001\uDB00\uDC06)|(\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE))§. §.(?<giver>.*?)(§" +
+public class RaidRewardsListFeature extends ListFeature {
+    private static final Pattern ASPECT_MESSAGE_PATTERN = Pattern.compile("^§.((\uDAFF\uDFFC\uE001\uDB00\uDC06)|(\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE))§. §.(?<giver>.*?)(§" +
             ".)? rewarded §.an Aspect§. to §.(?<receiver>.*?)(§.)?$");
+    private static final String ENDPOINT = "guilds/raids/rewards/";
+    private String sort = "aspects";
 
-    public AspectListFeature() {
-        super("aspect", "aspects", (listItem) -> Text.literal(listItem.getAsJsonObject().get("username")
+    public RaidRewardsListFeature() {
+        super("rewards", ENDPOINT, (listItem) -> Text.literal(listItem.getAsJsonObject().get("username")
                         .getAsString()).append(": ")
-                .append(listItem.getAsJsonObject().get("aspects").getAsString())
+                .append(listItem.getAsJsonObject().get("aspects").getAsString()).append(" aspects | ")
+                .append(Integer.toString(listItem.getAsJsonObject().get("emeralds").getAsInt() / 4096)).append(" emeralds")
                 .setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
     }
 
@@ -62,7 +65,7 @@ public class AspectListFeature extends ListFeature {
     }
 
     private void search(String username) {
-        Managers.Net.guild.get("aspects/" + username).whenCompleteAsync((res, exception) -> {
+        Managers.Net.guild.get(ENDPOINT + Managers.Net.guild.guildId + "/" + username).whenCompleteAsync((res, exception) -> {
             try {
                 NetUtils.applyDefaultCallback(res, exception, (response) -> {
                     JsonObject resObject = response.getAsJsonObject();

@@ -24,17 +24,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TomeListFeature extends ListFeature {
-    private final Pattern TOME_MESSAGE_PATTERN = Pattern.compile("^§.((\uDAFF\uDFFC\uE001\uDB00\uDC06)|(\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE))§. §.(?<giver>.*?)(§.)?" + " rewarded §.a Guild Tome§. to §.(?<receiver>.*?)(§.)?$");
+    private static final Pattern TOME_MESSAGE_PATTERN = Pattern.compile("^§.((\uDAFF\uDFFC\uE001\uDB00\uDC06)|(\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE))§. §.(?<giver>.*?)(§.)?" + " rewarded §.a Guild Tome§. to §.(?<receiver>.*?)(§.)?$");
+    private static final String ENDPOINT = "guilds/tomes/";
 
     public TomeListFeature() {
-        super("tome", "tomes", (listItem) -> Text.literal(listItem.getAsJsonObject().get("username").getAsString()).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+        super("tome", ENDPOINT, (listItem) -> Text.literal(listItem.getAsJsonObject().get("username").getAsString()).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
     }
 
     @Override
     public void init() {
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
         super.registerCommands(List.of(ClientCommandManager.literal("add").executes((context) -> {
-            Managers.Net.guild.post("tomes", JsonUtils.toJsonObject("{\"username\":\"" + McUtils.playerName() + "\"}")).whenCompleteAsync((res, exception) -> {
+            Managers.Net.guild.post(ENDPOINT, JsonUtils.toJsonObject("{\"username\":\"" + McUtils.playerName() + "\"}")).whenCompleteAsync((res, exception) -> {
                 try {
                     NetUtils.applyDefaultCallback(res, exception, (response) -> McUtils.sendLocalMessage(Text.literal("§aSuccessfully added to the tome queue"), Prepend.DEFAULT.get(), false),
                             (error) -> {
@@ -69,12 +70,12 @@ public class TomeListFeature extends ListFeature {
         Matcher tomeMatcher = TOME_MESSAGE_PATTERN.matcher(tomeMessage);
         if (tomeMatcher.find()) {
             GuildApi.LOGGER.info("{} gave a tome to {}", tomeMatcher.group("giver"), tomeMatcher.group("receiver"));
-            Managers.Net.guild.delete("tomes/" + tomeMatcher.group("receiver"));
+            Managers.Net.guild.delete("guilds/tomes/" + Managers.Net.guild.guildId + "/" + tomeMatcher.group("receiver"));
         }
     }
 
     private void search(String username) {
-        Managers.Net.guild.get("tomes/" + username).whenCompleteAsync((res, exception) -> {
+        Managers.Net.guild.get(ENDPOINT + Managers.Net.guild.guildId + "/" + username).whenCompleteAsync((res, exception) -> {
             try {
                 NetUtils.applyDefaultCallback(res, exception, (response) -> {
                     JsonObject resBody = response.getAsJsonObject();

@@ -12,8 +12,10 @@ import pixlze.guildapi.utils.text.TextUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
 public class McUtils {
+    public static String devName = "pixlze";
+
     public static String playerName() {
-        if (GuildApi.isDevelopment()) return "pixlze";
+        if (GuildApi.isDevelopment()) return devName;
         return player().getName().getString();
     }
 

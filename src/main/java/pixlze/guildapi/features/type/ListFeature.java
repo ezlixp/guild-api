@@ -25,8 +25,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class ListFeature extends Feature {
-    private final String name;
     protected String endpoint;
+    private final String name;
     private final Function<JsonElement, MutableText> lineParser;
     private JsonElement cachedResponse;
 
@@ -72,7 +72,7 @@ public class ListFeature extends Feature {
     private void listItems(int page, boolean reload) {
         CompletableFuture<JsonElement> response = new CompletableFuture<>();
         if (reload) {
-            Managers.Net.guild.get(endpoint).whenCompleteAsync((res, exception) -> {
+            Managers.Net.guild.get(endpoint + Managers.Net.guild.guildId).whenCompleteAsync((res, exception) -> {
                 try {
                     NetUtils.applyDefaultCallback(res, exception, response::complete, (error) -> response.completeExceptionally(null));
                 } catch (Exception e) {

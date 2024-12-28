@@ -111,7 +111,7 @@ public class DiscordBridgeFeature extends Feature {
 
                                 }
                                 socketIOClient.emit(socketIOClient.discordSocket, "discordOnlyWynnMessage", McUtils.playerName() + ": " + message);
-                                socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message, "GuildId", socketIOClient.guildId));
+                                socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message, "WynnGuildId", socketIOClient.guildId));
                                 return Command.SINGLE_SUCCESS;
                             })));
             dispatcher.register(ClientCommandManager.literal("dc").redirect(dispatcher.getRoot().getChild("discord")));

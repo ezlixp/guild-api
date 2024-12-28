@@ -2,6 +2,7 @@ package pixlze.guildapi.net;
 
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.text.ClickEvent;
@@ -42,19 +43,28 @@ public class WynnApiClient extends Api {
     }
 
     public void init() {
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> dispatcher.register(
-                ClientCommandManager.literal("reloadWynnInfo").executes(context -> {
-                    if (!isDisabled() || reloading) return 0;
-                    new Thread(() -> {
-                        reloading = true;
-                        McUtils.sendLocalMessage(
-                                Text.literal("Reloading...")
-                                        .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get(), false);
-                        initWynnPlayerInfo(true);
-                        reloading = false;
-                    }).start();
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+            dispatcher.register(
+                    ClientCommandManager.literal("reloadWynnInfo").executes(context -> {
+                        if (!isDisabled() || reloading) return 0;
+                        new Thread(() -> {
+                            reloading = true;
+                            McUtils.sendLocalMessage(
+                                    Text.literal("Reloading...")
+                                            .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get(), false);
+                            initWynnPlayerInfo(true);
+                            reloading = false;
+                        }).start();
+                        return Command.SINGLE_SUCCESS;
+                    }));
+            if (GuildApi.isDevelopment()) {
+                dispatcher.register(ClientCommandManager.literal("setplayer").then(ClientCommandManager.argument("username", StringArgumentType.word()).executes(context -> {
+                    McUtils.devName = StringArgumentType.getString(context, "username");
+                    reloadWynnInfo();
                     return Command.SINGLE_SUCCESS;
                 })));
+            }
+        });
         WynnChatMessage.EVENT.register(this::onWynnMessage);
         WynncraftConnectionEvents.JOIN.register(this::onWynnJoin);
     }
@@ -68,7 +78,7 @@ public class WynnApiClient extends Api {
     public void initWynnPlayerInfo(boolean print) {
         if (McUtils.mc().player != null) {
             try {
-                URI uri = URI.create(GuildApi.isDevelopment() ? "https://api.wynncraft.com/v3/player/doggc":
+                URI uri = URI.create(GuildApi.isDevelopment() ? "https://api.wynncraft.com/v3/player/" + McUtils.playerName():
                         "https://api.wynncraft.com/v3/player/" + McUtils.mc().player.getUuidAsString());
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(uri)

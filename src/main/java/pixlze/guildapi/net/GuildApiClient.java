@@ -33,16 +33,13 @@ public class GuildApiClient extends Api {
             append(Text.literal(" to retry.")
                     .setStyle(Style.EMPTY.withColor(Formatting.RED)));
     private final Text successMessage = Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN));
-    private String apiBasePath = "api/v2/";
+    private final String apiBasePath = "api/v2/";
     public String guildPrefix = "";
-    public String guildId = "";
+    public String guildId = "none";
     private String token;
     private JsonElement validationKey;
     private JsonObject wynnPlayerInfo;
 
-    // TODO improve error handling
-    // add optional callback to each request so i can handle non errors natively
-    // phase out checkerror
     public GuildApiClient() {
         super("guild", List.of(WynnApiClient.class));
         instance = this;
@@ -63,7 +60,7 @@ public class GuildApiClient extends Api {
                 JsonObject requestBody = new JsonObject();
                 requestBody.add("validationKey", validationKey);
                 HttpRequest.Builder builder = HttpRequest.newBuilder()
-                        .uri(URI.create(baseURL + apiBasePath + "auth/get-token"))
+                        .uri(URI.create(baseURL + apiBasePath + "guilds/auth/get-token/" + guildId))
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()));
                 if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
@@ -237,7 +234,6 @@ public class GuildApiClient extends Api {
                         JsonObject res = JsonUtils.toJsonObject(response.body());
                         baseURL = GuildApi.isDevelopment() ? "http://localhost:3000/":res.get("url").getAsString();
                         guildId = wynnPlayerInfo.get("guild").getAsJsonObject().get("uuid").getAsString();
-                        apiBasePath += guildId + "/";
                         validationKey = res.get("validationKey");
                         GuildApi.LOGGER.info("successfully loaded base url");
                         super.enable();
@@ -252,6 +248,15 @@ public class GuildApiClient extends Api {
                                     "Talk to a chief about setting one up for your guild.")
                     .setStyle(Style.EMPTY.withColor(Formatting.RED)), this);
         }
+    }
+
+    protected void unready() {
+        validationKey = null;
+        wynnPlayerInfo = null;
+        guildId = null;
+        baseURL = null;
+        token = null;
+        super.unready();
     }
 
 }
