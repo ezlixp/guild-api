@@ -1,4 +1,3 @@
-### Bug Fixes
-- more incorrect messages
-- fixed an issue with changing guilds
-- fixed an issue with reconnection logging
+### Misc
+- revamped aspect list into rewards list
+- improved support for more guilds
