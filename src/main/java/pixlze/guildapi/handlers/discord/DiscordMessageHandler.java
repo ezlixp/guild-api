@@ -21,7 +21,7 @@ public class DiscordMessageHandler extends Handler {
             try {
                 GuildApi.LOGGER.info("received discord {}", data.get("Content").toString());
                 if (data.get("Content").toString().isBlank() || Models.DiscordMessage.isBlocked(data.get("Author")
-                        .toString())) return;
+                        .toString().split(" ")[0])) return;
                 S2CDiscordEvents.MESSAGE.invoker().interact(data);
             } catch (Exception e) {
                 GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
