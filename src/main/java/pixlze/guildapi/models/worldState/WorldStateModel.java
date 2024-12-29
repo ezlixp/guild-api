@@ -1,11 +1,9 @@
 package pixlze.guildapi.models.worldState;
 
-import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.mc.event.PlayerInfoChangedEvents;
-import pixlze.guildapi.mc.event.ScreenOpen;
 import pixlze.guildapi.mod.event.WynncraftConnectionEvents;
 import pixlze.guildapi.models.worldState.event.WorldStateEvents;
 import pixlze.guildapi.models.worldState.type.WorldState;
@@ -18,7 +16,6 @@ public class WorldStateModel {
     private static final Pattern HUB_NAME = Pattern.compile("^\n§6§l play.wynncraft.com \n$");
     private static final UUID WORLD_NAME_UUID = UUID.fromString("16ff7452-714f-2752-b3cd-c3cb2068f6af");
     private static final Pattern WORLD_NAME = Pattern.compile("^§f {2}§lGlobal \\[(.*)]$");
-    private static final String CHARACTER_SELECTION_TITLE = "§8§lSelect a Character";
     private static final Vec3d AFK_QUEUE_POSITION = new Vec3d(8.5, 65, 8.5);
     private WorldState currentState = WorldState.NOT_CONNECTED;
     private Text currentTabListFooter = Text.empty();
@@ -29,7 +26,6 @@ public class WorldStateModel {
         WynncraftConnectionEvents.CHANGE.register(this::changing);
         PlayerInfoChangedEvents.DISPLAY.register(this::onDisplayChanged);
         PlayerInfoChangedEvents.FOOTER.register(this::onTabListFooter);
-        ScreenOpen.EVENT.register(this::onOpenContainer);
     }
 
     public void connecting() {
@@ -64,12 +60,6 @@ public class WorldStateModel {
             if (HUB_NAME.matcher(Objects.requireNonNull(footer.getLiteralString())).find()) {
                 setState(WorldState.HUB);
             }
-        }
-    }
-
-    public void onOpenContainer(ScreenHandlerType<?> type, Text name) {
-        if (type == ScreenHandlerType.GENERIC_9X3 && Objects.equals(name.getLiteralString(), CHARACTER_SELECTION_TITLE)) {
-            setState(WorldState.CHARACTER_SELECTION);
         }
     }
 
