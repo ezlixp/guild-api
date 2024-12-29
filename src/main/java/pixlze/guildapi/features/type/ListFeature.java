@@ -22,18 +22,40 @@ import pixlze.guildapi.utils.type.Prepend;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class ListFeature extends Feature {
     protected String endpoint;
     private final String name;
-    private final Function<JsonElement, MutableText> lineParser;
+    private final BiFunction<JsonElement, String, MutableText> lineParser;
     private JsonElement cachedResponse;
+    private String sortMember;
 
     public ListFeature(String name, String endpoint, Function<JsonElement, MutableText> lineParser) {
         this.name = name;
         this.endpoint = endpoint;
+        this.lineParser = (listItem, sortBy) -> lineParser.apply(listItem);
+    }
+
+    public ListFeature(String name, String endpoint, Function<JsonElement, MutableText> lineParser, String sortMember) {
+        this.name = name;
+        this.endpoint = endpoint;
+        this.lineParser = (listItem, sortBy) -> lineParser.apply(listItem);
+        this.sortMember = sortMember;
+    }
+
+    public ListFeature(String name, String endpoint, BiFunction<JsonElement, String, MutableText> lineParser) {
+        this.name = name;
+        this.endpoint = endpoint;
         this.lineParser = lineParser;
+    }
+
+    public ListFeature(String name, String endpoint, BiFunction<JsonElement, String, MutableText> lineParser, String sortMember) {
+        this.name = name;
+        this.endpoint = endpoint;
+        this.lineParser = lineParser;
+        this.sortMember = sortMember;
     }
 
     @Override
@@ -69,6 +91,29 @@ public class ListFeature extends Feature {
         );
     }
 
+    protected String getSortMember() {
+        return this.sortMember;
+    }
+
+    protected void setSortMember(String sortMember) {
+        this.sortMember = sortMember;
+    }
+
+    private void applySort(List<JsonElement> listElements) {
+        if (sortMember == null) return;
+        listElements.sort((a, b) -> {
+            try {
+                double val1 = a.getAsJsonObject().get(sortMember).getAsDouble();
+                double val2 = b.getAsJsonObject().get(sortMember).getAsDouble();
+                if (val1 < val2) return 1;
+                else if (Math.abs(val1 - val2) < 0.0000001) return 0;
+                else return -1;
+            } catch (Exception error) {
+                return 0;
+            }
+        });
+    }
+
     private void listItems(int page, boolean reload) {
         CompletableFuture<JsonElement> response = new CompletableFuture<>();
         if (reload) {
@@ -94,6 +139,7 @@ public class ListFeature extends Feature {
                 return;
             }
             List<JsonElement> listItems = res.getAsJsonArray().asList();
+            applySort(listItems);
             MutableText listMessage = Text.literal(name.substring(0, 1)
                             .toUpperCase() + name.substring(1) + " list page " + (page + 1) + ":\n")
                     .setStyle(Style.EMPTY.withColor(Formatting.WHITE));
@@ -102,7 +148,7 @@ public class ListFeature extends Feature {
                     break;
                 }
                 listMessage.append(Text.literal(i + 1 + ". ")).withColor(0xFFFFFF);
-                listMessage.append(lineParser.apply(listItems.get(i)));
+                listMessage.append(lineParser.apply(listItems.get(i), sortMember));
                 if (i != Math.min(page, listItems.size()) - 1) {
                     listMessage.append(Text.literal("\n"));
                 }
@@ -117,7 +163,6 @@ public class ListFeature extends Feature {
                             .setStyle(Style.EMPTY.withColor(hasNext ? Formatting.GREEN:Formatting.GRAY).withBold(true)
                                     .withClickEvent(hasNext ? new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + name + "list view " + (page + 2) + " false"):null)));
             listMessage.append("\n");
-            GuildApi.LOGGER.info("{} listmessage", listMessage);
             McUtils.sendLocalMessage(listMessage, Prepend.DEFAULT.get(), false);
         });
     }
