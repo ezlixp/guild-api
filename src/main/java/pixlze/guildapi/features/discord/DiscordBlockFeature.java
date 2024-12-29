@@ -94,8 +94,8 @@ public class DiscordBlockFeature extends ListFeature {
             guildApiClient.get("user/blocked/" + McUtils.playerUUID()).whenCompleteAsync((res, error) -> {
                 try {
                     NetUtils.applyDefaultCallback(res, error, (resOK) -> {
-                        GuildApi.LOGGER.info("{} blocked peoploe:", resOK);
-                        List<JsonElement> blocked = resOK.getAsJsonArray().asList();
+                        GuildApi.LOGGER.info("{} blocked peoploe:", resOK.getAsJsonObject().get("blocked"));
+                        List<JsonElement> blocked = resOK.getAsJsonObject().get("blocked").getAsJsonArray().asList();
                         for (JsonElement block : blocked) {
                             GuildApi.LOGGER.info("blocking: {}", block.getAsString());
                             Models.DiscordMessage.block(block.getAsString());
