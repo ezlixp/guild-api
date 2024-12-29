@@ -16,17 +16,32 @@ import java.util.List;
 public class CommandHelpFeature extends Feature {
     private final List<Pair<String, String>> commands = List.of(
             new Pair<>("/guildapi (/gapi) help", "Displays this list of commands."),
+
+            new Pair<>("\n", "Bridge:"),
+
             new Pair<>("/discord (/dc) <message>", "Sends a guild chat message that is only visible to other mod users and the discord."),
             new Pair<>("/reconnect", "Tries to connect to the chat server if it isn't already connected."),
+            new Pair<>("/online", "Displays all connected mod users."),
+
+            new Pair<>("\n", "Block List:"),
+
             new Pair<>("/blocklist", "Lists all blocked usernames."),
             new Pair<>("/blocklist add <username>", "Blocks all discord type messages from a specified discord/minecraft username."),
             new Pair<>("/blocklist remove <username>", "Unblocks a specified discord/minecraft username."),
+
+            new Pair<>("\n", "Tome List:"),
+
             new Pair<>("/tomelist", "Displays the current queue to get a guild tome."),
             new Pair<>("/tomelist add", "Adds you to the tome list queue if you're not already listed."),
             new Pair<>("/tomelist search <player>", "Fetches the position of a specified player in the tome list queue, or your position if no player is specified."),
-            new Pair<>("/aspectlist", "Displays how many aspects are owed to each player."),
-            new Pair<>("/aspectlist search <player>", "Fetches the number of aspects owed to a specified player, or to you if no player is specified."),
-            new Pair<>("/online", "Displays all online mod users."));
+
+            new Pair<>("\n", "Raid List:"),
+
+            new Pair<>("/raidlist", "Displays raid information for all players."),
+            new Pair<>("/raidlist search <player>", "Fetches the raid information for a specific player, or your information if no player is specified."),
+            new Pair<>("/raidlist sort <raids|apsects|emeralds>", "Defines how to sort information displayed in the raid list.")
+    );
+
     private MutableText helpMessage;
 
     @Override
@@ -34,7 +49,8 @@ public class CommandHelpFeature extends Feature {
         helpMessage = Text.literal("§aCommands:\n");
         for (int i = 0; i < commands.size(); i++) {
             Pair<String, String> entry = commands.get(i);
-            helpMessage.append(entry.getLeft() + " - " + entry.getRight());
+            String delimiter = entry.getLeft().isBlank() ? "":" - ";
+            helpMessage.append(entry.getLeft() + delimiter + entry.getRight());
             if (i != commands.size() - 1)
                 helpMessage.append("\n");
         }
