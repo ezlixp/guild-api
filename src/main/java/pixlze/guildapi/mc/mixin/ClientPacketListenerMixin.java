@@ -2,7 +2,10 @@ package pixlze.guildapi.mc.mixin;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.network.packet.s2c.play.*;
+import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerListHeaderS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mc.event.PlayerInfoChangedEvents;
 import pixlze.guildapi.mc.event.PlayerTeleport;
-import pixlze.guildapi.mc.event.ScreenOpen;
 import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.utils.type.Prepend;
 
@@ -24,12 +26,6 @@ public class ClientPacketListenerMixin {
             Prepend.lastBadge = "";
             WynnChatMessage.EVENT.invoker().interact(packet.content());
         }
-    }
-
-    @Inject(method = "onOpenScreen", at = @At("HEAD"))
-    private void onOpenScreen(OpenScreenS2CPacket packet, CallbackInfo ci) {
-        if (!MinecraftClient.getInstance().isOnThread()) return;
-        ScreenOpen.EVENT.invoker().interact(packet.getScreenHandlerType(), packet.getName());
     }
 
     // for world
