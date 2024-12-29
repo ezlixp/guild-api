@@ -1,8 +1,10 @@
 package pixlze.guildapi.consumers;
 
+import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.components.Feature;
 import pixlze.guildapi.features.AutoUpdateFeature;
 import pixlze.guildapi.features.CommandHelpFeature;
+import pixlze.guildapi.features.DevCommandHelpFeature;
 import pixlze.guildapi.features.discord.DiscordBlockFeature;
 import pixlze.guildapi.features.discord.DiscordBridgeFeature;
 import pixlze.guildapi.features.guildresources.GuildRaidFeature;
@@ -14,6 +16,7 @@ public class FeatureManager {
 
     public void init() {
         registerFeature(new CommandHelpFeature());
+        if (GuildApi.isDevelopment()) registerFeature(new DevCommandHelpFeature());
 
         registerFeature(new GuildRaidFeature());
         registerFeature(new RaidRewardsListFeature());
