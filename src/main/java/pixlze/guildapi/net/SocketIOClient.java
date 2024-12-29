@@ -210,5 +210,6 @@ public class SocketIOClient extends Api {
         if (discordSocket != null)
             discordSocket.disconnect();
         options.extraHeaders.clear();
+        options.extraHeaders.put("user-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_VERSION));
     }
 }
