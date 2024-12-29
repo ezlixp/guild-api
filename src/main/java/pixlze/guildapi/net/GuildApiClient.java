@@ -216,8 +216,9 @@ public class GuildApiClient extends Api {
         wynnPlayerInfo = Managers.Net.wynn.wynnPlayerInfo;
         try {
             guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
+            guildId = wynnPlayerInfo.get("guild").getAsJsonObject().get("uuid").getAsString();
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(GuildApi.secrets.get("url").getAsString() + "guild/" + guildPrefix))
+                    .uri(URI.create(GuildApi.secrets.get("url").getAsString() + "guild/id/" + guildId))
                     .header("Authorization", "bearer " + GuildApi.secrets.get("password").getAsString())
                     .GET()
                     .build();
@@ -232,8 +233,7 @@ public class GuildApiClient extends Api {
                             return;
                         }
                         JsonObject res = JsonUtils.toJsonObject(response.body());
-                        baseURL = GuildApi.isDevelopment() ? "http://localhost:3000/":res.get("url").getAsString();
-                        guildId = wynnPlayerInfo.get("guild").getAsJsonObject().get("uuid").getAsString();
+                        baseURL = GuildApi.isDevelopment() ? "http://localhost:3000/":"https://ico-server-test.onrender.com/";
                         validationKey = res.get("validationKey");
                         GuildApi.LOGGER.info("successfully loaded base url");
                         super.enable();
