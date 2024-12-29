@@ -207,7 +207,8 @@ public class SocketIOClient extends Api {
     @Override
     protected void unready() {
         super.unready();
-        discordSocket.disconnect();
+        if (discordSocket != null)
+            discordSocket.disconnect();
         options.extraHeaders.clear();
     }
 }
