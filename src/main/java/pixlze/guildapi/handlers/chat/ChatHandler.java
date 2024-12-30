@@ -23,6 +23,8 @@ public final class ChatHandler extends Handler {
             Pattern.compile("^ *§[47]Press §[cf](SNEAK|SHIFT) §[47]to continue$");
     private static final Pattern NPC_SELECT_PATTERN =
             Pattern.compile("^ *§[47cf](Select|CLICK) §[47cf]an option (§[47])?to continue$");
+    private static final int CHAT_SCREEN_TICK_DELAY = 3;
+
     private ArrayList<Text> collectedLines = new ArrayList<>();
     private long chatScreenTicks = 0;
     private String lastRealChat = null;
@@ -40,8 +42,8 @@ public final class ChatHandler extends Handler {
         long currentTicks = McUtils.mc().world.getTime();
 
         List<Text> lines = TextUtils.splitLines(message);
-        if (lines.size() > 1 || (message.getString().isEmpty() && (currentTicks <= chatScreenTicks + 1))) {
-            if (currentTicks <= chatScreenTicks + 1) {
+        if (lines.size() > 1 || (message.getString().isEmpty() && (currentTicks <= chatScreenTicks + CHAT_SCREEN_TICK_DELAY))) {
+            if (currentTicks <= chatScreenTicks + CHAT_SCREEN_TICK_DELAY) {
                 collectedLines.addAll(lines);
             } else {
                 if (chatScreenTicks != 0) {
@@ -59,6 +61,7 @@ public final class ChatHandler extends Handler {
     }
 
     private void onConnectionChange(WorldState state) {
+        GuildApi.LOGGER.info("CONNECTION CHANGE");
         lastRealChat = null;
         oneBeforeLastRealChat = null;
         lastConfirmationlessDialogue = null;
@@ -67,12 +70,12 @@ public final class ChatHandler extends Handler {
     }
 
     private void processCollected() {
+        GuildApi.LOGGER.info("{} {} last chats", oneBeforeLastRealChat, lastRealChat);
         List<Text> lines = new ArrayList<>(collectedLines);
-//        for (Text line : lines) {
-//            if (!TextUtils.parsePlain(line).isBlank())
-//                GuildApi.LOGGER.info("Collected line: {}", line.getString());
-//        }
-//        GuildApi.LOGGER.info("Collected line spacer: \n\n\n");
+        for (Text line : lines) {
+            GuildApi.LOGGER.info("Collected line: {}", line.getString());
+        }
+        GuildApi.LOGGER.info("Collected line spacer: \n\n\n");
 
         collectedLines = new ArrayList<>();
         chatScreenTicks = 0;
