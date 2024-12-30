@@ -12,6 +12,7 @@ import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.JsonUtils;
 import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.NetUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.URI;
@@ -217,6 +218,7 @@ public class GuildApiClient extends Api {
         try {
             guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
             guildId = wynnPlayerInfo.get("guild").getAsJsonObject().get("uuid").getAsString();
+            GuildApi.LOGGER.info(guildId);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(GuildApi.secrets.get("url").getAsString() + "guild/id/" + guildId))
                     .header("Authorization", "bearer " + GuildApi.secrets.get("password").getAsString())
@@ -224,19 +226,36 @@ public class GuildApiClient extends Api {
                     .build();
             NetManager.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                     .whenCompleteAsync((response, error) -> {
-                        if (error != null) {
-                            GuildApi.LOGGER.error("get guild url error: {} {}", error, error.getMessage());
-                            return;
+                        try {
+                            NetUtils.applyDefaultCallback(response, error, (resOK) -> {
+                                JsonObject res = JsonUtils.toJsonObject(response.body());
+                                baseURL = "https://ico-server-test.onrender.com/";
+                                validationKey = res.get("validationKey");
+                                GuildApi.LOGGER.info("successfully loaded base url");
+                                super.enable();
+                            }, (e) -> {
+                                String guildString = null;
+                                if (wynnPlayerInfo.get("guild").isJsonObject()) {
+                                    guildString = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
+                                }
+                                Managers.Net.apiCrash(Text.literal(
+                                                "Couldn't fetch base url for server of guild \"" + guildString + "\". " +
+                                                        "Talk to a chief about setting one up for your guild. If you believe this is a mistake, check logs for more details.")
+                                        .setStyle(Style.EMPTY.withColor(Formatting.RED)), this);
+                                GuildApi.LOGGER.error("Fetch guild api exception: {}", e);
+                            });
+                        } catch (Exception e) {
+                            String guildString = null;
+                            if (wynnPlayerInfo.get("guild").isJsonObject()) {
+                                guildString = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
+                            }
+                            Managers.Net.apiCrash(Text.literal(
+                                            "Couldn't fetch base url for server of guild \"" + guildString + "\". " +
+                                                    "Talk to a chief about setting one up for your guild. If you believe this is a mistake, check logs for more details.")
+                                    .setStyle(Style.EMPTY.withColor(Formatting.RED)), this);
+                            GuildApi.LOGGER.error("Fetch guild exception: {} {}", e, e.getMessage());
+
                         }
-                        if (response.statusCode() / 100 != 2) {
-                            GuildApi.LOGGER.info("get guild url error: {}", response.body());
-                            return;
-                        }
-                        JsonObject res = JsonUtils.toJsonObject(response.body());
-                        baseURL = GuildApi.isDevelopment() ? "http://localhost:3000/":"https://ico-server-test.onrender.com/";
-                        validationKey = res.get("validationKey");
-                        GuildApi.LOGGER.info("successfully loaded base url");
-                        super.enable();
                     });
         } catch (Exception e) {
             String guildString = null;
