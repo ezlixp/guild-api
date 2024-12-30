@@ -229,7 +229,7 @@ public class GuildApiClient extends Api {
                         try {
                             NetUtils.applyDefaultCallback(response, error, (resOK) -> {
                                 JsonObject res = JsonUtils.toJsonObject(response.body());
-                                baseURL = "https://ico-server-test.onrender.com/";
+                                baseURL = GuildApi.isDevelopment() ? "http://localhost:3000/":"https://ico-server-test.onrender.com/";
                                 validationKey = res.get("validationKey");
                                 GuildApi.LOGGER.info("successfully loaded base url");
                                 super.enable();
