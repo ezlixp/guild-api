@@ -83,7 +83,7 @@ public class SocketIOClient extends Api {
                 registerDiscordListener(listener.getLeft(), listener.getRight());
             }
 
-            addDiscordListener(Socket.EVENT_DISCONNECT, (reason) -> {
+            registerDiscordListener(Socket.EVENT_DISCONNECT, (reason) -> {
                 GuildApi.LOGGER.info("{} disconnected", reason);
                 if (reason[0].equals("io client disconnect") || reason[0].equals("forced close")) {
                     GuildApi.LOGGER.info("{} skip", reason);
@@ -102,7 +102,7 @@ public class SocketIOClient extends Api {
                 }
             });
 
-            addDiscordListener(Socket.EVENT_CONNECT_ERROR, (err) -> {
+            registerDiscordListener(Socket.EVENT_CONNECT_ERROR, (err) -> {
                 if (connectAttempt % 5 == 0) {
                     if (firstConnect) McUtils.sendLocalMessage(Text.literal("§eConnecting to chat server..."),
                             Prepend.GUILD.getWithStyle(ColourUtils.YELLOW), true);
@@ -134,7 +134,7 @@ public class SocketIOClient extends Api {
                 }
             });
 
-            addDiscordListener(Socket.EVENT_CONNECT, (args) -> {
+            registerDiscordListener(Socket.EVENT_CONNECT, (args) -> {
                 McUtils.sendLocalMessage(Text.literal("§aSuccessfully connected to chat server."),
                         Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)), true);
                 firstConnect = false;
