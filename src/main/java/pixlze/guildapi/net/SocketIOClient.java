@@ -28,12 +28,11 @@ import java.util.function.Consumer;
 
 public class SocketIOClient extends Api {
     private static SocketIOClient instance;
-    private final HashSet<Pair<String, Consumer<Object[]>>> listeners = new HashSet<>();
+    private final ArrayList<Pair<String, Consumer<Object[]>>> listeners = new ArrayList<>();
     public Socket discordSocket;
     private boolean firstConnect = true;
     private int connectAttempt = 0;
     private GuildApiClient guild;
-    private String guildPrefix;
     public String guildId;
     private final IO.Options options = IO.Options.builder()
             .setExtraHeaders(new HashMap<>(Map.of("user" +
@@ -67,8 +66,7 @@ public class SocketIOClient extends Api {
 
         options.extraHeaders.put("from", Collections.singletonList(McUtils.playerName()));
         boolean reloadSocket = false;
-        if (!guild.guildPrefix.equals(guildPrefix)) {
-            guildPrefix = guild.guildPrefix;
+        if (!guild.guildId.equals(guildId)) {
             guildId = guild.guildId;
             reloadSocket = true;
         }
@@ -77,13 +75,12 @@ public class SocketIOClient extends Api {
     }
 
     private void initSocket(boolean reloadSocket) {
-        GuildApi.LOGGER.info("initializing sockets");
         if (reloadSocket) {
             firstConnect = true;
             options.extraHeaders.put("Authorization", Collections.singletonList("bearer " + guild.getToken(true)));
             discordSocket = IO.socket(URI.create(guild.getBaseURL() + "discord"), options);
             for (Pair<String, Consumer<Object[]>> listener : listeners) {
-                addDiscordListener(listener.getLeft(), listener.getRight());
+                registerDiscordListener(listener.getLeft(), listener.getRight());
             }
 
             addDiscordListener(Socket.EVENT_DISCONNECT, (reason) -> {
@@ -123,7 +120,6 @@ public class SocketIOClient extends Api {
                         GuildApi.LOGGER.error("connect error: {} {}", e, e.getMessage());
                     }
                 }
-                GuildApi.LOGGER.info("here, {}", connectAttempt);
                 try {
                     Thread.sleep(1000);
                     if (++connectAttempt < 10) {
@@ -153,6 +149,10 @@ public class SocketIOClient extends Api {
 
     public void addDiscordListener(String name, Consumer<Object[]> listener) {
         listeners.add(new Pair<>(name, listener));
+        registerDiscordListener(name, listener);
+    }
+
+    public void registerDiscordListener(String name, Consumer<Object[]> listener) {
         if (discordSocket != null)
             discordSocket.on(name, listener::accept);
     }
@@ -211,5 +211,8 @@ public class SocketIOClient extends Api {
             discordSocket.disconnect();
         options.extraHeaders.clear();
         options.extraHeaders.put("user-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_VERSION));
+        firstConnect = true;
+        connectAttempt = 0;
+
     }
 }
