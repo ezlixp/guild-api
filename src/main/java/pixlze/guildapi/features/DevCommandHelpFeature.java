@@ -18,7 +18,8 @@ public class DevCommandHelpFeature extends Feature {
             new Pair<>("/setplayer <username>", "Impersonates specified username."),
             new Pair<>("/raid <notg|nol|tcc|tna> <player1> <player2> <player3> <player 4>", "Simulates raid completion."),
             new Pair<>("/tome <username>", "Simulates a tome given to specified username."),
-            new Pair<>("/aspect <username>", "Simulates an aspect given to specified username.")
+            new Pair<>("/aspect <username>", "Simulates an aspect given to specified username."),
+            new Pair<>("/testmessage <message>", "Simulates a guild message.")
     );
 
     private MutableText helpMessage;
