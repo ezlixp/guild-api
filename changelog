@@ -1,3 +1,7 @@
+### Bug Fixes
+- fixed an error with account switching
+- fixed an issue with blocklist
+
 ### Misc
 - revamped aspect list into rewards list
 - improved support for more guilds
