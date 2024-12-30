@@ -21,10 +21,12 @@ import pixlze.guildapi.utils.type.Prepend;
 import java.util.List;
 
 public class DiscordBlockFeature extends ListFeature {
+    private static final String ENDPOINT = "user/blocked/";
     private final GuildApiClient guildApiClient = Managers.Net.guild;
 
+
     public DiscordBlockFeature() {
-        super("block", "", (listItem) -> {
+        super("block", ENDPOINT, (listItem) -> {
             Models.DiscordMessage.block(listItem.getAsString());
             return Text.literal(listItem.getAsString());
         });
@@ -43,7 +45,7 @@ public class DiscordBlockFeature extends ListFeature {
                         McUtils.sendLocalMessage(Text.literal("§cYou can't block yourself."), Prepend.GUILD.getWithStyle(ColourUtils.RED), true);
                         return 0;
                     }
-                    guildApiClient.post("user/blocked/" + McUtils.playerUUID(), JsonUtils.toJsonObject("{toBlock:\"" + toBlock + "\"}")).whenCompleteAsync((res, exception) -> {
+                    guildApiClient.post(ENDPOINT + McUtils.playerUUID(), JsonUtils.toJsonObject("{toBlock:\"" + toBlock + "\"}")).whenCompleteAsync((res, exception) -> {
                         try {
                             NetUtils.applyDefaultCallback(res, exception, (resOK) -> {
                                 McUtils.sendLocalMessage(Text.literal("§aSuccessfully blocked \"" + toBlock + "\".\n" +
@@ -67,7 +69,7 @@ public class DiscordBlockFeature extends ListFeature {
                 })),
                 ClientCommandManager.literal("remove").then(ClientCommandManager.argument("toRemove", StringArgumentType.word()).executes((context -> {
                     String toRemove = StringArgumentType.getString(context, "toRemove");
-                    guildApiClient.delete("user/blocked/" + McUtils.playerUUID() + "/" + toRemove).whenCompleteAsync((res, exception) -> {
+                    guildApiClient.delete(ENDPOINT + McUtils.playerUUID() + "/" + toRemove).whenCompleteAsync((res, exception) -> {
                         try {
                             NetUtils.applyDefaultCallback(res, exception, (resOK) -> {
                                 McUtils.sendLocalMessage(Text.literal("§aSuccessfully unblocked " + toRemove + ".\n" +
@@ -90,12 +92,13 @@ public class DiscordBlockFeature extends ListFeature {
 
     private void onApiLoaded(Api api) {
         if (api.getClass().equals(GuildApiClient.class)) {
-            super.endpoint = "user/blocked/" + McUtils.playerUUID();
-            guildApiClient.get("user/blocked/" + McUtils.playerUUID()).whenCompleteAsync((res, error) -> {
+            super.endpoint = ENDPOINT;
+            setExtra(McUtils.playerUUID());
+
+            guildApiClient.get(ENDPOINT + McUtils.playerUUID()).whenCompleteAsync((res, error) -> {
                 try {
                     NetUtils.applyDefaultCallback(res, error, (resOK) -> {
-                        GuildApi.LOGGER.info("{} blocked peoploe:", resOK.getAsJsonObject().get("blocked"));
-                        List<JsonElement> blocked = resOK.getAsJsonObject().get("blocked").getAsJsonArray().asList();
+                        List<JsonElement> blocked = resOK.getAsJsonArray().asList();
                         for (JsonElement block : blocked) {
                             GuildApi.LOGGER.info("blocking: {}", block.getAsString());
                             Models.DiscordMessage.block(block.getAsString());
