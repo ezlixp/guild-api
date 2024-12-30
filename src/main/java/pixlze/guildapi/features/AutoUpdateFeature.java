@@ -47,8 +47,7 @@ public class AutoUpdateFeature extends Feature {
                         }
                     }, NetUtils.defaultFailed("mod update check", false));
                 } catch (Exception e) {
-                    McUtils.sendLocalMessage(Text.literal("§cSomething went wrong. Check logs for more details."), Prepend.DEFAULT.get(), false);
-                    GuildApi.LOGGER.error("auto update error: {} {}", e, e.getMessage());
+                    NetUtils.defaultException("auto update", e);
                 }
             });
             completed = true;
