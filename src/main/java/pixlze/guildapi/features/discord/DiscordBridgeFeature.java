@@ -160,7 +160,6 @@ public class DiscordBridgeFeature extends Feature {
 
     private void onDiscordMessage(JSONObject message) {
         try {
-            GuildApi.LOGGER.info("received discord {}", message.get("Content").toString());
             McUtils.sendLocalMessage(Text.empty().append(FontUtils.BannerPillFont.parseStringWithFill("discord")
                             .fillStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE))).append(" ")
                     .append(Text.literal(message.get("Author").toString())
