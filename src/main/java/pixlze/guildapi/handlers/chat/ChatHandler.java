@@ -73,24 +73,24 @@ public final class ChatHandler extends Handler {
     // add back last real message for first chat screen checking
     private synchronized void processCollected() {
         ArrayList<Text> filteredCollected = new ArrayList<>();
-        for (int i = 0; i < collectedLines.size(); i++) {
-            Text line = collectedLines.get(i);
-            filteredCollected.add(line);
-            if ((NPC_CONFIRM_PATTERN.matcher(TextUtils.parseStyled(line, TextParseOptions.DEFAULT)).find() ||
-                    NPC_SELECT_PATTERN.matcher(TextUtils.parseStyled(line, TextParseOptions.DEFAULT)).find() ||
-                    (i >= 3 &&
-                            EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(i))).find() &&
-                            EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(i - 1))).find() &&
-                            EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(i - 2))).find() &&
-                            EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(i - 3))).find()
-                    )
-            ) && i != collectedLines.size() - 1) {
-                filteredCollected.clear();
-            }
-        }
-
-        collectedLines = filteredCollected;
-        if (collectedLines.isEmpty()) return;
+//        for (int i = 0; i < collectedLines.size(); i++) {
+//            Text line = collectedLines.get(i);
+//            filteredCollected.add(line);
+//            if ((NPC_CONFIRM_PATTERN.matcher(TextUtils.parseStyled(line, TextParseOptions.DEFAULT)).find() ||
+//                    NPC_SELECT_PATTERN.matcher(TextUtils.parseStyled(line, TextParseOptions.DEFAULT)).find() ||
+//                    (i >= 3 &&
+//                            EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(i))).find() &&
+//                            EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(i - 1))).find() &&
+//                            EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(i - 2))).find() &&
+//                            EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(i - 3))).find()
+//                    )
+//            ) && i != collectedLines.size() - 1) {
+//                filteredCollected.clear();
+//            }
+//        }
+//
+//        collectedLines = filteredCollected;
+//        if (collectedLines.isEmpty()) return;
         if (NPC_CONFIRM_PATTERN.matcher(TextUtils.parseStyled(collectedLines.getLast(), TextParseOptions.DEFAULT)).find()) {
             if (collectedLines.size() < 4) {
                 GuildApi.LOGGER.warn("Unable to safely remove 4 lines for npc confirm pattern.");
@@ -131,46 +131,56 @@ public final class ChatHandler extends Handler {
         }
         collectedLines = filteredCollected;
 
-        if (collectedLines.size() % 2 == 0) {
-            boolean doubled = true;
-            filteredCollected = new ArrayList<>();
-            for (int i = 0; i < collectedLines.size() / 2; i++) {
-                if (!TextUtils.parsePlain(collectedLines.get(i)).equals(TextUtils.parsePlain(collectedLines.get(i + collectedLines.size() / 2)))) {
-                    doubled = false;
-                    break;
-                }
-                filteredCollected.add(collectedLines.get(i));
-            }
-            if (doubled) {
-                collectedLines = filteredCollected;
-            }
-        }
-
-
-        for (Text line : collectedLines) {
-            GuildApi.LOGGER.info("collected: {} {}", TextUtils.parsePlain(line), TextUtils.parseStyled(line, TextParseOptions.DEFAULT));
-        }
-        GuildApi.LOGGER.info("collected spacer: \n\n\n");
         if (collectedLines.isEmpty()) return;
-
         LinkedList<Text> newLines = new LinkedList<>();
-        for (int i = 0; i < lastCollected.size(); i++) {
-            int index = 0;
-            boolean works = true;
-            while (i + index < lastCollected.size() && index < collectedLines.size()) {
-                if (!TextUtils.parsePlain(lastCollected.get(i + index)).equals(TextUtils.parsePlain(collectedLines.get(index)))) {
-                    works = false;
+        boolean done = false;
+        if (collectedLines.size() > lastCollected.size() + 5) {
+            GuildApi.LOGGER.info("(minecraft)");
+        }
+        for (int start = collectedLines.size() - 1; start >= 0; start--) {
+            for (int i = 0; i < lastCollected.size(); i++) {
+                int index = 0;
+                boolean works = true;
+                while (i + index < lastCollected.size() && start + index < collectedLines.size()) {
+                    if (!TextUtils.parsePlain(lastCollected.get(i + index)).equals(TextUtils.parsePlain(collectedLines.get(start + index)))) {
+                        works = false;
+                        break;
+                    }
+                    ++index;
+                }
+                if (i + index < lastCollected.size()) {
+                    GuildApi.LOGGER.info("continuing {} {} {}", i, index, start);
+                    continue;
+                }
+                if (works) {
+                    GuildApi.LOGGER.info("i stuff {} {}", i, start);
+                    for (Text line : lastCollected) {
+                        GuildApi.LOGGER.info("last collected: {}", TextUtils.parsePlain(line));
+                    }
+                    GuildApi.LOGGER.info("last collected spacer: \n\n\n");
+                    for (Text line : collectedLines) {
+                        GuildApi.LOGGER.info("collected: {}", TextUtils.parsePlain(line));
+                    }
+                    GuildApi.LOGGER.info("collected spacer: \n\n\n");
+                    filteredCollected = new ArrayList<>();
+                    for (int j = start; j < collectedLines.size(); j++) {
+                        filteredCollected.add(collectedLines.get(j));
+                    }
+                    collectedLines = filteredCollected;
+                    for (Text line : collectedLines) {
+                        GuildApi.LOGGER.info("filtered collected: {}", TextUtils.parsePlain(line));
+                    }
+                    GuildApi.LOGGER.info("filtered collected spacer: \n\n\n");
+
+                    int extra = collectedLines.size() - lastCollected.size() + i;
+                    for (int j = collectedLines.size() - 1; j >= collectedLines.size() - extra; j--) {
+                        newLines.addFirst(collectedLines.get(j));
+                    }
+                    done = true;
                     break;
                 }
-                ++index;
             }
-            if (works) {
-                int extra = collectedLines.size() - lastCollected.size() + i;
-                for (int j = collectedLines.size() - 1; j >= collectedLines.size() - extra; j--) {
-                    newLines.addFirst(collectedLines.get(j));
-                }
-                break;
-            }
+            if (done) break;
         }
         lastCollected = new LinkedList<>(collectedLines);
         processNewLines(newLines);
