@@ -72,7 +72,8 @@ public final class ChatHandler extends Handler {
 
     // add back last real message for first chat screen checking
     private synchronized void processCollected() {
-        ArrayList<Text> filteredCollected = new ArrayList<>();
+        ArrayList<Text> filteredCollected;
+        chatScreenTicks = 0;
 //        for (int i = 0; i < collectedLines.size(); i++) {
 //            Text line = collectedLines.get(i);
 //            filteredCollected.add(line);
@@ -132,15 +133,15 @@ public final class ChatHandler extends Handler {
         collectedLines = filteredCollected;
 
         if (collectedLines.isEmpty()) return;
+
         LinkedList<Text> newLines = new LinkedList<>();
-        boolean done = false;
-        if (collectedLines.size() > lastCollected.size() + 5) {
-            GuildApi.LOGGER.info("(minecraft)");
-        }
+        int candidate = -1;
+        int offset = 0;
         for (int start = collectedLines.size() - 1; start >= 0; start--) {
+            boolean works = true;
             for (int i = 0; i < lastCollected.size(); i++) {
                 int index = 0;
-                boolean works = true;
+                works = true;
                 while (i + index < lastCollected.size() && start + index < collectedLines.size()) {
                     if (!TextUtils.parsePlain(lastCollected.get(i + index)).equals(TextUtils.parsePlain(collectedLines.get(start + index)))) {
                         works = false;
@@ -149,39 +150,39 @@ public final class ChatHandler extends Handler {
                     ++index;
                 }
                 if (i + index < lastCollected.size()) {
-                    GuildApi.LOGGER.info("continuing {} {} {}", i, index, start);
+                    works = false;
                     continue;
                 }
                 if (works) {
-                    GuildApi.LOGGER.info("i stuff {} {}", i, start);
-                    for (Text line : lastCollected) {
-                        GuildApi.LOGGER.info("last collected: {}", TextUtils.parsePlain(line));
-                    }
-                    GuildApi.LOGGER.info("last collected spacer: \n\n\n");
-                    for (Text line : collectedLines) {
-                        GuildApi.LOGGER.info("collected: {}", TextUtils.parsePlain(line));
-                    }
-                    GuildApi.LOGGER.info("collected spacer: \n\n\n");
-                    filteredCollected = new ArrayList<>();
-                    for (int j = start; j < collectedLines.size(); j++) {
-                        filteredCollected.add(collectedLines.get(j));
-                    }
-                    collectedLines = filteredCollected;
-                    for (Text line : collectedLines) {
-                        GuildApi.LOGGER.info("filtered collected: {}", TextUtils.parsePlain(line));
-                    }
-                    GuildApi.LOGGER.info("filtered collected spacer: \n\n\n");
-
-                    int extra = collectedLines.size() - lastCollected.size() + i;
-                    for (int j = collectedLines.size() - 1; j >= collectedLines.size() - extra; j--) {
-                        newLines.addFirst(collectedLines.get(j));
-                    }
-                    done = true;
+                    candidate = start;
+                    offset = i;
                     break;
                 }
             }
-            if (done) break;
+            if (!works && candidate != -1) break;
         }
+        GuildApi.LOGGER.info("i stuff cand: {} ofset: {}", candidate, offset);
+        for (Text line : lastCollected) {
+            GuildApi.LOGGER.info("last collected: {}", TextUtils.parsePlain(line));
+        }
+        GuildApi.LOGGER.info("last collected spacer: \n\n\n");
+        for (Text line : collectedLines) {
+            GuildApi.LOGGER.info("collected: {}", TextUtils.parsePlain(line));
+        }
+        GuildApi.LOGGER.info("collected spacer: \n\n\n");
+
+        if (candidate != -1) {
+            filteredCollected = new ArrayList<>();
+            for (int j = candidate; j < collectedLines.size(); j++) {
+                filteredCollected.add(collectedLines.get(j));
+            }
+            collectedLines = filteredCollected;
+            int extra = collectedLines.size() - lastCollected.size() + offset;
+            for (int j = collectedLines.size() - 1; j >= collectedLines.size() - extra; j--) {
+                newLines.addFirst(collectedLines.get(j));
+            }
+        }
+
         lastCollected = new LinkedList<>(collectedLines);
         processNewLines(newLines);
     }
