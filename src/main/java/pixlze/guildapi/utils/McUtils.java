@@ -20,7 +20,7 @@ public class McUtils {
     }
 
     public static String playerUUID() {
-        if (GuildApi.isDevelopment()) return "39365bd45c7841de8901c7dc5b7c64c4";
+        if (GuildApi.isDevelopment()) return "39365bd4-5c78-41de-8901-c7dc5b7c64c4";
         if (player() != null)
             return player().getUuidAsString();
         return null;
