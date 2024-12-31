@@ -85,14 +85,13 @@ public class SocketIOClient extends Api {
 
             registerDiscordListener(Socket.EVENT_DISCONNECT, (reason) -> {
                 GuildApi.LOGGER.info("{} disconnected", reason);
+                McUtils.sendLocalMessage(Text.literal("§cDisconnected from chat server."),
+                        Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.RED)), true);
                 if (reason[0].equals("io client disconnect") || reason[0].equals("forced close")) {
                     GuildApi.LOGGER.info("{} skip", reason);
                     return;
                 }
                 connectAttempt = 0;
-
-                McUtils.sendLocalMessage(Text.literal("§cDisconnected from chat server."),
-                        Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.RED)), true);
 
                 try {
                     Thread.sleep(1000);
