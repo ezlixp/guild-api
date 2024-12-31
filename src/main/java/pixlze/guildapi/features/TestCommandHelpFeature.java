@@ -35,7 +35,7 @@ public class TestCommandHelpFeature extends Feature {
                 helpMessage.append("\n");
         }
         ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> {
-            dispatcher.register(GuildApi.BASE_COMMAND.then(ClientCommandManager.literal("devhelp").executes((context) -> {
+            dispatcher.register(GuildApi.BASE_COMMAND.then(ClientCommandManager.literal("testhelp").executes((context) -> {
                 McUtils.sendLocalMessage(helpMessage, Prepend.DEFAULT.get(), false);
                 return Command.SINGLE_SUCCESS;
             })));
