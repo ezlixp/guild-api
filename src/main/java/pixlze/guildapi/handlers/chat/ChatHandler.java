@@ -74,6 +74,10 @@ public final class ChatHandler extends Handler {
     private synchronized void processCollected() {
         ArrayList<Text> filteredCollected;
         chatScreenTicks = 0;
+        for (Text line : collectedLines) {
+            GuildApi.LOGGER.info("pre collected: {}", TextUtils.parsePlain(line));
+        }
+        GuildApi.LOGGER.info("pre collected spacer: \n\n\n");
 //        for (int i = 0; i < collectedLines.size(); i++) {
 //            Text line = collectedLines.get(i);
 //            filteredCollected.add(line);
@@ -113,19 +117,21 @@ public final class ChatHandler extends Handler {
                 GuildApi.LOGGER.warn("Unable to safely remove lines for npc select pattern.");
                 return;
             }
-        } else if (collectedLines.size() > 4) {
-            if (EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.getLast())).find() &&
-                    EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(collectedLines.size() - 2))).find() &&
-                    EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(collectedLines.size() - 3))).find() &&
-                    EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(collectedLines.size() - 4))).find()
-            ) {
-                collectedLines.removeLast();
-                collectedLines.removeLast();
-                collectedLines.removeLast();
-                collectedLines.removeLast();
-            }
-        }
+        } else if (collectedLines.size() > 4 &&
+                EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.getLast())).find() &&
+                EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(collectedLines.size() - 2))).find() &&
+                EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(collectedLines.size() - 3))).find() &&
+                EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(collectedLines.size() - 4))).find()
+        ) {
+            collectedLines.removeLast();
+            collectedLines.removeLast();
+            collectedLines.removeLast();
+            collectedLines.removeLast();
 
+        } else if (collectedLines.size() >= 2 && EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(collectedLines.size() - 2))).find() && !EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.getLast())).find()) {
+            collectedLines.removeLast();
+            collectedLines.removeLast();
+        }
         filteredCollected = new ArrayList<>();
         for (Text line : collectedLines) {
             if (!EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(line)).find()) filteredCollected.add(line);
@@ -161,11 +167,11 @@ public final class ChatHandler extends Handler {
             }
             if (!works && candidate != -1) break;
         }
-        GuildApi.LOGGER.info("i stuff cand: {} ofset: {}", candidate, offset);
-        for (Text line : lastCollected) {
-            GuildApi.LOGGER.info("last collected: {}", TextUtils.parsePlain(line));
-        }
-        GuildApi.LOGGER.info("last collected spacer: \n\n\n");
+//        GuildApi.LOGGER.info("i stuff cand: {} ofset: {}", candidate, offset);
+//        for (Text line : lastCollected) {
+//            GuildApi.LOGGER.info("last collected: {}", TextUtils.parsePlain(line));
+//        }
+//        GuildApi.LOGGER.info("last collected spacer: \n\n\n");
         for (Text line : collectedLines) {
             GuildApi.LOGGER.info("collected: {}", TextUtils.parsePlain(line));
         }
