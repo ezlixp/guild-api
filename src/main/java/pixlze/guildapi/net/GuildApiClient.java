@@ -218,7 +218,6 @@ public class GuildApiClient extends Api {
         try {
             guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
             guildId = wynnPlayerInfo.get("guild").getAsJsonObject().get("uuid").getAsString();
-            GuildApi.LOGGER.info(guildId);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(GuildApi.secrets.get("url").getAsString() + "guild/id/" + guildId))
                     .header("Authorization", "bearer " + GuildApi.secrets.get("password").getAsString())

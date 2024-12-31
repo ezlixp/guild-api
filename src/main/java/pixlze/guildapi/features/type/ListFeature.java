@@ -135,7 +135,6 @@ public class ListFeature extends Feature {
             });
         } else response.complete(cachedResponse);
         response.whenCompleteAsync((res, exception) -> {
-            GuildApi.LOGGER.info("{}", res);
             if (exception != null) {
                 McUtils.sendLocalMessage(Text.literal("§cSomething went wrong. Check logs for more details."), Prepend.DEFAULT.get(), false);
                 GuildApi.LOGGER.error("List feature error: {} {}", exception, exception.getMessage());
