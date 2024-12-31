@@ -196,7 +196,7 @@ public class SocketIOClient extends Api {
                     return 0;
                 }
             }));
-            if (GuildApi.isDevelopment()) {
+            if (GuildApi.isTesting()) {
                 dispatcher.register(ClientCommandManager.literal("testmessage")
                         .then(ClientCommandManager.argument("message", StringArgumentType.greedyString())
                                 .executes((context) -> {

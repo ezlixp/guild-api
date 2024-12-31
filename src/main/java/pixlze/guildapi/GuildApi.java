@@ -47,6 +47,10 @@ public class GuildApi implements ClientModInitializer {
         return development;
     }
 
+    public static boolean isTesting() {
+        return true;
+    }
+
     @Override
     public void onInitializeClient() {
         development = FabricLoader.getInstance().isDevelopmentEnvironment();

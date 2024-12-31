@@ -13,7 +13,7 @@ import pixlze.guildapi.utils.type.Prepend;
 
 import java.util.List;
 
-public class DevCommandHelpFeature extends Feature {
+public class TestCommandHelpFeature extends Feature {
     private final List<Pair<String, String>> commands = List.of(
             new Pair<>("/setplayer <username>", "Impersonates specified username."),
             new Pair<>("/raid <notg|nol|tcc|tna> <player1> <player2> <player3> <player 4>", "Simulates raid completion."),
@@ -26,7 +26,7 @@ public class DevCommandHelpFeature extends Feature {
 
     @Override
     public void init() {
-        helpMessage = Text.literal("§aDev Commands:\n");
+        helpMessage = Text.literal("§aTest Commands:\n");
         for (int i = 0; i < commands.size(); i++) {
             Pair<String, String> entry = commands.get(i);
             String delimiter = entry.getLeft().isBlank() ? "":" - ";

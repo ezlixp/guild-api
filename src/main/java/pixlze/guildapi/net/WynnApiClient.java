@@ -57,7 +57,7 @@ public class WynnApiClient extends Api {
                         }).start();
                         return Command.SINGLE_SUCCESS;
                     }));
-            if (GuildApi.isDevelopment()) {
+            if (GuildApi.isTesting()) {
                 dispatcher.register(ClientCommandManager.literal("setplayer").then(ClientCommandManager.argument("username", StringArgumentType.word()).executes(context -> {
                     McUtils.devName = StringArgumentType.getString(context, "username");
                     reloadWynnInfo();

@@ -62,7 +62,7 @@ public class TomeListFeature extends ListFeature {
             return Command.SINGLE_SUCCESS;
         }))));
 
-        if (GuildApi.isDevelopment()) {
+        if (GuildApi.isTesting()) {
             ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
                 dispatcher.register(ClientCommandManager.literal("tome").then(ClientCommandManager.argument("username", StringArgumentType.word()).executes((context) -> {
                     String username = StringArgumentType.getString(context, "username");

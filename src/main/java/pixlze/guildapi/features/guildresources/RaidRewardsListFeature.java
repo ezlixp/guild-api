@@ -84,7 +84,7 @@ public class RaidRewardsListFeature extends ListFeature {
                         }))
         ));
 
-        if (GuildApi.isDevelopment()) {
+        if (GuildApi.isTesting()) {
             ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> {
                 dispatcher.register(ClientCommandManager.literal("aspect").then(ClientCommandManager.argument("username", StringArgumentType.word()).executes((context) -> {
                     String username = StringArgumentType.getString(context, "username");

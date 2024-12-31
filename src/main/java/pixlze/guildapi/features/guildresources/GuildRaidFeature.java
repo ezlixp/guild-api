@@ -25,7 +25,7 @@ public class GuildRaidFeature extends Feature {
     @Override
     public void init() {
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
-        if (GuildApi.isDevelopment()) {
+        if (GuildApi.isTesting()) {
             ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> {
                 dispatcher.register(ClientCommandManager.literal("raid").then(
                         ClientCommandManager.argument("raid", StringArgumentType.word()).suggests((context, builder) -> {
