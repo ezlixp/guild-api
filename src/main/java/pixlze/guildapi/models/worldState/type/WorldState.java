@@ -4,6 +4,5 @@ public enum WorldState {
     NOT_CONNECTED,
     CONNECTING,
     HUB,
-    CHARACTER_SELECTION,
     WORLD
 }

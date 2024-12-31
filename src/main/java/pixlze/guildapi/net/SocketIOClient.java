@@ -156,13 +156,15 @@ public class SocketIOClient extends Api {
     }
 
     private void worldStateChanged(WorldState state) {
-        if (isDisabled()) return;
         if (state == WorldState.WORLD) {
+            this.enable();
             if (!discordSocket.connected()) {
                 discordSocket.connect();
                 GuildApi.LOGGER.info("discord socket on");
             }
         } else {
+            this.disable();
+            connectAttempt = 999;
             if (discordSocket.connected()) {
                 discordSocket.disconnect();
                 GuildApi.LOGGER.info("discord socket off");
@@ -174,6 +176,10 @@ public class SocketIOClient extends Api {
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(ClientCommandManager.literal("reconnect").executes((context) -> {
+                if (isDisabled()) {
+                    McUtils.sendLocalMessage(Text.literal("§cCannot connect to chat server at this time. Please join a world first."), Prepend.GUILD.getWithStyle(ColourUtils.RED), true);
+                    return 0;
+                }
                 if (discordSocket == null) {
                     McUtils.sendLocalMessage(Text.literal("§cCould not find chat server."), Prepend.GUILD.getWithStyle(ColourUtils.RED), true);
                     return 0;

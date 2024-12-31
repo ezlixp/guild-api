@@ -65,6 +65,7 @@ public class WorldStateModel {
 
     private void setState(WorldState state) {
         if (currentState != state) {
+            GuildApi.LOGGER.info("worldstate: {}", state.name());
             currentState = state;
             WorldStateEvents.CHANGE.invoker().changed(state);
         }
