@@ -35,7 +35,6 @@ public final class ChatHandler extends Handler {
     }
 
     private void onConnectionChange(WorldState state) {
-        GuildApi.LOGGER.info("CONNECTION CHANGE");
         lastCollected = new LinkedList<>();
         collectedLines = new ArrayList<>();
         chatScreenTicks = 0;
