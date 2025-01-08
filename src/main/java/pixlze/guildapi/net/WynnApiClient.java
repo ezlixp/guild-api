@@ -71,6 +71,7 @@ public class WynnApiClient extends Api {
 
     private void onWynnMessage(Text message) {
         if (GUILD_JOIN_PATTERN.matcher(TextUtils.parseStyled(message, TextParseOptions.DEFAULT)).find()) {
+            GuildApi.LOGGER.info("joining guild");
             reloadWynnInfo();
         }
     }
