@@ -45,6 +45,6 @@ public class McUtils {
         if (wynncraftStyle) withPrepend = TextUtils.toBlockMessage(withPrepend, prepend.getStyle());
         Prepend.linesSinceBadge += ChatMessages.breakRenderedChatMessageLines(withPrepend, chatHudAccessorInvoker.invokeGetWidth(), MinecraftClient.getInstance().textRenderer)
                 .size();
-        player().sendMessage(withPrepend);
+        player().sendMessage(withPrepend, false);
     }
 }

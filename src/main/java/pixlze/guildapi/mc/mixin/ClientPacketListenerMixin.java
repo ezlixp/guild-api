@@ -5,15 +5,12 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerListHeaderS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
-import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pixlze.guildapi.components.Managers;
 import pixlze.guildapi.mc.event.PlayerInfoChangedEvents;
-import pixlze.guildapi.mc.event.PlayerTeleport;
 import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.utils.type.Prepend;
 
@@ -48,12 +45,5 @@ public class ClientPacketListenerMixin {
     private void onPlayerListHeader(PlayerListHeaderS2CPacket packet, CallbackInfo ci) {
         if (!MinecraftClient.getInstance().isOnThread()) return;
         PlayerInfoChangedEvents.FOOTER.invoker().footerChanged(packet.footer());
-    }
-
-    @Inject(method = "onPlayerPositionLook", at = @At("HEAD"))
-    private void onPlayerPositionLook(PlayerPositionLookS2CPacket packet, CallbackInfo ci) {
-        if (!MinecraftClient.getInstance().isOnThread()) return;
-        if (!packet.getFlags().isEmpty()) return;
-        PlayerTeleport.EVENT.invoker().playerTeleported(new Vec3d(packet.getX(), packet.getY(), packet.getZ()));
     }
 }
