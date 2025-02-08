@@ -60,6 +60,7 @@ public class GuildApiClient extends Api {
             try {
                 JsonObject requestBody = new JsonObject();
                 requestBody.add("validationKey", validationKey);
+                requestBody.add("username", JsonUtils.toJsonElement(McUtils.playerName()));
                 HttpRequest.Builder builder = HttpRequest.newBuilder()
                         .uri(URI.create(baseURL + apiBasePath + "guilds/auth/get-token/" + guildId))
                         .header("Content-Type", "application/json")

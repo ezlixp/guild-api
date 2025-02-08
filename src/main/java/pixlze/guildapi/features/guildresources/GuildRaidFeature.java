@@ -46,7 +46,7 @@ public class GuildRaidFeature extends Feature {
                                                                     String player3 = StringArgumentType.getString(context, "player3");
                                                                     String player4 = StringArgumentType.getString(context, "player4");
                                                                     Text raidFinishedMessage = Text.literal("§b\uDAFF\uDFFC\uE001\uDB00\uDC06§b §e" + player1 + "§b, §e" + player2 + "§b, §e" + player3 + "§b, and §e" + player4 +
-                                                                            "§b finished §3" + raid + "§b");
+                                                                            "§b finished §3" + raid + "thisisatestraid§b");
                                                                     WynnChatMessage.EVENT.invoker().interact(raidFinishedMessage);
                                                                     McUtils.sendLocalMessage(raidFinishedMessage, Text.empty(), false);
                                                                     return Command.SINGLE_SUCCESS;
