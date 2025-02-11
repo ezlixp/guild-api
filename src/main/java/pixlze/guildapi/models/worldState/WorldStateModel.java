@@ -1,7 +1,6 @@
 package pixlze.guildapi.models.worldState;
 
 import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec3d;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.mc.event.PlayerInfoChangedEvents;
 import pixlze.guildapi.mod.event.WynncraftConnectionEvents;
@@ -16,7 +15,7 @@ public class WorldStateModel {
     private static final Pattern HUB_NAME = Pattern.compile("^\n§6§l play.wynncraft.com \n$");
     private static final UUID WORLD_NAME_UUID = UUID.fromString("16ff7452-714f-2752-b3cd-c3cb2068f6af");
     private static final Pattern WORLD_NAME = Pattern.compile("^§f {2}§lGlobal \\[(.*)]$");
-    private static final Vec3d AFK_QUEUE_POSITION = new Vec3d(8.5, 65, 8.5);
+    //    private static final Vec3d AFK_QUEUE_POSITION = new Vec3d(8.5, 65, 8.5);
     private WorldState currentState = WorldState.NOT_CONNECTED;
     private Text currentTabListFooter = Text.empty();
 
