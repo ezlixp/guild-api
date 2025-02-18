@@ -35,8 +35,8 @@ public final class ChatHandler extends Handler {
     }
 
     private void onConnectionChange(WorldState state) {
-        lastCollected = new LinkedList<>();
-        collectedLines = new ArrayList<>();
+        lastCollected.clear();
+        collectedLines.clear();
         chatScreenTicks = 0;
     }
 
@@ -77,24 +77,6 @@ public final class ChatHandler extends Handler {
             GuildApi.LOGGER.info("pre collected: {}", TextUtils.parsePlain(line));
         }
         GuildApi.LOGGER.info("pre collected spacer: \n\n\n");
-//        for (int i = 0; i < collectedLines.size(); i++) {
-//            Text line = collectedLines.get(i);
-//            filteredCollected.add(line);
-//            if ((NPC_CONFIRM_PATTERN.matcher(TextUtils.parseStyled(line, TextParseOptions.DEFAULT)).find() ||
-//                    NPC_SELECT_PATTERN.matcher(TextUtils.parseStyled(line, TextParseOptions.DEFAULT)).find() ||
-//                    (i >= 3 &&
-//                            EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(i))).find() &&
-//                            EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(i - 1))).find() &&
-//                            EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(i - 2))).find() &&
-//                            EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(collectedLines.get(i - 3))).find()
-//                    )
-//            ) && i != collectedLines.size() - 1) {
-//                filteredCollected.clear();
-//            }
-//        }
-//
-//        collectedLines = filteredCollected;
-//        if (collectedLines.isEmpty()) return;
         if (NPC_CONFIRM_PATTERN.matcher(TextUtils.parseStyled(collectedLines.getLast(), TextParseOptions.DEFAULT)).find()) {
             if (collectedLines.size() < 4) {
                 GuildApi.LOGGER.warn("Unable to safely remove 4 lines for npc confirm pattern.");
@@ -189,6 +171,8 @@ public final class ChatHandler extends Handler {
         }
 
         lastCollected = new LinkedList<>(collectedLines);
+        collectedLines.clear();
+        while (lastCollected.size() > 5) lastCollected.removeFirst();
         processNewLines(newLines);
     }
 
