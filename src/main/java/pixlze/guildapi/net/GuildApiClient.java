@@ -229,14 +229,15 @@ public class GuildApiClient extends Api {
                         try {
                             NetUtils.applyDefaultCallback(response, error, (resOK) -> {
                                 JsonObject res = JsonUtils.toJsonObject(response.body());
-                                baseURL = GuildApi.isDevelopment() ? "http://localhost:3000/":"https://ico-server-test.onrender.com/";
+                                baseURL = GuildApi.isDevelopment() ? "http://localhost:3000/":"https://ico-server.onrender.com/";
                                 validationKey = res.get("validationKey");
                                 GuildApi.LOGGER.info("successfully loaded base url");
                                 super.enable();
                             }, (e) -> {
                                 String guildString = null;
                                 if (wynnPlayerInfo.get("guild").isJsonObject()) {
-                                    guildString = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
+                                    guildString = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix")
+                                            .getAsString();
                                 }
                                 Managers.Net.apiCrash(Text.literal(
                                                 "Couldn't fetch base url for server of guild \"" + guildString + "\". " +
