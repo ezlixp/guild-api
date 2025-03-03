@@ -7,8 +7,8 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.components.Feature;
-import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
+import pixlze.guildapi.core.features.Feature;
+import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.TextUtils;

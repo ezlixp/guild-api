@@ -1,4 +1,4 @@
-package pixlze.guildapi.mod.event;
+package pixlze.guildapi.core.handlers.connection.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;

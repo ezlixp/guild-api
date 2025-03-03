@@ -1,16 +1,16 @@
-package pixlze.guildapi.mod;
+package pixlze.guildapi.core.handlers.connection;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.mod.event.WynncraftConnectionEvents;
+import pixlze.guildapi.core.handlers.connection.event.WynncraftConnectionEvents;
 
 import java.net.InetSocketAddress;
 import java.util.regex.Pattern;
 
-public class ConnectionManager {
+public class ConnectionHandler {
     private static final Pattern WYNNCRAFT_SERVER_PATTERN =
             Pattern.compile("^(?:(.*)\\.)?wynncraft\\.(?:com|net|org)\\.?$");
     private boolean isConnected = false;

@@ -1,4 +1,4 @@
-package pixlze.guildapi.handlers.chat.event;
+package pixlze.guildapi.core.handlers.chat.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;

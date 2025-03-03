@@ -7,7 +7,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.components.Feature;
+import pixlze.guildapi.core.features.Feature;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 

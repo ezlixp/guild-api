@@ -14,9 +14,9 @@ import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pixlze.guildapi.components.Handlers;
-import pixlze.guildapi.components.Managers;
-import pixlze.guildapi.components.Models;
+import pixlze.guildapi.core.Managers;
+import pixlze.guildapi.core.handlers.Handlers;
+import pixlze.guildapi.models.Models;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
@@ -74,9 +74,7 @@ public class GuildApi implements ClientModInitializer {
 
 
         Handlers.init();
-        Managers.Connection.init();
-        Managers.Net.init();
-        Managers.Feature.init();
+        Managers.init();
         Models.WorldState.init();
     }
 }

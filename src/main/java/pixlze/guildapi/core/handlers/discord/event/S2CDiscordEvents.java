@@ -1,4 +1,4 @@
-package pixlze.guildapi.handlers.discord.event;
+package pixlze.guildapi.core.handlers.discord.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;

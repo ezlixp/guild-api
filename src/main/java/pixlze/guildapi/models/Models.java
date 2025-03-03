@@ -1,4 +1,4 @@
-package pixlze.guildapi.components;
+package pixlze.guildapi.models;
 
 
 import pixlze.guildapi.models.discord.DiscordMessageModel;

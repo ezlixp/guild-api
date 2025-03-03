@@ -1,11 +1,11 @@
-package pixlze.guildapi.handlers.discord;
+package pixlze.guildapi.core.handlers.discord;
 
 import org.json.JSONObject;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.components.Handler;
-import pixlze.guildapi.components.Managers;
-import pixlze.guildapi.components.Models;
-import pixlze.guildapi.handlers.discord.event.S2CDiscordEvents;
+import pixlze.guildapi.core.Managers;
+import pixlze.guildapi.core.handlers.Handler;
+import pixlze.guildapi.core.handlers.discord.event.S2CDiscordEvents;
+import pixlze.guildapi.models.Models;
 import pixlze.guildapi.net.SocketIOClient;
 
 public class DiscordMessageHandler extends Handler {

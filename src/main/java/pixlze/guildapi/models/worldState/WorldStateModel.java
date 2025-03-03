@@ -2,8 +2,8 @@ package pixlze.guildapi.models.worldState;
 
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.core.handlers.connection.event.WynncraftConnectionEvents;
 import pixlze.guildapi.mc.event.PlayerInfoChangedEvents;
-import pixlze.guildapi.mod.event.WynncraftConnectionEvents;
 import pixlze.guildapi.models.worldState.event.WorldStateEvents;
 import pixlze.guildapi.models.worldState.type.WorldState;
 

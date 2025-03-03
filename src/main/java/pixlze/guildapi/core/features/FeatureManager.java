@@ -1,7 +1,6 @@
-package pixlze.guildapi.consumers;
+package pixlze.guildapi.core.features;
 
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.components.Feature;
 import pixlze.guildapi.features.AutoUpdateFeature;
 import pixlze.guildapi.features.CommandHelpFeature;
 import pixlze.guildapi.features.TestCommandHelpFeature;
