@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import pixlze.guildapi.core.Managers;
+import pixlze.guildapi.core.handlers.Handlers;
 import pixlze.guildapi.mc.event.PlayerInfoChangedEvents;
 import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.utils.type.Prepend;
@@ -19,7 +19,7 @@ public class ClientPacketListenerMixin {
     @Inject(method = "onGameMessage", at = @At("HEAD"))
     private void onGameMessage(GameMessageS2CPacket packet, CallbackInfo ci) {
         if (!MinecraftClient.getInstance().isOnThread()) return;
-        if (!packet.overlay() && Managers.Connection.onWynncraft()) {
+        if (!packet.overlay() && Handlers.Connection.onWynncraft()) {
             Prepend.lastBadge = "";
             WynnChatMessage.EVENT.invoker().interact(packet.content());
         }
@@ -29,7 +29,7 @@ public class ClientPacketListenerMixin {
     @Inject(method = "onPlayerList", at = @At("HEAD"))
     private void onPlayerList(PlayerListS2CPacket packet, CallbackInfo ci) {
         if (!MinecraftClient.getInstance().isOnThread()) return;
-        if (!Managers.Connection.onWynncraft()) return;
+        if (!Handlers.Connection.onWynncraft()) return;
         for (PlayerListS2CPacket.Entry entry : packet.getEntries()) {
             for (PlayerListS2CPacket.Action action : packet.getActions()) {
                 if (action == PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME) {
