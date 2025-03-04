@@ -1,4 +1,4 @@
-package pixlze.guildapi.features.guildresources;
+package pixlze.guildapi.features;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.core.config.Config;
 import pixlze.guildapi.core.features.Feature;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.mc.event.WynnChatMessage;
@@ -26,6 +27,7 @@ public class GuildRaidFeature extends Feature {
     public void init() {
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
         if (GuildApi.isTesting()) {
+            // TODO: move to testcommands
             ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> {
                 dispatcher.register(ClientCommandManager.literal("raid").then(
                         ClientCommandManager.argument("raid", StringArgumentType.word()).suggests((context, builder) -> {
@@ -54,6 +56,11 @@ public class GuildRaidFeature extends Feature {
                                                         ))))));
             }));
         }
+    }
+
+    @Override
+    public void onConfigUpdate(Config<?> config) {
+
     }
 
     private void onWynnMessage(Text message) {
