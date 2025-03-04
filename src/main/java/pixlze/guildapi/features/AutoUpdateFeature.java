@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.Managers;
+import pixlze.guildapi.core.config.Config;
 import pixlze.guildapi.core.features.Feature;
 import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.net.event.NetEvents;
@@ -30,6 +31,11 @@ public class AutoUpdateFeature extends Feature {
                     })));
         });
         NetEvents.LOADED.register(this::onApiLoaded);
+    }
+
+    @Override
+    public void onConfigUpdate(Config<?> config) {
+
     }
 
     private void onApiLoaded(Api loaded) {

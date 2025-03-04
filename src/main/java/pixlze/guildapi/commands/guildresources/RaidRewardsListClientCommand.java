@@ -1,4 +1,4 @@
-package pixlze.guildapi.features.guildresources;
+package pixlze.guildapi.commands.guildresources;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -11,9 +11,9 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.commands.type.ListClientCommand;
 import pixlze.guildapi.core.Managers;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
-import pixlze.guildapi.features.type.ListFeature;
 import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.NetUtils;
@@ -25,13 +25,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class RaidRewardsListFeature extends ListFeature {
+public class RaidRewardsListClientCommand extends ListClientCommand {
     private static final Pattern ASPECT_MESSAGE_PATTERN = Pattern.compile("^§.((\uDAFF\uDFFC\uE001\uDB00\uDC06)|(\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE))§. §.(?<giver>.*?)(§" +
             ".)? rewarded §.an Aspect§. to §.(?<receiver>.*?)(§.)?$");
     private static final String ENDPOINT = "guilds/raids/rewards/";
 
-    public RaidRewardsListFeature() {
-        super("raid", ENDPOINT, RaidRewardsListFeature::formatLine, "raids");
+    public RaidRewardsListClientCommand() {
+        super("raid", ENDPOINT, RaidRewardsListClientCommand::formatLine, "raids");
     }
 
     private static MutableText formatLine(JsonElement listItem, String sortMember) {

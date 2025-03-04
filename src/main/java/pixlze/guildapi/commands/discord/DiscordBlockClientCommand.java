@@ -1,4 +1,4 @@
-package pixlze.guildapi.features.discord;
+package pixlze.guildapi.commands.discord;
 
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.Command;
@@ -6,8 +6,8 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.commands.type.ListClientCommand;
 import pixlze.guildapi.core.Managers;
-import pixlze.guildapi.features.type.ListFeature;
 import pixlze.guildapi.models.Models;
 import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.net.event.NetEvents;
@@ -20,12 +20,12 @@ import pixlze.guildapi.utils.type.Prepend;
 
 import java.util.List;
 
-public class DiscordBlockFeature extends ListFeature {
+public class DiscordBlockClientCommand extends ListClientCommand {
     private static final String ENDPOINT = "user/blocked/";
     private final GuildApiClient guildApiClient = Managers.Net.guild;
 
 
-    public DiscordBlockFeature() {
+    public DiscordBlockClientCommand() {
         super("block", ENDPOINT, (listItem) -> {
             Models.DiscordMessage.block(listItem.getAsString());
             return Text.literal(listItem.getAsString());

@@ -1,4 +1,4 @@
-package pixlze.guildapi.features;
+package pixlze.guildapi.commands;
 
 import com.mojang.brigadier.Command;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -7,13 +7,13 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.core.features.Feature;
+import pixlze.guildapi.core.commands.ClientCommand;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.util.List;
 
-public class CommandHelpFeature extends Feature {
+public class ClientCommandHelpFeature extends ClientCommand {
     private final List<Pair<String, String>> commands = List.of(
             new Pair<>("/guildapi (/gapi) help", "Displays this list of commands."),
 

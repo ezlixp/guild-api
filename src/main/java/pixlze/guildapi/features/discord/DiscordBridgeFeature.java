@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.Managers;
+import pixlze.guildapi.core.config.Config;
 import pixlze.guildapi.core.features.Feature;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.core.handlers.discord.event.S2CDiscordEvents;
@@ -143,6 +144,11 @@ public class DiscordBridgeFeature extends Feature {
 
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
         S2CDiscordEvents.MESSAGE.register(this::onDiscordMessage);
+    }
+
+    @Override
+    public void onConfigUpdate(Config<?> config) {
+
     }
 
     private void onWynnMessage(Text message) {

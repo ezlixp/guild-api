@@ -1,28 +1,23 @@
 package pixlze.guildapi.core.features;
 
-import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.core.Manager;
 import pixlze.guildapi.features.AutoUpdateFeature;
-import pixlze.guildapi.features.CommandHelpFeature;
-import pixlze.guildapi.features.TestCommandHelpFeature;
-import pixlze.guildapi.features.discord.DiscordBlockFeature;
+import pixlze.guildapi.features.GuildRaidFeature;
 import pixlze.guildapi.features.discord.DiscordBridgeFeature;
-import pixlze.guildapi.features.guildresources.GuildRaidFeature;
-import pixlze.guildapi.features.guildresources.RaidRewardsListFeature;
-import pixlze.guildapi.features.guildresources.TomeListFeature;
 
-public class FeatureManager {
+public class FeatureManager extends Manager {
 //    private static final Map<Feature, FeatureState> FEATURES = new LinkedHashMap<>();
 
     public void init() {
-        registerFeature(new CommandHelpFeature());
-        if (GuildApi.isTesting()) registerFeature(new TestCommandHelpFeature());
+//        registerFeature(new ClientCommandHelpFeature());
+//        if (GuildApi.isTesting()) registerFeature(new TestCommandHelpFeature());
 
         registerFeature(new GuildRaidFeature());
-        registerFeature(new RaidRewardsListFeature());
-        registerFeature(new TomeListFeature());
+//        registerFeature(new RaidRewardsListClientCommand());
+//        registerFeature(new TomeListClientCommand());
 
         registerFeature(new DiscordBridgeFeature());
-        registerFeature(new DiscordBlockFeature());
+//        registerFeature(new DiscordBlockClientCommand());
 
         registerFeature(new AutoUpdateFeature());
     }
@@ -34,5 +29,13 @@ public class FeatureManager {
 
     private void initializeFeature(Feature feature) {
         feature.init();
+    }
+
+    public void enableFeature(Feature feature) {
+        feature.onEnabled();
+    }
+
+    public void disableFeature(Feature feature) {
+        feature.onDisabled();
     }
 }

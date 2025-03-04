@@ -1,19 +1,18 @@
-package pixlze.guildapi.features;
+package pixlze.guildapi.commands.test;
 
 import com.mojang.brigadier.Command;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.core.features.Feature;
+import pixlze.guildapi.core.commands.ClientCommand;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.util.List;
 
-public class TestCommandHelpFeature extends Feature {
+public class TestCommandHelpCommand extends ClientCommand {
     private final List<Pair<String, String>> commands = List.of(
             new Pair<>("/setplayer <username>", "Impersonates specified username."),
             new Pair<>("/raid <notg|nol|tcc|tna> <player1> <player2> <player3> <player 4>", "Simulates raid completion."),
@@ -34,11 +33,9 @@ public class TestCommandHelpFeature extends Feature {
             if (i != commands.size() - 1)
                 helpMessage.append("\n");
         }
-        ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> {
-            dispatcher.register(GuildApi.BASE_COMMAND.then(ClientCommandManager.literal("testhelp").executes((context) -> {
-                McUtils.sendLocalMessage(helpMessage, Prepend.DEFAULT.get(), false);
-                return Command.SINGLE_SUCCESS;
-            })));
-        }));
+        setCommand(GuildApi.BASE_COMMAND.then(ClientCommandManager.literal("testhelp").executes((context) -> {
+            McUtils.sendLocalMessage(helpMessage, Prepend.DEFAULT.get(), false);
+            return Command.SINGLE_SUCCESS;
+        })));
     }
 }
