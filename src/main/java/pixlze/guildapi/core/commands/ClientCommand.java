@@ -3,29 +3,31 @@ package pixlze.guildapi.core.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import pixlze.guildapi.GuildApi;
 
-// one command per object
 public abstract class ClientCommand {
-    private String literal; // maybe theres a way to automatically get the /___ with arguments from mc functions
+    private final String name;
     private LiteralArgumentBuilder<FabricClientCommandSource> command;
-    private String description;
 
-    public abstract void init();
+    public ClientCommand(String name) {
+        this.name = name;
+    }
+
+    public ClientCommand(String name, LiteralArgumentBuilder<FabricClientCommandSource> command) {
+        this.name = name;
+        this.command = command;
+    }
+
 
     public void setCommand(LiteralArgumentBuilder<FabricClientCommandSource> command) {
         this.command = command;
     }
 
     public void register() {
-        ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> dispatcher.register(command)));
+        if (command != null)
+            ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> dispatcher.register(command)));
+        else {
+            GuildApi.LOGGER.warn("null command at {}", name);
+        }
     }
-
-    public String getLiteral() {
-        return literal;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
 }

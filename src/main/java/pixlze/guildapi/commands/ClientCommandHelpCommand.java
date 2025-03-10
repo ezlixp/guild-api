@@ -2,7 +2,6 @@ package pixlze.guildapi.commands;
 
 import com.mojang.brigadier.Command;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
@@ -13,8 +12,8 @@ import pixlze.guildapi.utils.type.Prepend;
 
 import java.util.List;
 
-public class ClientCommandHelpFeature extends ClientCommand {
-    private final List<Pair<String, String>> commands = List.of(
+public class ClientCommandHelpCommand extends ClientCommand {
+    private static final List<Pair<String, String>> COMMANDS = List.of(
             new Pair<>("/guildapi (/gapi) help", "Displays this list of commands."),
 
             new Pair<>("\n", "Bridge:"),
@@ -42,23 +41,21 @@ public class ClientCommandHelpFeature extends ClientCommand {
             new Pair<>("/raidlist sort <raids|apsects|emeralds>", "Defines how to sort information displayed in the raid list.")
     );
 
-    private MutableText helpMessage;
+    private final MutableText helpMessage;
 
-    @Override
-    public void init() {
+    public ClientCommandHelpCommand() {
+        super("ClientCommandHelp");
         helpMessage = Text.literal("§aCommands:\n");
-        for (int i = 0; i < commands.size(); i++) {
-            Pair<String, String> entry = commands.get(i);
+        for (int i = 0; i < COMMANDS.size(); i++) {
+            Pair<String, String> entry = COMMANDS.get(i);
             String delimiter = entry.getLeft().isBlank() ? "":" - ";
             helpMessage.append(entry.getLeft() + delimiter + entry.getRight());
-            if (i != commands.size() - 1)
+            if (i != COMMANDS.size() - 1)
                 helpMessage.append("\n");
         }
-        ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> {
-            dispatcher.register(GuildApi.BASE_COMMAND.then(ClientCommandManager.literal("help").executes((context) -> {
-                McUtils.sendLocalMessage(helpMessage, Prepend.DEFAULT.get(), false);
-                return Command.SINGLE_SUCCESS;
-            })));
-        }));
+        setCommand(GuildApi.BASE_COMMAND.then(ClientCommandManager.literal("help").executes((context) -> {
+            McUtils.sendLocalMessage(helpMessage, Prepend.DEFAULT.get(), false);
+            return Command.SINGLE_SUCCESS;
+        })));
     }
 }

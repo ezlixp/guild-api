@@ -13,7 +13,7 @@ import pixlze.guildapi.utils.type.Prepend;
 import java.util.List;
 
 public class TestCommandHelpCommand extends ClientCommand {
-    private final List<Pair<String, String>> commands = List.of(
+    private static final List<Pair<String, String>> TEST_COMMANDS = List.of(
             new Pair<>("/setplayer <username>", "Impersonates specified username."),
             new Pair<>("/raid <notg|nol|tcc|tna> <player1> <player2> <player3> <player 4>", "Simulates raid completion."),
             new Pair<>("/tome <username>", "Simulates a tome given to specified username."),
@@ -21,16 +21,16 @@ public class TestCommandHelpCommand extends ClientCommand {
             new Pair<>("/testmessage <message>", "Simulates a guild message.")
     );
 
-    private MutableText helpMessage;
+    private final MutableText helpMessage;
 
-    @Override
-    public void init() {
+    public TestCommandHelpCommand() {
+        super("TestCommandHelp");
         helpMessage = Text.literal("§aTest Commands:\n");
-        for (int i = 0; i < commands.size(); i++) {
-            Pair<String, String> entry = commands.get(i);
+        for (int i = 0; i < TEST_COMMANDS.size(); i++) {
+            Pair<String, String> entry = TEST_COMMANDS.get(i);
             String delimiter = entry.getLeft().isBlank() ? "":" - ";
             helpMessage.append(entry.getLeft() + delimiter + entry.getRight());
-            if (i != commands.size() - 1)
+            if (i != TEST_COMMANDS.size() - 1)
                 helpMessage.append("\n");
         }
         setCommand(GuildApi.BASE_COMMAND.then(ClientCommandManager.literal("testhelp").executes((context) -> {

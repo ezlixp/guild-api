@@ -13,14 +13,15 @@ import pixlze.guildapi.utils.type.Prepend;
 
 public class McUtils {
     public static String devName = "pixlze";
+    public static String devUUID = "39365bd4-5c78-41de-8901-c7dc5b7c64c4";
 
     public static String playerName() {
-        if (GuildApi.isDevelopment()) return devName;
+        if (GuildApi.isDevelopment() || GuildApi.isTesting()) return devName;
         return player().getName().getString();
     }
 
     public static String playerUUID() {
-        if (GuildApi.isDevelopment()) return "39365bd4-5c78-41de-8901-c7dc5b7c64c4";
+        if (GuildApi.isDevelopment() || GuildApi.isTesting()) return devUUID;
         if (player() != null)
             return player().getUuidAsString();
         return null;

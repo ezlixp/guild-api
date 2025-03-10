@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -14,7 +13,6 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.commands.type.ListClientCommand;
 import pixlze.guildapi.core.Managers;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
-import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.NetUtils;
 import pixlze.guildapi.utils.text.TextUtils;
@@ -32,30 +30,6 @@ public class RaidRewardsListClientCommand extends ListClientCommand {
 
     public RaidRewardsListClientCommand() {
         super("raid", ENDPOINT, RaidRewardsListClientCommand::formatLine, "raids");
-    }
-
-    private static MutableText formatLine(JsonElement listItem, String sortMember) {
-        List<Pair<MutableText, String>> components = new java.util.ArrayList<>(List.of(
-                new Pair<>(Text.literal(listItem.getAsJsonObject().get("raids").getAsString()).append(" raids"), "raids"),
-                new Pair<>(Text.literal(listItem.getAsJsonObject().get("aspects").getAsString()).append(" aspects"), "aspects"),
-                new Pair<>(Text.literal(String.format("%.2f", listItem.getAsJsonObject().get("liquidEmeralds").getAsDouble())).append(" ¼²"), "liquidEmeralds")
-        ));
-        components.sort((a, b) -> {
-            if (a.getRight().equals(sortMember)) return -1;
-            if (b.getRight().equals(sortMember)) return 1;
-            return 0;
-        });
-        MutableText out = Text.literal(listItem.getAsJsonObject().get("username")
-                .getAsString()).append(": ");
-        for (int i = 0; i < components.size() - 1; i++) {
-            out.append(components.get(i).getLeft()).append(" | ");
-        }
-        out.append(components.getLast().getLeft());
-        return out;
-    }
-
-    @Override
-    public void init() {
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
         super.registerCommands(List.of(
                 ClientCommandManager.literal("search").executes((context) -> {
@@ -83,18 +57,26 @@ public class RaidRewardsListClientCommand extends ListClientCommand {
                             return Command.SINGLE_SUCCESS;
                         }))
         ));
+    }
 
-        if (GuildApi.isTesting()) {
-            ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> {
-                dispatcher.register(ClientCommandManager.literal("aspect").then(ClientCommandManager.argument("username", StringArgumentType.word()).executes((context) -> {
-                    String username = StringArgumentType.getString(context, "username");
-                    Text aspectGivenMessage = Text.literal("§b\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE§b §etest§b rewarded §ean Aspect§b to §e" + username);
-                    WynnChatMessage.EVENT.invoker().interact(aspectGivenMessage);
-                    McUtils.sendLocalMessage(aspectGivenMessage, Text.empty(), false);
-                    return Command.SINGLE_SUCCESS;
-                })));
-            }));
+    private static MutableText formatLine(JsonElement listItem, String sortMember) {
+        List<Pair<MutableText, String>> components = new java.util.ArrayList<>(List.of(
+                new Pair<>(Text.literal(listItem.getAsJsonObject().get("raids").getAsString()).append(" raids"), "raids"),
+                new Pair<>(Text.literal(listItem.getAsJsonObject().get("aspects").getAsString()).append(" aspects"), "aspects"),
+                new Pair<>(Text.literal(String.format("%.2f", listItem.getAsJsonObject().get("liquidEmeralds").getAsDouble())).append(" ¼²"), "liquidEmeralds")
+        ));
+        components.sort((a, b) -> {
+            if (a.getRight().equals(sortMember)) return -1;
+            if (b.getRight().equals(sortMember)) return 1;
+            return 0;
+        });
+        MutableText out = Text.literal(listItem.getAsJsonObject().get("username")
+                .getAsString()).append(": ");
+        for (int i = 0; i < components.size() - 1; i++) {
+            out.append(components.get(i).getLeft()).append(" | ");
         }
+        out.append(components.getLast().getLeft());
+        return out;
     }
 
     private void onWynnMessage(Text message) {

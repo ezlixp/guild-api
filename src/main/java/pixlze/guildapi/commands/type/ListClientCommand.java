@@ -34,29 +34,37 @@ public class ListClientCommand extends ClientCommand {
     private String extra;
 
     public ListClientCommand(String name, String endpoint, Function<JsonElement, MutableText> lineParser) {
+        super(name);
         this.name = name;
         this.endpoint = endpoint;
         this.lineParser = (listItem, sortBy) -> lineParser.apply(listItem);
+        registerCommands(List.of());
     }
 
     public ListClientCommand(String name, String endpoint, Function<JsonElement, MutableText> lineParser, String sortMember) {
+        super(name);
         this.name = name;
         this.endpoint = endpoint;
         this.lineParser = (listItem, sortBy) -> lineParser.apply(listItem);
         this.sortMember = sortMember;
+        registerCommands(List.of());
     }
 
     public ListClientCommand(String name, String endpoint, BiFunction<JsonElement, String, MutableText> lineParser) {
+        super(name);
         this.name = name;
         this.endpoint = endpoint;
         this.lineParser = lineParser;
+        registerCommands(List.of());
     }
 
     public ListClientCommand(String name, String endpoint, BiFunction<JsonElement, String, MutableText> lineParser, String sortMember) {
+        super(name);
         this.name = name;
         this.endpoint = endpoint;
         this.lineParser = lineParser;
         this.sortMember = sortMember;
+        registerCommands(List.of());
     }
 
     protected void setExtra(String extra) {
@@ -65,11 +73,6 @@ public class ListClientCommand extends ClientCommand {
 
     private String getExtra() {
         return extra != null ? extra:Managers.Net.guild.guildId;
-    }
-
-    @Override
-    public void init() {
-        registerCommands(List.of());
     }
 
     public void registerCommands(List<LiteralArgumentBuilder<FabricClientCommandSource>> subCommands) {

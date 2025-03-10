@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -13,7 +12,6 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.commands.type.ListClientCommand;
 import pixlze.guildapi.core.Managers;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
-import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.utils.JsonUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.NetUtils;
@@ -31,10 +29,6 @@ public class TomeListClientCommand extends ListClientCommand {
 
     public TomeListClientCommand() {
         super("tome", ENDPOINT, (listItem) -> Text.literal(listItem.getAsJsonObject().get("username").getAsString()).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
-    }
-
-    @Override
-    public void init() {
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
         super.registerCommands(List.of(ClientCommandManager.literal("add").executes((context) -> {
             Managers.Net.guild.post(ENDPOINT + Managers.Net.guild.guildId, JsonUtils.toJsonObject("{\"username\":\"" + McUtils.playerName() + "\"}")).whenCompleteAsync((res, exception) -> {
@@ -61,18 +55,6 @@ public class TomeListClientCommand extends ListClientCommand {
             search(StringArgumentType.getString(context, "username"));
             return Command.SINGLE_SUCCESS;
         }))));
-
-        if (GuildApi.isTesting()) {
-            ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-                dispatcher.register(ClientCommandManager.literal("tome").then(ClientCommandManager.argument("username", StringArgumentType.word()).executes((context) -> {
-                    String username = StringArgumentType.getString(context, "username");
-                    Text tomeGivenMessage = Text.literal("§b\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE§b §etest rewarded §ea Guild Tome§b to §e" + username);
-                    WynnChatMessage.EVENT.invoker().interact(tomeGivenMessage);
-                    McUtils.sendLocalMessage(tomeGivenMessage, Text.empty(), false);
-                    return Command.SINGLE_SUCCESS;
-                })));
-            });
-        }
     }
 
     private void onWynnMessage(Text message) {

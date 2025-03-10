@@ -30,10 +30,6 @@ public class DiscordBlockClientCommand extends ListClientCommand {
             Models.DiscordMessage.block(listItem.getAsString());
             return Text.literal(listItem.getAsString());
         });
-    }
-
-    @Override
-    public void init() {
         super.registerCommands(List.of(
                 ClientCommandManager.literal("add").then(ClientCommandManager.argument("toBlock", StringArgumentType.word()).executes((context) -> {
                     String toBlock = StringArgumentType.getString(context, "toBlock");

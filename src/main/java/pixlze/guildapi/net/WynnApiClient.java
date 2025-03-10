@@ -43,6 +43,7 @@ public class WynnApiClient extends Api {
     }
 
     public void init() {
+        // TODO move these to client command classes
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(
                     ClientCommandManager.literal("reloadWynnInfo").executes(context -> {
@@ -79,8 +80,7 @@ public class WynnApiClient extends Api {
     public void initWynnPlayerInfo(boolean print) {
         if (McUtils.mc().player != null) {
             try {
-                URI uri = URI.create(GuildApi.isDevelopment() ? "https://api.wynncraft.com/v3/player/" + McUtils.playerName():
-                        "https://api.wynncraft.com/v3/player/" + McUtils.mc().player.getUuidAsString());
+                URI uri = URI.create("https://api.wynncraft.com/v3/player/" + McUtils.playerName());
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(uri)
                         .build();
@@ -93,6 +93,8 @@ public class WynnApiClient extends Api {
                     throw new Exception(message);
                 }
                 GuildApi.LOGGER.info("successfully loaded wynn player info");
+                if (GuildApi.isDevelopment() || GuildApi.isTesting())
+                    McUtils.devUUID = wynnPlayerInfo.get("uuid").getAsString();
                 if (print)
                     McUtils.sendLocalMessage(
                             Text.literal("Success!")

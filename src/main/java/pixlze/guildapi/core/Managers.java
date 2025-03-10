@@ -22,7 +22,7 @@ public final class Managers {
         Feature.init();
         Config.init();
         Command.init();
-        if (GuildApi.isTesting())
+        if (GuildApi.isDevelopment() || GuildApi.isTesting())
             TestCommand.init();
     }
 }
