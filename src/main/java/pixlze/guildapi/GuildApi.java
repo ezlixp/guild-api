@@ -2,23 +2,14 @@ package pixlze.guildapi;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pixlze.guildapi.core.Managers;
 import pixlze.guildapi.core.handlers.Handlers;
 import pixlze.guildapi.models.Models;
-import pixlze.guildapi.utils.McUtils;
-import pixlze.guildapi.utils.type.Prepend;
 
 import java.io.File;
 import java.io.InputStream;
@@ -32,11 +23,6 @@ public class GuildApi implements ClientModInitializer {
     public static ModContainer MOD_CONTAINER;
     public static String MOD_VERSION;
     public static JsonObject secrets;
-    public static LiteralArgumentBuilder<FabricClientCommandSource> BASE_COMMAND = ClientCommandManager.literal("guildapi")
-            .executes((context) -> {
-                McUtils.sendLocalMessage(Text.of("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands."), Prepend.DEFAULT.get(), false);
-                return Command.SINGLE_SUCCESS;
-            });
     private static boolean development;
 
     public static File getModStorageDir(String dirName) {
@@ -58,12 +44,6 @@ public class GuildApi implements ClientModInitializer {
             MOD_CONTAINER = FabricLoader.getInstance().getModContainer(MOD_ID).get();
             MOD_VERSION = MOD_CONTAINER.getMetadata().getVersion().getFriendlyString();
         }
-
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            final LiteralCommandNode<FabricClientCommandSource> baseCommandNode = dispatcher.register(BASE_COMMAND);
-            dispatcher.register(ClientCommandManager.literal("gapi").executes(baseCommandNode.getCommand())
-                    .redirect(baseCommandNode));
-        });
 
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("secrets.json");
         if (inputStream == null) {

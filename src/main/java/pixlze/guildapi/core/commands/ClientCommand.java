@@ -1,33 +1,52 @@
 package pixlze.guildapi.core.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.type.Prepend;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 public abstract class ClientCommand {
-    private final String name;
-    private LiteralArgumentBuilder<FabricClientCommandSource> command;
+    private final String literal;
 
-    public ClientCommand(String name) {
-        this.name = name;
+    public ClientCommand(String literal) {
+        this.literal = literal;
     }
 
-    public ClientCommand(String name, LiteralArgumentBuilder<FabricClientCommandSource> command) {
-        this.name = name;
-        this.command = command;
+    protected String getLiteral() {
+        return literal;
     }
 
+    protected List<String> getAliases() {
+        return List.of();
+    }
 
-    public void setCommand(LiteralArgumentBuilder<FabricClientCommandSource> command) {
-        this.command = command;
+    protected List<ClientCommand> getSubCommands() {
+        return List.of();
+    }
+
+    protected abstract LiteralArgumentBuilder<FabricClientCommandSource> getCommand(LiteralArgumentBuilder<FabricClientCommandSource> base);
+
+    public List<LiteralArgumentBuilder<FabricClientCommandSource>> getCommands() {
+        return Stream.concat(Stream.of(getCommand(ClientCommandManager.literal(getLiteral()))), getAliases().stream().map(ClientCommandManager::literal).map(this::getCommand)).toList();
     }
 
     public void register() {
-        if (command != null)
-            ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> dispatcher.register(command)));
-        else {
-            GuildApi.LOGGER.warn("null command at {}", name);
-        }
+        ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> {
+            GuildApi.LOGGER.info("registering: {} {}", getLiteral(), getAliases().stream());
+            for (LiteralArgumentBuilder<FabricClientCommandSource> command : getCommands()) {
+                dispatcher.register(command);
+            }
+        }));
+    }
+
+    protected void syntaxError() {
+        McUtils.sendLocalMessage(Text.literal("§cInvalid arguments, please check the syntax and try again."), Prepend.DEFAULT.get(), false);
     }
 }

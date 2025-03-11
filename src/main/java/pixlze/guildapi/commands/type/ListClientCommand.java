@@ -1,6 +1,5 @@
 package pixlze.guildapi.commands.type;
 
-import com.google.common.base.Supplier;
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.BoolArgumentType;
@@ -34,37 +33,33 @@ public class ListClientCommand extends ClientCommand {
     private String extra;
 
     public ListClientCommand(String name, String endpoint, Function<JsonElement, MutableText> lineParser) {
-        super(name);
+        super(name + "list");
         this.name = name;
         this.endpoint = endpoint;
         this.lineParser = (listItem, sortBy) -> lineParser.apply(listItem);
-        registerCommands(List.of());
     }
 
     public ListClientCommand(String name, String endpoint, Function<JsonElement, MutableText> lineParser, String sortMember) {
-        super(name);
+        super(name + "list");
         this.name = name;
         this.endpoint = endpoint;
         this.lineParser = (listItem, sortBy) -> lineParser.apply(listItem);
         this.sortMember = sortMember;
-        registerCommands(List.of());
     }
 
     public ListClientCommand(String name, String endpoint, BiFunction<JsonElement, String, MutableText> lineParser) {
-        super(name);
+        super(name + "list");
         this.name = name;
         this.endpoint = endpoint;
         this.lineParser = lineParser;
-        registerCommands(List.of());
     }
 
     public ListClientCommand(String name, String endpoint, BiFunction<JsonElement, String, MutableText> lineParser, String sortMember) {
-        super(name);
+        super(name + "list");
         this.name = name;
         this.endpoint = endpoint;
         this.lineParser = lineParser;
         this.sortMember = sortMember;
-        registerCommands(List.of());
     }
 
     protected void setExtra(String extra) {
@@ -75,32 +70,32 @@ public class ListClientCommand extends ClientCommand {
         return extra != null ? extra:Managers.Net.guild.guildId;
     }
 
-    public void registerCommands(List<LiteralArgumentBuilder<FabricClientCommandSource>> subCommands) {
-        Supplier<LiteralArgumentBuilder<FabricClientCommandSource>> literalArgumentBuilderSupplier = () -> {
-            LiteralArgumentBuilder<FabricClientCommandSource> builder = ClientCommandManager.literal(name + "list")
-                    .executes(context -> {
-                        listItems(0, true);
-                        return Command.SINGLE_SUCCESS;
-                    }).then(ClientCommandManager.literal("view")
-                            .then(ClientCommandManager.argument("page", IntegerArgumentType.integer(1))
-                                    .executes(context -> {
-                                        int page = IntegerArgumentType.getInteger(context, "page");
-                                        listItems(page - 1, true);
-                                        return Command.SINGLE_SUCCESS;
-                                    }).then(ClientCommandManager.argument("reload", BoolArgumentType.bool())
-                                            .executes(context -> {
-                                                int page = IntegerArgumentType.getInteger(context, "page");
-                                                boolean reload = BoolArgumentType.getBool(context, "reload");
-                                                listItems(page - 1, reload);
-                                                return Command.SINGLE_SUCCESS;
-                                            })
-                                    )));
-            for (LiteralArgumentBuilder<FabricClientCommandSource> subCommand : subCommands) {
-                builder.then(subCommand);
-            }
-            return builder;
-        };
-        setCommand((literalArgumentBuilderSupplier.get()));
+    @Override
+    protected LiteralArgumentBuilder<FabricClientCommandSource> getCommand(LiteralArgumentBuilder<FabricClientCommandSource> base) {
+        LiteralArgumentBuilder<FabricClientCommandSource> builder = base.executes(context -> {
+            listItems(0, true);
+            return Command.SINGLE_SUCCESS;
+        }).then(ClientCommandManager.literal("view")
+                .then(ClientCommandManager.argument("page", IntegerArgumentType.integer(1))
+                        .executes(context -> {
+                            int page = IntegerArgumentType.getInteger(context, "page");
+                            listItems(page - 1, true);
+                            return Command.SINGLE_SUCCESS;
+                        }).then(ClientCommandManager.argument("reload", BoolArgumentType.bool())
+                                .executes(context -> {
+                                    int page = IntegerArgumentType.getInteger(context, "page");
+                                    boolean reload = BoolArgumentType.getBool(context, "reload");
+                                    listItems(page - 1, reload);
+                                    return Command.SINGLE_SUCCESS;
+                                })
+                        )).executes(context -> {
+                    syntaxError();
+                    return Command.SINGLE_SUCCESS;
+                }));
+        for (ClientCommand subCommand : getSubCommands())
+            for (LiteralArgumentBuilder<FabricClientCommandSource> command : subCommand.getCommands())
+                builder.then(command);
+        return builder;
     }
 
     protected String getSortMember() {

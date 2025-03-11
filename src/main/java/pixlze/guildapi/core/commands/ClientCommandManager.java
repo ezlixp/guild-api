@@ -1,9 +1,9 @@
 package pixlze.guildapi.core.commands;
 
-import pixlze.guildapi.commands.ClientCommandHelpCommand;
-import pixlze.guildapi.commands.discord.DiscordBlockClientCommand;
-import pixlze.guildapi.commands.guildresources.RaidRewardsListClientCommand;
-import pixlze.guildapi.commands.guildresources.TomeListClientCommand;
+import pixlze.guildapi.commands.base.BaseClientCommand;
+import pixlze.guildapi.commands.discord.discordblocklist.DiscordBlockClientCommand;
+import pixlze.guildapi.commands.guildresources.raidrewardslist.RaidRewardsListClientCommand;
+import pixlze.guildapi.commands.guildresources.tomelist.TomeListClientCommand;
 import pixlze.guildapi.core.Manager;
 
 public class ClientCommandManager extends Manager {
@@ -12,7 +12,7 @@ public class ClientCommandManager extends Manager {
         registerCommand(new TomeListClientCommand());
         registerCommand(new DiscordBlockClientCommand());
 
-        registerCommand(new ClientCommandHelpCommand());
+        registerCommand(new BaseClientCommand());
     }
 
     private void registerCommand(ClientCommand command) {

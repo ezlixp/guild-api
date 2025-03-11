@@ -1,24 +1,24 @@
-package pixlze.guildapi.commands;
+package pixlze.guildapi.commands.base;
 
 import com.mojang.brigadier.Command;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
-import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.commands.ClientCommand;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.util.List;
 
-public class ClientCommandHelpCommand extends ClientCommand {
+class ClientCommandHelpCommand extends ClientCommand {
     private static final List<Pair<String, String>> COMMANDS = List.of(
-            new Pair<>("/guildapi (/gapi) help", "Displays this list of commands."),
+            new Pair<>("/guildapi help", "Displays this list of commands."),
 
             new Pair<>("\n", "Bridge:"),
 
-            new Pair<>("/discord (/dc) <message>", "Sends a guild chat message that is only visible to other mod users and the discord."),
+            new Pair<>("/discord <message>", "Sends a guild chat message that is only visible to other mod users and the discord."),
             new Pair<>("/reconnect", "Tries to connect to the chat server if it isn't already connected."),
             new Pair<>("/online", "Displays all connected mod users."),
 
@@ -43,8 +43,16 @@ public class ClientCommandHelpCommand extends ClientCommand {
 
     private final MutableText helpMessage;
 
+    @Override
+    protected LiteralArgumentBuilder<FabricClientCommandSource> getCommand(LiteralArgumentBuilder<FabricClientCommandSource> base) {
+        return base.executes((context) -> {
+            McUtils.sendLocalMessage(helpMessage, Prepend.DEFAULT.get(), false);
+            return Command.SINGLE_SUCCESS;
+        });
+    }
+
     public ClientCommandHelpCommand() {
-        super("ClientCommandHelp");
+        super("help");
         helpMessage = Text.literal("§aCommands:\n");
         for (int i = 0; i < COMMANDS.size(); i++) {
             Pair<String, String> entry = COMMANDS.get(i);
@@ -53,9 +61,5 @@ public class ClientCommandHelpCommand extends ClientCommand {
             if (i != COMMANDS.size() - 1)
                 helpMessage.append("\n");
         }
-        setCommand(GuildApi.BASE_COMMAND.then(ClientCommandManager.literal("help").executes((context) -> {
-            McUtils.sendLocalMessage(helpMessage, Prepend.DEFAULT.get(), false);
-            return Command.SINGLE_SUCCESS;
-        })));
     }
 }

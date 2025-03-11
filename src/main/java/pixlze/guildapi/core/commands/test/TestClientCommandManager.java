@@ -1,7 +1,6 @@
 package pixlze.guildapi.core.commands.test;
 
 import pixlze.guildapi.commands.test.AspectRewardTestCommand;
-import pixlze.guildapi.commands.test.TestCommandHelpCommand;
 import pixlze.guildapi.commands.test.TomeRewardTestCommand;
 import pixlze.guildapi.core.Manager;
 import pixlze.guildapi.core.commands.ClientCommand;
@@ -11,8 +10,6 @@ public class TestClientCommandManager extends Manager {
     public void init() {
         registerCommand(new AspectRewardTestCommand());
         registerCommand(new TomeRewardTestCommand());
-        
-        registerCommand(new TestCommandHelpCommand());
     }
 
     private void registerCommand(ClientCommand command) {
