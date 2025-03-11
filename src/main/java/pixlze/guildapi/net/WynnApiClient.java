@@ -57,8 +57,6 @@ public class WynnApiClient extends Api {
                         }).start();
                         return Command.SINGLE_SUCCESS;
                     }));
-            if (GuildApi.isTesting()) {
-            }
         });
         WynnChatMessage.EVENT.register(this::onWynnMessage);
         WynncraftConnectionEvents.JOIN.register(this::onWynnJoin);
