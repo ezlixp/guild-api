@@ -1,7 +1,6 @@
 package pixlze.guildapi.net;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -196,15 +195,6 @@ public class SocketIOClient extends Api {
                     return 0;
                 }
             }));
-            if (GuildApi.isTesting()) {
-                dispatcher.register(ClientCommandManager.literal("testmessage")
-                        .then(ClientCommandManager.argument("message", StringArgumentType.greedyString())
-                                .executes((context) -> {
-                                    emit(discordSocket, "wynnMessage", StringArgumentType.getString(context, "message")
-                                            .replaceAll("&", "§"));
-                                    return Command.SINGLE_SUCCESS;
-                                })));
-            }
         });
     }
 

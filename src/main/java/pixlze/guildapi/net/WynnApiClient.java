@@ -2,7 +2,6 @@ package pixlze.guildapi.net;
 
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.text.ClickEvent;
@@ -59,11 +58,6 @@ public class WynnApiClient extends Api {
                         return Command.SINGLE_SUCCESS;
                     }));
             if (GuildApi.isTesting()) {
-                dispatcher.register(ClientCommandManager.literal("setplayer").then(ClientCommandManager.argument("username", StringArgumentType.word()).executes(context -> {
-                    McUtils.devName = StringArgumentType.getString(context, "username");
-                    reloadWynnInfo();
-                    return Command.SINGLE_SUCCESS;
-                })));
             }
         });
         WynnChatMessage.EVENT.register(this::onWynnMessage);
@@ -118,7 +112,7 @@ public class WynnApiClient extends Api {
         }
     }
 
-    private void reloadWynnInfo() {
+    public void reloadWynnInfo() {
         this.disable();
         initWynnPlayerInfo(false);
     }

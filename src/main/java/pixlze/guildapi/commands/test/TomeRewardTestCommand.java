@@ -12,7 +12,7 @@ import pixlze.guildapi.utils.McUtils;
 
 public class TomeRewardTestCommand extends ClientCommand {
     public TomeRewardTestCommand() {
-        super("TomeRewardTest");
+        super("tome");
     }
 
     @Override
