@@ -15,5 +15,4 @@ public class JsonUtils {
     public static JsonObject toJsonObject(String convert) {
         return GSON.fromJson(convert, JsonObject.class);
     }
-
 }

@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
-import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
@@ -39,7 +38,6 @@ public abstract class ClientCommand {
 
     public void register() {
         ClientCommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess) -> {
-            GuildApi.LOGGER.info("registering: {} {}", getLiteral(), getAliases().stream());
             for (LiteralArgumentBuilder<FabricClientCommandSource> command : getCommands()) {
                 dispatcher.register(command);
             }
