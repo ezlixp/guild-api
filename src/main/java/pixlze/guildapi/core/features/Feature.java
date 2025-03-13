@@ -6,7 +6,7 @@ import pixlze.guildapi.core.config.Configurable;
 
 public abstract class Feature {
     @Configurable
-    public Config<Boolean> enabled = new Config<>(true);
+    public final Config<Boolean> enabled = new Config<>(true);
 
     public abstract void init();
 

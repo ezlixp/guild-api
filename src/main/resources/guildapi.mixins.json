@@ -5,7 +5,8 @@
   "mixins": [
     "ChatScreenMixin",
     "ClientPacketListenerMixin",
-    "accessors.ChatHudAccessorInvoker"
+    "accessors.ChatHudAccessorInvoker",
+    "accessors.SystemToastInvoker"
   ],
   "injectors": {
     "defaultRequire": 1

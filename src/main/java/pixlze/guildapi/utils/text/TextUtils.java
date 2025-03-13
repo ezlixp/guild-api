@@ -36,6 +36,26 @@ public class TextUtils {
         return splitted;
     }
 
+    public static String wrapText(String text, int maxWidth) {
+        MinecraftClient client = McUtils.mc();
+        if (client == null || client.textRenderer == null) return text;
+
+        StringBuilder wrapped = new StringBuilder();
+        String[] words = text.split(" ");
+        StringBuilder line = new StringBuilder();
+
+        for (String word : words) {
+            if (client.textRenderer.getWidth(line + word) > maxWidth) {
+                wrapped.append(line).append("\n");
+                line = new StringBuilder();
+            }
+            line.append(word).append(" ");
+        }
+        wrapped.append(line); // Add last line
+
+        return wrapped.toString();
+    }
+
 
     public static String parseStyled(StringVisitable text, TextParseOptions options) {
         TextVisitors.first = true;

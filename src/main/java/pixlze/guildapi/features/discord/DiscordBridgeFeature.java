@@ -1,22 +1,20 @@
 package pixlze.guildapi.features.discord;
 
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import io.socket.client.Ack;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.minecraft.text.MutableText;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.toast.SystemToast;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.Managers;
 import pixlze.guildapi.core.config.Config;
+import pixlze.guildapi.core.config.Configurable;
 import pixlze.guildapi.core.features.Feature;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.core.handlers.discord.event.S2CDiscordEvents;
+import pixlze.guildapi.mc.mixin.accessors.SystemToastInvoker;
 import pixlze.guildapi.net.SocketIOClient;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.FontUtils;
@@ -24,7 +22,8 @@ import pixlze.guildapi.utils.text.TextUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
 import pixlze.guildapi.utils.type.Prepend;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -89,59 +88,12 @@ public class DiscordBridgeFeature extends Feature {
     ).map(Pattern::compile).toArray(Pattern[]::new);
     private SocketIOClient socketIOClient;
 
+    @Configurable
+    public final Config<Boolean> useGui = new Config<>(false);
+
     @Override
     public void init() {
         socketIOClient = Managers.Net.socket;
-
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            dispatcher.register(ClientCommandManager.literal("discord")
-                    .then(ClientCommandManager.argument("message", StringArgumentType.greedyString())
-                            .executes((context) -> {
-                                String message = StringArgumentType.getString(context, "message");
-                                message = message.replaceAll("[\u200C\uE087\uE013\u2064\uE071\uE012\uE000\uE089\uE088\uE07F\uE08B\uE07E\uE080ÁÀ֎]", "");
-                                if (message.isBlank()) return 0;
-                                if (socketIOClient == null || socketIOClient.discordSocket == null) {
-                                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...")
-                                            .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
-                                    return 0;
-                                }
-                                if (!socketIOClient.discordSocket.connected()) {
-                                    McUtils.sendLocalMessage(Text.literal("Chat server not connected. Type /reconnect to try to connect.")
-                                            .setStyle(Style.EMPTY.withColor(Formatting.RED)), Prepend.DEFAULT.get(), false);
-                                    return 0;
-
-                                }
-                                socketIOClient.emit(socketIOClient.discordSocket, "discordOnlyWynnMessage", McUtils.playerName() + ": " + message);
-                                socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message, "WynnGuildId", Managers.Net.guild.guildId));
-                                return Command.SINGLE_SUCCESS;
-                            })));
-            dispatcher.register(ClientCommandManager.literal("dc").redirect(dispatcher.getRoot().getChild("discord")));
-
-            dispatcher.register(ClientCommandManager.literal("online").executes((context) -> {
-                if (socketIOClient == null || socketIOClient.discordSocket == null) {
-                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...")
-                            .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
-                    return 0;
-                }
-                socketIOClient.emit(socketIOClient.discordSocket, "listOnline", (Ack) args -> {
-                    if (args[0] instanceof JSONArray data) {
-                        try {
-                            MutableText message = Text.literal("Online mod users: ");
-                            for (int i = 0; i < data.length(); i++) {
-                                message.append(data.getString(i));
-                                if (i != data.length() - 1) message.append(", ");
-                            }
-                            message.setStyle(Style.EMPTY.withColor(Formatting.GREEN));
-                            McUtils.sendLocalMessage(message, Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)), true);
-                        } catch (Exception e) {
-                            GuildApi.LOGGER.error("error parsing online users: {} {}", e, e.getMessage());
-                        }
-                    }
-                });
-                return Command.SINGLE_SUCCESS;
-            }));
-        });
-
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
         S2CDiscordEvents.MESSAGE.register(this::onDiscordMessage);
     }
@@ -165,15 +117,28 @@ public class DiscordBridgeFeature extends Feature {
     }
 
     private void onDiscordMessage(JSONObject message) {
-        try {
-            McUtils.sendLocalMessage(Text.empty().append(FontUtils.BannerPillFont.parseStringWithFill("discord")
-                            .fillStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE))).append(" ")
-                    .append(Text.literal(message.get("Author").toString())
-                            .fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE)).append(": "))
-                    .append(Text.literal(TextUtils.highlightUser(message.get("Content").toString()))
-                            .setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), true);
-        } catch (Exception e) {
-            GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
+        if (!useGui.getValue()) {
+            try {
+                McUtils.sendLocalMessage(Text.empty().append(FontUtils.BannerPillFont.parseStringWithFill("discord")
+                                .fillStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE))).append(" ")
+                        .append(Text.literal(message.get("Author").toString())
+                                .fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE)).append(": "))
+                        .append(Text.literal(TextUtils.highlightUser(message.get("Content").toString()))
+                                .setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), true);
+            } catch (Exception e) {
+                GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
+            }
+        } else {
+            try {
+                Text description = Text.literal(message.get("Content").toString());
+                TextRenderer textRenderer = McUtils.mc().textRenderer;
+                List<OrderedText> lines = textRenderer.wrapLines(description, (int) (McUtils.mc().getWindow().getScaledWidth() * 0.25));
+                Objects.requireNonNull(textRenderer);
+                int width = Math.max(50, lines.stream().mapToInt(textRenderer::getWidth).max().orElse((int) (McUtils.mc().getWindow().getScaledWidth() * 0.25)));
+                McUtils.mc().getToastManager().add(SystemToastInvoker.create(SystemToast.Type.PERIODIC_NOTIFICATION, Text.literal(message.get("Author").toString()), lines, width + 30));
+            } catch (Exception e) {
+                GuildApi.LOGGER.info("discord message toast error: {} {}", e, e.getMessage());
+            }
         }
     }
 
