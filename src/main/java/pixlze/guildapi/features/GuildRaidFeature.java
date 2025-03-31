@@ -18,6 +18,10 @@ public class GuildRaidFeature extends Feature {
     private final Pattern RAID_PATTERN = Pattern.compile("^§[b8]((\uDAFF\uDFFC\uE001\uDB00\uDC06)|(\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE))§[b8] §[e8](?<player1>.*?)" +
             "§[b8], §[e8](?<player2>.*?)§[b8], §[e8](?<player3>.*?)§[b8], and §[e8](?<player4>.*?)§[b8] finished §[38](?<raid>.*?)§[b8].*$");
 
+    public GuildRaidFeature() {
+        super("Guild Raid Notification");
+    }
+
     @Override
     public void init() {
         ChatMessageReceived.EVENT.register(this::onWynnMessage);

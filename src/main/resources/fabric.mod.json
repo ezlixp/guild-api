@@ -17,6 +17,9 @@
   "entrypoints": {
     "client": [
       "pixlze.guildapi.GuildApi"
+    ],
+    "modmenu": [
+      "pixlze.guildapi.config.ModMenuIntegration"
     ]
   },
   "mixins": [

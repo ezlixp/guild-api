@@ -88,6 +88,10 @@ public class DiscordBridgeFeature extends Feature {
     ).map(Pattern::compile).toArray(Pattern[]::new);
     private SocketIOClient socketIOClient;
 
+    public DiscordBridgeFeature() {
+        super("Discord Bridging");
+    }
+
     @Configurable
     public final Config<Boolean> useGui = new Config<>(false);
 

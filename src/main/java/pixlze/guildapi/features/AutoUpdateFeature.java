@@ -17,6 +17,10 @@ public class AutoUpdateFeature extends Feature {
     private boolean needUpdate = false;
     private String modDownloadURL;
 
+    public AutoUpdateFeature() {
+        super("Auto Update");
+    }
+
     @Override
     public void init() {
         NetEvents.LOADED.register(this::onApiLoaded);
