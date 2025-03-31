@@ -3,8 +3,8 @@ package pixlze.guildapi.screens.config;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.text.Text;
@@ -14,7 +14,7 @@ import pixlze.guildapi.utils.McUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FeatureConfigWidget extends ElementListWidget.Entry<FeatureConfigWidget> {
+public class FeatureConfigWidget extends AlwaysSelectedEntryListWidget.Entry<FeatureConfigWidget> {
     private final Feature feature;
     private final TextRenderer textRenderer;
     private final List<Widget> children = new ArrayList<>();
@@ -41,5 +41,10 @@ public class FeatureConfigWidget extends ElementListWidget.Entry<FeatureConfigWi
     @Override
     public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
 
+    }
+
+    @Override
+    public Text getNarration() {
+        return null;
     }
 }
