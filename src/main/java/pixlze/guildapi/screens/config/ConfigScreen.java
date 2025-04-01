@@ -5,10 +5,10 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ThreePartsLayoutWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
+import pixlze.guildapi.screens.config.widgets.FeatureConfigListWidget;
 
 public class ConfigScreen extends Screen {
     private final Screen parent;
-    private int y = 0;
     public final ThreePartsLayoutWidget layout = new ThreePartsLayoutWidget(this);
     private FeatureConfigListWidget body;
 
@@ -37,7 +37,7 @@ public class ConfigScreen extends Screen {
     }
 
     protected void initBody() {
-        this.body = this.layout.addBody(new FeatureConfigListWidget(this.client, this, this.width));
+        this.body = this.layout.addBody(new FeatureConfigListWidget());
     }
 
     protected void initFooter() {
