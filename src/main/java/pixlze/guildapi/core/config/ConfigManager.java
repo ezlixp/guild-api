@@ -38,6 +38,7 @@ public class ConfigManager extends Manager {
         for (Map.Entry<Feature, List<Config<?>>> entry : configs.entrySet()) {
             JsonObject curConfig = new JsonObject();
             for (Config<?> config : entry.getValue()) {
+                config.applyPending();
                 curConfig.add(config.getName(), JsonUtils.toJsonElement(config.getValue().toString()));
             }
             configObject.add(entry.getKey().getClass().getSimpleName(), curConfig);
@@ -63,10 +64,7 @@ public class ConfigManager extends Manager {
                 config.setOwner(feature);
 
                 if (featureConfigObject.get(config.getName()) != null) {
-                    Object newValue = Managers.Json.GSON.fromJson(featureConfigObject.get(config.getName()), config.getType());
-                    if (!newValue.equals(config.getValue())) {
-                        config.setValue(Managers.Json.GSON.fromJson(featureConfigObject.get(config.getName()), config.getType()));
-                    }
+                    config.setPending(Managers.Json.GSON.fromJson(featureConfigObject.get(config.getName()), config.getType()));
                 }
 
                 featureConfigs.add(config);
@@ -75,5 +73,9 @@ public class ConfigManager extends Manager {
             }
         }
         configs.put(feature, featureConfigs);
+    }
+
+    public List<Config<?>> getFeatureConfigs(Feature feature) {
+        return configs.get(feature);
     }
 }

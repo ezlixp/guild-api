@@ -1,7 +1,7 @@
 package pixlze.guildapi.screens.widgets;
 
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.ParentElement;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ContainerWidget;
@@ -11,19 +11,13 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import pixlze.guildapi.utils.McUtils;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class DynamicSizeElementListWidget<E extends DynamicSizeElementListWidget.Entry<E>> extends ContainerWidget {
-    private final List<E> children = new ArrayList<>();
+public abstract class DynamicSizeElementListWidget<E extends DynamicSizeElementListWidget.Entry<E>> extends ContainerWidget {
 
     public DynamicSizeElementListWidget(Text message) {
         super(0, 0, 0, 0, Text.empty());
-    }
-
-    @Override
-    public List<E> children() {
-        return children;
     }
 
     @Override
@@ -58,8 +52,30 @@ public class DynamicSizeElementListWidget<E extends DynamicSizeElementListWidget
         return children().get(index);
     }
 
-    protected void add(E entry) {
-        children.add(entry);
+    abstract public List<E> children();
+
+    protected Entry<E> getEntryAtPosition(double mouseX, double mouseY) {
+        if (mouseX < this.getX() || mouseX > this.getRight())
+            return null;
+        mouseY += this.getScrollY();
+        int height = getY();
+        for (int i = 0; i < getEntryCount(); i++) {
+            if (height <= mouseY && mouseY <= height + getEntry(i).getHeight()) {
+                return getEntry(i);
+            }
+            height += getEntry(i).getHeight() + 4;
+        }
+        return null;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        boolean bl = this.checkScrollbarDragged(mouseX, mouseY, button);
+        for (E child : children()) {
+            bl |= child.mouseClicked(mouseX, mouseY, button);
+            if (child.isMouseOver(mouseX, mouseY)) this.setFocused(child);
+        }
+        return bl;
     }
 
     @Override
@@ -92,9 +108,20 @@ public class DynamicSizeElementListWidget<E extends DynamicSizeElementListWidget
 
     }
 
-    public abstract static class Entry<E extends Entry<E>> implements ParentElement {
+    public abstract static class Entry<E extends Entry<E>> implements Element {
+        DynamicSizeElementListWidget<E> parent;
+
+        public Entry(DynamicSizeElementListWidget<E> parent) {
+            this.parent = parent;
+        }
+
         public abstract int getHeight();
 
         public abstract void render(DrawContext context, int index, int x, int y, int entryWidth, int entryHeight, int mouseX, int mouseY, float tickDelta);
+
+        @Override
+        public boolean isMouseOver(double mouseX, double mouseY) {
+            return Objects.equals(parent.getEntryAtPosition(mouseX, mouseY), this);
+        }
     }
 }

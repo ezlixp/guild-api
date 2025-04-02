@@ -37,7 +37,7 @@ public class ConfigScreen extends Screen {
     }
 
     protected void initBody() {
-        this.body = this.layout.addBody(new FeatureConfigListWidget());
+        this.body = this.layout.addBody(new FeatureConfigListWidget(this));
     }
 
     protected void initFooter() {
