@@ -9,6 +9,7 @@ import net.minecraft.client.gui.widget.ThreePartsLayoutWidget;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 import pixlze.guildapi.utils.McUtils;
 
 import java.util.List;
@@ -72,8 +73,9 @@ public abstract class DynamicSizeElementListWidget<E extends DynamicSizeElementL
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         boolean bl = this.checkScrollbarDragged(mouseX, mouseY, button);
         for (E child : children()) {
-            bl |= child.mouseClicked(mouseX, mouseY, button);
-            if (child.isMouseOver(mouseX, mouseY)) this.setFocused(child);
+            boolean t = child.mouseClicked(mouseX, mouseY, button);
+            if (t) this.setFocused(child);
+            bl |= t;
         }
         return bl;
     }
@@ -106,6 +108,12 @@ public abstract class DynamicSizeElementListWidget<E extends DynamicSizeElementL
     @Override
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {
 
+    }
+
+    @Override
+    public void setFocused(@Nullable Element focused) {
+        if (Objects.equals(focused, getFocused())) return;
+        super.setFocused(focused);
     }
 
     public abstract static class Entry<E extends Entry<E>> implements Element {

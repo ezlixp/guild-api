@@ -5,7 +5,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TextWidget;
-import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.config.Config;
 
 import java.util.List;
@@ -31,12 +30,6 @@ public class ConfigRow extends AbstractParentElement {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        GuildApi.LOGGER.info("clicked");
-        return super.mouseClicked(mouseX, mouseY, button);
-    }
-
-    @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
         return x <= mouseX && mouseX <= x + width && y <= mouseY && mouseY <= y + height;
     }
@@ -53,5 +46,12 @@ public class ConfigRow extends AbstractParentElement {
         title.setHeight(rowHeight);
         action.setHeight(rowHeight);
         context.drawBorder(title.getX(), title.getY(), title.getWidth(), title.getHeight(), 0xFFFFFFFF);
+    }
+
+    @Override
+    public void setFocused(boolean focused) {
+        if (!focused)
+            this.setFocused(null);
+        super.setFocused(focused);
     }
 }

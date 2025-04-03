@@ -94,18 +94,12 @@ public class FeatureConfigListWidget extends DynamicSizeElementListWidget<Featur
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             Optional<Element> optional = this.hoveredElement(mouseX, mouseY);
-            for (ConfigRow child : children()) {
-                if (optional.isPresent()) {
-                    if (child.equals(optional.get())) {
-                        if (optional.get().mouseClicked(mouseX, mouseY, button)) {
-                            this.setFocused(optional.get());
-                            if (button == 0) {
-                                this.setDragging(true);
-                            }
-                        }
-                    } else child.setFocused(null);
-                } else {
-                    child.setFocused(null);
+            if (optional.isPresent()) {
+                if (optional.get().mouseClicked(mouseX, mouseY, button)) {
+                    this.setFocused(optional.get());
+                    if (button == 0) {
+                        this.setDragging(true);
+                    }
                 }
             }
             return optional.isPresent();
@@ -129,7 +123,7 @@ public class FeatureConfigListWidget extends DynamicSizeElementListWidget<Featur
 
         @Override
         public void setFocused(@Nullable Element focused) {
-            if (this.focused != null) {
+            if (this.focused != null && !this.focused.equals(focused)) {
                 this.focused.setFocused(false);
             }
 
@@ -138,6 +132,12 @@ public class FeatureConfigListWidget extends DynamicSizeElementListWidget<Featur
             }
 
             this.focused = focused;
+        }
+
+        @Override
+        public void setFocused(boolean focused) {
+            if (!focused) this.setFocused(null);
+            ParentElement.super.setFocused(false);
         }
     }
 }
