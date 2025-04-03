@@ -28,7 +28,6 @@ public class AutoUpdateFeature extends Feature {
 
     @Override
     public void onConfigUpdate(Config<?> config) {
-
     }
 
     private void onApiLoaded(Api loaded) {
