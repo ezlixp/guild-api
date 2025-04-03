@@ -64,15 +64,17 @@ public class Config<T> {
     public ClickableWidget getActionWidget() {
         TextFieldWidget out = new TextFieldWidget(McUtils.mc().textRenderer, 300, 25, Text.of("enter here"));
         out.setEditable(true);
-        out.write("test");
-        out.setChangedListener((to) -> tryParseStringValue(to).ifPresent(this::setPending));
+        out.write(this.value.toString());
+        out.setChangedListener((to) -> {
+            tryParseStringValue(to).ifPresent(this::setPending);
+        });
         return out;
     }
 
     @SuppressWarnings("unchecked")
     public Optional<T> tryParseStringValue(String value) {
         try {
-            Class<?> wrapped = ClassUtils.primitiveToWrapper((Class<?>) getType());
+            Class<?> wrapped = ClassUtils.primitiveToWrapper(this.value.getClass());
             return Optional.of((T) wrapped.getConstructor(String.class).newInstance(value));
         } catch (Exception ignored) {
         }
