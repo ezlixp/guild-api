@@ -5,6 +5,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ThreePartsLayoutWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
+import pixlze.guildapi.core.Managers;
 import pixlze.guildapi.screens.config.widgets.FeatureConfigListWidget;
 
 public class ConfigScreen extends Screen {
@@ -30,6 +31,11 @@ public class ConfigScreen extends Screen {
     public void close() {
         assert client != null;
         client.setScreen(parent);
+    }
+
+    @Override
+    public void removed() {
+        Managers.Config.saveConfig();
     }
 
     protected void initHeader() {
