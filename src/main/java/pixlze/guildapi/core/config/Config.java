@@ -1,6 +1,7 @@
 package pixlze.guildapi.core.config;
 
 import com.google.common.reflect.TypeToken;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TextWidget;
@@ -29,8 +30,12 @@ public class Config<T> {
         return value;
     }
 
-    public Type getType() {
+    public Type getTypeToken() {
         return type;
+    }
+
+    public Class<?> getType() {
+        return value.getClass();
     }
 
     public void setPending(T value) {
@@ -61,20 +66,32 @@ public class Config<T> {
         return new TextWidget(300, 25, Text.of(getName()), McUtils.mc().textRenderer);
     }
 
+    @SuppressWarnings("unchecked")
     public ClickableWidget getActionWidget() {
-        TextFieldWidget out = new TextFieldWidget(McUtils.mc().textRenderer, 300, 25, Text.of("enter here"));
-        out.setEditable(true);
-        out.write(this.value.toString());
-        out.setChangedListener((to) -> {
-            tryParseStringValue(to).ifPresent(this::setPending);
-        });
-        return out;
+        if (getType().equals(Boolean.class)) {
+//            OptionToggleWidget out = new OptionToggleWidget(300, 25, (boolean) this.value);
+//            out.setOnToggled((toggled) -> setPending((T) toggled));
+//            return out;
+            setPending(this.value);
+            return ButtonWidget.builder(Text.of((boolean) this.pending ? "Yes":"No"), (button) -> {
+                this.setPending((T) (this.pending.equals(Boolean.TRUE) ? Boolean.FALSE:Boolean.TRUE));
+                button.setMessage(Text.of((boolean) this.pending ? "Yes":"No"));
+            }).dimensions(0, 0, 80, 25 - 4).build();
+        } else {
+            TextFieldWidget out = new TextFieldWidget(McUtils.mc().textRenderer, 300, 25 - 4, Text.of("enter here"));
+            out.setEditable(true);
+            out.write(this.value.toString());
+            out.setChangedListener((to) -> {
+                tryParseStringValue(to).ifPresent(this::setPending);
+            });
+            return out;
+        }
     }
 
     @SuppressWarnings("unchecked")
     public Optional<T> tryParseStringValue(String value) {
         try {
-            Class<?> wrapped = ClassUtils.primitiveToWrapper(this.value.getClass());
+            Class<?> wrapped = ClassUtils.primitiveToWrapper(getType());
             return Optional.of((T) wrapped.getConstructor(String.class).newInstance(value));
         } catch (Exception ignored) {
         }

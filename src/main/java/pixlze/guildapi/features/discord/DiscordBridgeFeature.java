@@ -12,6 +12,7 @@ import pixlze.guildapi.core.Managers;
 import pixlze.guildapi.core.config.Config;
 import pixlze.guildapi.core.config.Configurable;
 import pixlze.guildapi.core.features.Feature;
+import pixlze.guildapi.core.features.FeatureState;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.core.handlers.discord.event.S2CDiscordEvents;
 import pixlze.guildapi.mc.mixin.accessors.SystemToastInvoker;
@@ -108,6 +109,7 @@ public class DiscordBridgeFeature extends Feature {
     }
 
     private void onWynnMessage(Text message) {
+        if (Managers.Feature.getFeatureState(this) == FeatureState.DISABLED) return;
         String m = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));
         if (GuildApi.isDevelopment()) m = m.replaceAll("&", "§");
         GuildApi.LOGGER.info("received: {}", m);
@@ -121,6 +123,7 @@ public class DiscordBridgeFeature extends Feature {
     }
 
     private void onDiscordMessage(JSONObject message) {
+        if (Managers.Feature.getFeatureState(this) == FeatureState.DISABLED) return;
         if (!useGui.getValue()) {
             try {
                 McUtils.sendLocalMessage(Text.empty().append(FontUtils.BannerPillFont.parseStringWithFill("discord")

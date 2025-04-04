@@ -64,7 +64,7 @@ public class ConfigManager extends Manager {
                 config.setOwner(feature);
 
                 if (featureConfigObject.get(config.getName()) != null) {
-                    config.setPending(Managers.Json.GSON.fromJson(featureConfigObject.get(config.getName()), config.getType()));
+                    config.setPending(Managers.Json.GSON.fromJson(featureConfigObject.get(config.getName()), config.getTypeToken()));
                 }
 
                 featureConfigs.add(config);

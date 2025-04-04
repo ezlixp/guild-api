@@ -3,8 +3,10 @@ package pixlze.guildapi.features;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.core.Managers;
 import pixlze.guildapi.core.config.Config;
 import pixlze.guildapi.core.features.Feature;
+import pixlze.guildapi.core.features.FeatureState;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.TextUtils;
@@ -33,6 +35,7 @@ public class GuildRaidFeature extends Feature {
     }
 
     private void onWynnMessage(Text message) {
+        if (Managers.Feature.getFeatureState(this) != FeatureState.ENABLED) return;
         if (!MinecraftClient.getInstance().isOnThread()) {
             GuildApi.LOGGER.info("not render thread message");
             return;

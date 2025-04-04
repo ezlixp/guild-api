@@ -15,7 +15,8 @@ public class FeatureManager extends Manager {
     private static final Map<Class<? extends Feature>, Feature> FEATURE_INSTANCES = new LinkedHashMap<>();
 
     public void init() {
-        registerFeature(new GuildRaidFeature());
+        if (GuildApi.isTesting())
+            registerFeature(new GuildRaidFeature());
         registerFeature(new DiscordBridgeFeature());
         registerFeature(new AutoUpdateFeature());
     }

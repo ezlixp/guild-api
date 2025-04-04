@@ -3,7 +3,6 @@ package pixlze.guildapi.screens.config.widgets;
 import net.minecraft.client.gui.AbstractParentElement;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import pixlze.guildapi.core.config.Config;
 
@@ -11,17 +10,15 @@ import java.util.List;
 
 public class ConfigRow extends AbstractParentElement {
     private final TextWidget title;
-    private final TextFieldWidget action;
-    private final Config<?> config;
+    private final ClickableWidget action;
     private int y;
     private int height;
     private int x;
     private int width;
 
     public ConfigRow(Config<?> config) {
-        this.config = config;
         title = config.getTitleWidget();
-        action = (TextFieldWidget) config.getActionWidget();
+        action = config.getActionWidget();
     }
 
     @Override
@@ -43,9 +40,8 @@ public class ConfigRow extends AbstractParentElement {
         action.setPosition(x + rowWidth - action.getWidth() - 4, y);
         title.render(context, mouseX, mouseY, delta);
         action.render(context, mouseX, mouseY, delta);
-        title.setHeight(rowHeight);
-        action.setHeight(rowHeight);
-        context.drawBorder(title.getX(), title.getY(), title.getWidth(), title.getHeight(), 0xFFFFFFFF);
+        title.setHeight(rowHeight - 4);
+        action.setHeight(rowHeight - 4);
     }
 
     @Override
