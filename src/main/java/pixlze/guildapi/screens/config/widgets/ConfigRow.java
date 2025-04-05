@@ -42,6 +42,7 @@ public class ConfigRow extends AbstractParentElement {
         action.render(context, mouseX, mouseY, delta);
         title.setHeight(rowHeight - 4);
         action.setHeight(rowHeight - 4);
+        context.drawBorder(title.getX(), title.getY(), title.getWidth(), title.getHeight(), 0xFFFFFFFF);
     }
 
     @Override

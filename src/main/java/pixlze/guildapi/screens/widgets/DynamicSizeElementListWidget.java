@@ -90,7 +90,7 @@ public abstract class DynamicSizeElementListWidget<E extends DynamicSizeElementL
             int top = getY() + pad - (int) getScrollY();
             int bottom = top + child.getHeight();
             if (bottom >= getY() && top <= getBottom())
-                child.render(context, i, getX(), top, getWidth(), child.getHeight(), mouseX, mouseY, delta);
+                child.render(context, i, getX(), top, getWidth() - (this.overflows() ? 6:0), child.getHeight(), mouseX, mouseY, delta);
             pad += child.getHeight() + 4;
         }
         context.disableScissor();
