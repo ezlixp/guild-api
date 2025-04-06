@@ -78,6 +78,16 @@ public class SocketIOClient extends Api {
     @Override
     protected void unready() {
         super.unready();
+        resetConnection();
+    }
+
+    @Override
+    public void disable() {
+        super.disable();
+        resetConnection();
+    }
+
+    private void resetConnection() {
         if (discordSocket != null)
             discordSocket.disconnect();
         options.extraHeaders.clear();
