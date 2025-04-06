@@ -14,6 +14,7 @@ public class DiscordMessageHandler extends Handler {
     public void init() {
         SocketIOClient socketIOClient = Managers.Net.socket;
         socketIOClient.addDiscordListener("discordMessage", this::onDiscordMessage);
+        // TODO handle c2s discord messages too, so all messages can be stored and added to discord screen.
     }
 
     private void onDiscordMessage(Object[] args) {
