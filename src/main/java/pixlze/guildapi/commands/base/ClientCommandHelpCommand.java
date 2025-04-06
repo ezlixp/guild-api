@@ -14,7 +14,10 @@ import java.util.List;
 
 class ClientCommandHelpCommand extends ClientCommand {
     private static final List<Pair<String, String>> COMMANDS = List.of(
+            new Pair<>("/guildapi", "Opens the main menu for this mod."),
             new Pair<>("/guildapi help", "Displays this list of commands."),
+            new Pair<>("/guildapi info", "Displays mod info."),
+            new Pair<>("/guildapi config", "Opens the config screen."),
 
             new Pair<>("\n", "Bridge:"),
 
