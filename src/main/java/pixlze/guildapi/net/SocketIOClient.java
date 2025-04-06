@@ -63,6 +63,7 @@ public class SocketIOClient extends Api {
 
     @Override
     public void ready() {
+        // TODO further testing about first enable without other apis loaded
         guild = Managers.Net.guild;
 
         options.extraHeaders.put("from", Collections.singletonList(McUtils.playerName()));
