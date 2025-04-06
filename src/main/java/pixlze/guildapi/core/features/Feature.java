@@ -7,6 +7,7 @@ import pixlze.guildapi.core.config.Configurable;
 public abstract class Feature {
     @Configurable
     public final Config<Boolean> enabled = new Config<>(true);
+    
     private final String name;
 
     protected Feature(String name) {

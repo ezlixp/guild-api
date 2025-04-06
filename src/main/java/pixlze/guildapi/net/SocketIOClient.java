@@ -12,6 +12,8 @@ import net.minecraft.util.Pair;
 import org.json.JSONObject;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.Managers;
+import pixlze.guildapi.core.features.FeatureState;
+import pixlze.guildapi.features.discord.DiscordBridgeFeature;
 import pixlze.guildapi.models.Models;
 import pixlze.guildapi.models.worldState.event.WorldStateEvents;
 import pixlze.guildapi.models.worldState.type.WorldState;
@@ -138,10 +140,16 @@ public class SocketIOClient extends Api {
             });
         }
         if (GuildApi.isDevelopment() || Models.WorldState.onWorld()) {
+            connectDiscord();
+        }
+        WorldStateEvents.CHANGE.register(this::worldStateChanged);
+    }
+
+    public void connectDiscord() {
+        if (Managers.Feature.getFeatureState(Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)) == FeatureState.ENABLED) {
             discordSocket.connect();
             GuildApi.LOGGER.info("sockets connecting");
         }
-        WorldStateEvents.CHANGE.register(this::worldStateChanged);
     }
 
     public void addDiscordListener(String name, Consumer<Object[]> listener) {
@@ -158,8 +166,7 @@ public class SocketIOClient extends Api {
         if (state == WorldState.WORLD) {
             this.enable();
             if (!discordSocket.connected()) {
-                discordSocket.connect();
-                GuildApi.LOGGER.info("discord socket on");
+                connectDiscord();
             }
         } else {
             this.disable();
@@ -175,6 +182,10 @@ public class SocketIOClient extends Api {
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(ClientCommandManager.literal("reconnect").executes((context) -> {
+                if (Managers.Feature.getFeatureState(Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)) != FeatureState.ENABLED) {
+                    McUtils.sendLocalMessage(Text.literal("§cDiscord bridging is disabled. Please turn it on in /guildapi config and try again."), Prepend.GUILD.getWithStyle(ColourUtils.RED), true);
+                    return 0;
+                }
                 if (isDisabled()) {
                     McUtils.sendLocalMessage(Text.literal("§cCannot connect to chat server at this time. Please join a world first."), Prepend.GUILD.getWithStyle(ColourUtils.RED), true);
                     return 0;
