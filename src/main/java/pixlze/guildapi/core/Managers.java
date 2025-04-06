@@ -7,6 +7,7 @@ import pixlze.guildapi.core.commands.test.TestClientCommandManager;
 import pixlze.guildapi.core.config.ConfigManager;
 import pixlze.guildapi.core.features.FeatureManager;
 import pixlze.guildapi.core.json.JsonManager;
+import pixlze.guildapi.core.mod.TickSchedulerManager;
 import pixlze.guildapi.net.NetManager;
 
 public final class Managers {
@@ -20,12 +21,15 @@ public final class Managers {
     public static final ClientCommandManager Command = new ClientCommandManager();
     public static final TestClientCommandManager TestCommand = new TestClientCommandManager();
 
+    public static final TickSchedulerManager Tick = new TickSchedulerManager();
+
     public static void init() {
         Json.init();
         Net.init();
         Feature.init();
         Config.init();
         Command.init();
+        Tick.init();
         if (GuildApi.isDevelopment() || GuildApi.isTesting())
             TestCommand.init();
     }
