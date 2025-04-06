@@ -19,7 +19,7 @@ public class AutoUpdateFeature extends Feature {
     private String modDownloadURL;
 
     public AutoUpdateFeature() {
-        super("Auto Update");
+        super("Update Notification");
     }
 
     @Override
