@@ -62,7 +62,7 @@ public class SocketIOClient extends Api {
     }
 
     @Override
-    protected void ready() {
+    public void ready() {
         guild = Managers.Net.guild;
 
         options.extraHeaders.put("from", Collections.singletonList(McUtils.playerName()));
@@ -76,7 +76,7 @@ public class SocketIOClient extends Api {
     }
 
     @Override
-    protected void unready() {
+    public void unready() {
         super.unready();
         resetConnection();
     }

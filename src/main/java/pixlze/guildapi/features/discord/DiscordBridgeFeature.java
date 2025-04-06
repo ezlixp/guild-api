@@ -110,12 +110,12 @@ public class DiscordBridgeFeature extends Feature {
 
     @Override
     public void onEnabled() {
-        socketIOClient.enable();
+        socketIOClient.ready();
     }
 
     @Override
     public void onDisabled() {
-        socketIOClient.disable();
+        socketIOClient.unready();
     }
 
     private void onWynnMessage(Text message) {
