@@ -27,7 +27,7 @@ public class FeatureConfigListWidget extends DynamicSizeElementListWidget<Featur
     // then that second class can be reused to hold subconfigs
     // Config<List<Config>>
     public FeatureConfigListWidget(ConfigScreen configScreen) {
-        super(Text.empty());
+        super(Text.empty(), McUtils.mc());
         this.configScreen = configScreen;
         for (Feature feature : Managers.Feature.getFeatures())
             this.add(createEntry(feature));

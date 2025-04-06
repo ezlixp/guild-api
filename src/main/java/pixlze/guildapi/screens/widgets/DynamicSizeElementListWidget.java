@@ -1,5 +1,6 @@
 package pixlze.guildapi.screens.widgets;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
@@ -16,9 +17,13 @@ import java.util.List;
 import java.util.Objects;
 
 public abstract class DynamicSizeElementListWidget<E extends DynamicSizeElementListWidget.Entry<E>> extends ContainerWidget {
+    private static final Identifier MENU_LIST_BACKGROUND_TEXTURE = Identifier.ofVanilla("textures/gui/menu_list_background.png");
+    private static final Identifier INWORLD_MENU_LIST_BACKGROUND_TEXTURE = Identifier.ofVanilla("textures/gui/inworld_menu_list_background.png");
+    private final MinecraftClient client;
 
-    public DynamicSizeElementListWidget(Text message) {
+    public DynamicSizeElementListWidget(Text message, MinecraftClient client) {
         super(0, 0, 0, 0, Text.empty());
+        this.client = client;
     }
 
     @Override
@@ -84,6 +89,7 @@ public abstract class DynamicSizeElementListWidget<E extends DynamicSizeElementL
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         int pad = 0;
         int t = getEntryCount();
+        this.drawMenuListBackground(context);
         context.enableScissor(this.getX(), this.getY(), this.getRight(), this.getBottom());
         for (int i = 0; i < t; i++) {
             E child = getEntry(i);
@@ -96,6 +102,22 @@ public abstract class DynamicSizeElementListWidget<E extends DynamicSizeElementL
         context.disableScissor();
         this.drawHeaderAndFooterSeparators(context);
         this.drawScrollbar(context);
+    }
+
+    protected void drawMenuListBackground(DrawContext context) {
+        Identifier identifier = this.client.world == null ? MENU_LIST_BACKGROUND_TEXTURE:INWORLD_MENU_LIST_BACKGROUND_TEXTURE;
+        context.drawTexture(
+                RenderLayer::getGuiTextured,
+                identifier,
+                this.getX(),
+                this.getY(),
+                (float) this.getRight(),
+                (float) (this.getBottom() + (int) this.getScrollY()),
+                this.getWidth(),
+                this.getHeight(),
+                32,
+                32
+        );
     }
 
     protected void drawHeaderAndFooterSeparators(DrawContext context) {
