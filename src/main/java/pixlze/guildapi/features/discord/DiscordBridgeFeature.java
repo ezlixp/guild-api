@@ -110,18 +110,12 @@ public class DiscordBridgeFeature extends Feature {
 
     @Override
     public void onEnabled() {
-        if (!socketIOClient.isDisabled()) {
-            socketIOClient.connectDiscord();
-        }
+        socketIOClient.enable();
     }
 
     @Override
     public void onDisabled() {
-        try {
-            socketIOClient.discordSocket.disconnect();
-        } catch (Exception e) {
-            GuildApi.LOGGER.warn("Could not disconnect discord socket: {}", e.getMessage());
-        }
+        socketIOClient.disable();
     }
 
     private void onWynnMessage(Text message) {
