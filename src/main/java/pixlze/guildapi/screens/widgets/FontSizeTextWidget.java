@@ -12,7 +12,7 @@ import net.minecraft.util.Language;
 
 public class FontSizeTextWidget extends TextWidget {
     private float horizontalAlignment = 0.5f;
-    private final int height;
+    private int height;
 
     public FontSizeTextWidget(int height, Text message, TextRenderer textRenderer) {
         super(message, textRenderer);
@@ -22,6 +22,11 @@ public class FontSizeTextWidget extends TextWidget {
     private TextWidget align(float horizontalAlignment) {
         this.horizontalAlignment = horizontalAlignment;
         return this;
+    }
+
+    @Override
+    public void setHeight(int height) {
+        this.height = height;
     }
 
     @Override
@@ -60,15 +65,13 @@ public class FontSizeTextWidget extends TextWidget {
         stack.push();
 
         float scale = ((float) height) / textRenderer.fontHeight;
-        stack.translate(getX() + (float) widgetWidth / 2, getY(), 0);
+        stack.translate(getX() + (float) widgetWidth / 2, getY() + (float) this.getHeight() / 2, 0);
         stack.scale(scale, scale, 1f);
-        stack.translate(-(getX() + (float) widgetWidth / 2) + 0.5f, -getY(), 0);
+        stack.translate(-(getX() + (float) widgetWidth / 2) + 0.5f, -getY() - (float) this.getHeight() / 2 + 0.5f, 0);
 
         context.drawText(textRenderer, orderedText, k, l, this.getTextColor(), false);
-        context.drawBorder(getX(), getY(), getWidth() - 1, getHeight(), 0xFFFFFFFF);
 
         stack.pop();
     }
-
 }
 
