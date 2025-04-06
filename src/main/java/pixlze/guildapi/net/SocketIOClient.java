@@ -63,7 +63,8 @@ public class SocketIOClient extends Api {
 
     @Override
     public void ready() {
-        // TODO further testing about first enable without other apis loaded
+        if (Managers.Feature.getFeatureState(Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)) != FeatureState.ENABLED)
+            return;
         guild = Managers.Net.guild;
 
         options.extraHeaders.put("from", Collections.singletonList(McUtils.playerName()));

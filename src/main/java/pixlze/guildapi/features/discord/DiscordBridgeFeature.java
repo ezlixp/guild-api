@@ -110,7 +110,7 @@ public class DiscordBridgeFeature extends Feature {
 
     @Override
     public void onEnabled() {
-        socketIOClient.ready();
+        socketIOClient.tryReady();
     }
 
     @Override
