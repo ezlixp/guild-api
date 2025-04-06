@@ -10,10 +10,7 @@ import pixlze.guildapi.utils.JsonUtils;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ConfigManager extends Manager {
     private static final File CONFIG_DIR = GuildApi.getModStorageDir("config");
@@ -67,7 +64,8 @@ public class ConfigManager extends Manager {
                     config.setPending(Managers.Json.GSON.fromJson(featureConfigObject.get(config.getName()), config.getTypeToken()));
                 }
 
-                featureConfigs.add(config);
+                if (Objects.equals(config.getName(), "enabled")) featureConfigs.addFirst(config);
+                else featureConfigs.add(config);
             } catch (Exception e) {
                 GuildApi.LOGGER.error("config register error: {} {}", e, e.getMessage());
             }
