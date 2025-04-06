@@ -75,6 +75,17 @@ public class SocketIOClient extends Api {
         super.enable();
     }
 
+    @Override
+    protected void unready() {
+        super.unready();
+        if (discordSocket != null)
+            discordSocket.disconnect();
+        options.extraHeaders.clear();
+        options.extraHeaders.put("user-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_VERSION));
+        firstConnect = true;
+        connectAttempt = 0;
+    }
+
     private void initSocket(boolean reloadSocket) {
         if (reloadSocket) {
             firstConnect = true;
@@ -207,17 +218,5 @@ public class SocketIOClient extends Api {
                 }
             }));
         });
-    }
-
-    @Override
-    protected void unready() {
-        super.unready();
-        if (discordSocket != null)
-            discordSocket.disconnect();
-        options.extraHeaders.clear();
-        options.extraHeaders.put("user-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_VERSION));
-        firstConnect = true;
-        connectAttempt = 0;
-
     }
 }
