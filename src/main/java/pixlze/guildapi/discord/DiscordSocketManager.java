@@ -8,7 +8,10 @@ import pixlze.guildapi.core.features.FeatureState;
 import pixlze.guildapi.features.discord.DiscordBridgeFeature;
 import pixlze.guildapi.models.worldState.event.WorldStateEvents;
 import pixlze.guildapi.models.worldState.type.WorldState;
+import pixlze.guildapi.net.GuildApiClient;
+import pixlze.guildapi.net.event.NetEvents;
 import pixlze.guildapi.net.type.AbstractSocketManager;
+import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.ColourUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
@@ -23,6 +26,11 @@ public class DiscordSocketManager extends AbstractSocketManager {
 
     public DiscordSocketManager() {
         super(List.of());
+        NetEvents.LOADED.register(this::onApiLoaded);
+    }
+
+    private void onApiLoaded(Api api) {
+        if (api.getClass().equals(GuildApiClient.class)) initSocket();
     }
 
     @Override
@@ -35,7 +43,7 @@ public class DiscordSocketManager extends AbstractSocketManager {
 
     @Override
     protected String getToken() {
-        return Managers.Net.guild.getToken(true);
+        return Managers.Net.guild.getToken(false);
     }
 
     @Override
@@ -47,15 +55,21 @@ public class DiscordSocketManager extends AbstractSocketManager {
 
     private void worldStateChanged(WorldState state) {
         if (state == WorldState.WORLD) {
-            boolean reload = false;
-            if (!Objects.equals(Managers.Net.guild.guildId, guildId)) {
-                guildId = Managers.Net.guild.guildId;
-                reload = true;
-            }
-            initSocket(reload);
+            this.initSocket();
         } else {
             this.disable();
         }
+    }
+
+    public void initSocket() {
+        if (Managers.Net.guild.isDisabled()) return;
+        boolean reload = false;
+        if (!Objects.equals(Managers.Net.guild.guildId, guildId)) {
+            Managers.Discord.clearMessages();
+            guildId = Managers.Net.guild.guildId;
+            reload = true;
+        }
+        initSocket(reload);
     }
 
     @Override

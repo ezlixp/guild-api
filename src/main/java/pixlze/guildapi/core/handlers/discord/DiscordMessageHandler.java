@@ -12,7 +12,6 @@ public class DiscordMessageHandler extends Handler {
     @Override
     public void init() {
         Managers.DiscordSocket.saveListener("discordMessage", this::onDiscordMessage);
-        // TODO handle c2s discord messages too, so all messages can be stored and added to discord screen.
     }
 
     private void onDiscordMessage(Object[] args) {

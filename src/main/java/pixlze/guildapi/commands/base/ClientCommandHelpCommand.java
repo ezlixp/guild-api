@@ -21,6 +21,7 @@ class ClientCommandHelpCommand extends ClientCommand {
 
             new Pair<>("\n", "Bridge:"),
 
+            new Pair<>("/discord", "Opens the discord screen."),
             new Pair<>("/discord <message>", "Sends a guild chat message that is only visible to other mod users and the discord."),
             new Pair<>("/reconnect", "Tries to connect to the chat server if it isn't already connected."),
             new Pair<>("/online", "Displays all connected mod users."),

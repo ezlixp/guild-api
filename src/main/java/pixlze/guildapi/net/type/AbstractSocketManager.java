@@ -48,8 +48,6 @@ public abstract class AbstractSocketManager extends Manager {
     protected void resetConnection() {
         if (socket != null)
             socket.disconnect();
-        options.extraHeaders.clear();
-        options.extraHeaders.put("user-agent", Collections.singletonList(GuildApi.MOD_ID + "/" + GuildApi.MOD_VERSION));
         firstConnect = true;
         connectAttempt = 0;
     }

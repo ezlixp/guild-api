@@ -12,7 +12,7 @@ import pixlze.guildapi.utils.McUtils;
 public class DiscordScreen extends Screen {
     private final Screen parent;
     public final ThreePartsLayoutWidget layout = new ThreePartsLayoutWidget(this);
-    private DiscordChatWidget body;
+    public DiscordChatWidget body;
 
     public DiscordScreen(Screen parent) {
         super(Text.of("Discord"));
@@ -21,6 +21,7 @@ public class DiscordScreen extends Screen {
 
     @Override
     public void init() {
+        Managers.Discord.setDiscordScreen(this);
         this.initHeader();
         this.initBody();
         this.initFooter();
@@ -36,7 +37,7 @@ public class DiscordScreen extends Screen {
 
     @Override
     public void removed() {
-        Managers.Config.saveConfig();
+        Managers.Discord.setDiscordScreen(null);
     }
 
     protected void initHeader() {
@@ -45,6 +46,7 @@ public class DiscordScreen extends Screen {
 
     protected void initBody() {
         this.body = this.layout.addBody(new DiscordChatWidget(McUtils.mc(), this.width, this));
+        Managers.Discord.addAll(this.body);
     }
 
     protected void initFooter() {

@@ -3,7 +3,6 @@ package pixlze.guildapi.screens.menu;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ThreePartsLayoutWidget;
 import net.minecraft.text.Text;
-import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.screens.config.ConfigScreen;
 import pixlze.guildapi.screens.discord.DiscordScreen;
 import pixlze.guildapi.screens.menu.widgets.MenuOptionsListWidget;
@@ -33,11 +32,6 @@ public class MenuScreen extends Screen {
     public void close() {
         assert client != null;
         client.setScreen(parent);
-    }
-
-    @Override
-    public void removed() {
-        Managers.Config.saveConfig();
     }
 
     protected void initHeader() {

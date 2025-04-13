@@ -114,15 +114,6 @@ public class GuildApiClient extends Api {
         response.whenCompleteAsync((res, exception) -> {
                     GuildApi.LOGGER.info("api GET completed: res {} exception {}", res, exception);
                     applyCallback(out, res, exception);
-                    // else {
-//                        if (res.statusCode() / 100 == 2)
-//                            out.complete(JsonUtils.toJsonElement(res.body()));
-//                        else {
-//                            if (handleError)
-//                                checkError(res, builder, false);
-//                            else out.complete(JsonUtils.toJsonElement(res.body()));
-//                        }
-//                    }
                 }
         );
         return out;

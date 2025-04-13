@@ -18,7 +18,9 @@ public class SetPlayerTestCommand extends ClientCommand {
     protected LiteralArgumentBuilder<FabricClientCommandSource> getCommand(LiteralArgumentBuilder<FabricClientCommandSource> base) {
         return base.then(ClientCommandManager.argument("username", StringArgumentType.word()).executes(context -> {
             McUtils.devName = StringArgumentType.getString(context, "username");
+            Managers.DiscordSocket.disable();
             Managers.Net.wynn.reloadWynnInfo();
+            Managers.DiscordSocket.initSocket();
             return Command.SINGLE_SUCCESS;
         }));
     }

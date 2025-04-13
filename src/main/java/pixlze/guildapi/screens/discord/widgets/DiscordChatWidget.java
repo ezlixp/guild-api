@@ -11,7 +11,6 @@ public class DiscordChatWidget extends DynamicSizeElementListWidget<DiscordChatW
 
     public DiscordChatWidget(MinecraftClient client, int width, DiscordScreen discordScreen) {
         super(client, width, discordScreen.layout.getContentHeight(), discordScreen.layout.getHeaderHeight());
-        this.addMessage(Text.of("pixlze"), Text.of("testing"));
     }
 
     public void addMessage(Text author, Text content) {
