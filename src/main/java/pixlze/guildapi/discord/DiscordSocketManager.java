@@ -34,11 +34,13 @@ public class DiscordSocketManager extends AbstractSocketManager {
     }
 
     @Override
-    protected void tryConnect() {
+    protected boolean tryConnect() {
         if (doConnect()) {
             socket.connect();
             GuildApi.LOGGER.info("discord socket connecting");
+            return true;
         }
+        return false;
     }
 
     @Override

@@ -58,8 +58,7 @@ public abstract class AbstractSocketManager extends Manager {
 
     public void enable() {
         if (!enabled) {
-            enabled = true;
-            tryConnect();
+            if (tryConnect()) enabled = true;
         }
     }
 
@@ -71,7 +70,7 @@ public abstract class AbstractSocketManager extends Manager {
     }
 
     /** Tries to connect based on connection conditions. */
-    protected abstract void tryConnect();
+    protected abstract boolean tryConnect();
 
     protected abstract String getToken();
 
