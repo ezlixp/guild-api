@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import pixlze.guildapi.core.handlers.Handlers;
+import pixlze.guildapi.core.components.Handlers;
 import pixlze.guildapi.mc.event.PlayerInfoChangedEvents;
 import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.utils.type.Prepend;

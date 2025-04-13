@@ -8,7 +8,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.core.Managers;
+import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.JsonUtils;
 import pixlze.guildapi.utils.McUtils;
@@ -44,6 +44,7 @@ public class GuildApiClient extends Api {
     public GuildApiClient() {
         super("guild", List.of(WynnApiClient.class));
         instance = this;
+        baseURL = "https://ico-server.onrender.com/";
     }
 
     public static GuildApiClient getInstance() {
@@ -229,7 +230,6 @@ public class GuildApiClient extends Api {
                         try {
                             NetUtils.applyDefaultCallback(response, error, (resOK) -> {
                                 JsonObject res = JsonUtils.toJsonObject(response.body());
-                                baseURL = "https://ico-server.onrender.com/";
                                 validationKey = res.get("validationKey");
                                 GuildApi.LOGGER.info("successfully loaded base url");
                                 super.enable();
@@ -273,7 +273,6 @@ public class GuildApiClient extends Api {
         validationKey = null;
         wynnPlayerInfo = null;
         guildId = null;
-        baseURL = null;
         token = null;
         super.unready();
     }

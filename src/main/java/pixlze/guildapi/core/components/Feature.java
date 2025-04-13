@@ -1,6 +1,5 @@
-package pixlze.guildapi.core.features;
+package pixlze.guildapi.core.components;
 
-import pixlze.guildapi.core.Managers;
 import pixlze.guildapi.core.config.Config;
 import pixlze.guildapi.core.config.Configurable;
 

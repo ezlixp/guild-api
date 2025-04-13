@@ -7,8 +7,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pixlze.guildapi.core.Managers;
-import pixlze.guildapi.core.handlers.Handlers;
+import pixlze.guildapi.core.components.Handlers;
+import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.models.Models;
 
 import java.io.File;

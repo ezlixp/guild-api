@@ -2,7 +2,7 @@ package pixlze.guildapi.core.handlers.chat;
 
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.core.handlers.Handler;
+import pixlze.guildapi.core.components.Handler;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.models.worldState.event.WorldStateEvents;

@@ -2,18 +2,16 @@ package pixlze.guildapi.core.handlers.discord;
 
 import org.json.JSONObject;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.core.Managers;
-import pixlze.guildapi.core.handlers.Handler;
+import pixlze.guildapi.core.components.Handler;
+import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.handlers.discord.event.S2CDiscordEvents;
 import pixlze.guildapi.models.Models;
-import pixlze.guildapi.net.SocketIOClient;
 
 public class DiscordMessageHandler extends Handler {
 
     @Override
     public void init() {
-        SocketIOClient socketIOClient = Managers.Net.socket;
-        socketIOClient.addDiscordListener("discordMessage", this::onDiscordMessage);
+        Managers.DiscordSocket.saveListener("discordMessage", this::onDiscordMessage);
         // TODO handle c2s discord messages too, so all messages can be stored and added to discord screen.
     }
 

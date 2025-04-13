@@ -7,7 +7,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.ClassUtils;
-import pixlze.guildapi.core.features.Feature;
+import pixlze.guildapi.core.components.Feature;
 import pixlze.guildapi.utils.McUtils;
 
 import java.lang.reflect.Type;

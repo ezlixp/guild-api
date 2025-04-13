@@ -1,4 +1,4 @@
-package pixlze.guildapi.core.handlers;
+package pixlze.guildapi.core.components;
 
 import pixlze.guildapi.core.handlers.chat.ChatHandler;
 import pixlze.guildapi.core.handlers.connection.ConnectionHandler;

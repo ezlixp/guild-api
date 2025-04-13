@@ -10,8 +10,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.json.JSONArray;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.core.Managers;
 import pixlze.guildapi.core.commands.ClientCommand;
+import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
@@ -22,12 +22,12 @@ public class DiscordOnlineCommand extends ClientCommand {
 
     protected LiteralArgumentBuilder<FabricClientCommandSource> getCommand(LiteralArgumentBuilder<FabricClientCommandSource> base) {
         return base.executes((context) -> {
-            if (Managers.Net.socket == null || Managers.Net.socket.discordSocket == null) {
-                McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...")
-                        .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
+            if (Managers.DiscordSocket.isDisabled()) {
+                McUtils.sendLocalMessage(Text.literal("Chat server not connected. Type /reconnect to try to connect.")
+                        .setStyle(Style.EMPTY.withColor(Formatting.RED)), Prepend.DEFAULT.get(), false);
                 return 0;
             }
-            Managers.Net.socket.emit(Managers.Net.socket.discordSocket, "listOnline", (Ack) args -> {
+            Managers.DiscordSocket.emit("listOnline", (Ack) args -> {
                 if (args[0] instanceof JSONArray data) {
                     try {
                         MutableText message = Text.literal("Online mod users: ");

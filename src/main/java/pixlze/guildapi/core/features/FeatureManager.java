@@ -1,7 +1,8 @@
 package pixlze.guildapi.core.features;
 
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.core.Manager;
+import pixlze.guildapi.core.components.Feature;
+import pixlze.guildapi.core.components.Manager;
 import pixlze.guildapi.features.AutoUpdateFeature;
 import pixlze.guildapi.features.GuildRaidFeature;
 import pixlze.guildapi.features.discord.DiscordBridgeFeature;
@@ -13,6 +14,10 @@ import java.util.Map;
 public class FeatureManager extends Manager {
     private static final Map<Feature, FeatureState> FEATURES = new LinkedHashMap<>();
     private static final Map<Class<? extends Feature>, Feature> FEATURE_INSTANCES = new LinkedHashMap<>();
+
+    public FeatureManager() {
+        super(List.of());
+    }
 
     public void init() {
         if (GuildApi.isTesting())

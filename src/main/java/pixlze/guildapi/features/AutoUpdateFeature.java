@@ -2,9 +2,9 @@ package pixlze.guildapi.features;
 
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.core.Managers;
+import pixlze.guildapi.core.components.Feature;
+import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.config.Config;
-import pixlze.guildapi.core.features.Feature;
 import pixlze.guildapi.core.features.FeatureState;
 import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.net.event.NetEvents;

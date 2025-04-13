@@ -3,9 +3,9 @@ package pixlze.guildapi.core.config;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.core.Manager;
-import pixlze.guildapi.core.Managers;
-import pixlze.guildapi.core.features.Feature;
+import pixlze.guildapi.core.components.Feature;
+import pixlze.guildapi.core.components.Manager;
+import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.utils.JsonUtils;
 
 import java.io.File;
@@ -20,6 +20,7 @@ public class ConfigManager extends Manager {
     private JsonObject configObject;
 
     public ConfigManager() {
+        super(List.of());
         configFile = new File(CONFIG_DIR, "config.json");
     }
 

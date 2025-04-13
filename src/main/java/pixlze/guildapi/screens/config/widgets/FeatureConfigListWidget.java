@@ -3,14 +3,13 @@ package pixlze.guildapi.screens.config.widgets;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ParentElement;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
-import pixlze.guildapi.core.Managers;
+import pixlze.guildapi.core.components.Feature;
+import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.config.Config;
-import pixlze.guildapi.core.features.Feature;
 import pixlze.guildapi.screens.config.ConfigScreen;
 import pixlze.guildapi.screens.widgets.DynamicSizeElementListWidget;
 import pixlze.guildapi.utils.McUtils;
@@ -21,44 +20,30 @@ import java.util.Optional;
 
 public class FeatureConfigListWidget extends DynamicSizeElementListWidget<FeatureConfigListWidget.Entry> {
     private final ConfigScreen configScreen;
-    private final List<Entry> children = new ArrayList<>();
 
     // if ever need subconfigs, create new type of widget that has section header as one pair of widget, the other piece is the dynamic size element list widget
     // then that second class can be reused to hold subconfigs
     // Config<List<Config>>
-    public FeatureConfigListWidget(ConfigScreen configScreen) {
-        super(Text.empty(), McUtils.mc());
+    public FeatureConfigListWidget(ConfigScreen configScreen, int width) {
+        super(McUtils.mc(), width, configScreen.layout.getContentHeight(), configScreen.layout.getHeaderHeight());
         this.configScreen = configScreen;
         for (Feature feature : Managers.Feature.getFeatures())
-            this.add(createEntry(feature));
+            this.addEntry(createEntry(feature));
     }
 
     private Entry createEntry(Feature feature) {
-        return new Entry(feature, configScreen, new TextWidget(configScreen.width, 25, Text.of(feature.getName()), McUtils.mc().textRenderer), this);
+        return new Entry(feature, new TextWidget(configScreen.width, 25, Text.of(feature.getName()), McUtils.mc().textRenderer));
     }
 
-    protected void add(Entry entry) {
-        children.add(entry);
-    }
-
-    @Override
-    public List<Entry> children() {
-        return children;
-    }
 
     public static class Entry extends DynamicSizeElementListWidget.Entry<FeatureConfigListWidget.Entry> implements ParentElement {
         private final List<ConfigRow> rows = new ArrayList<>();
-        private final Feature feature;
-        private final Screen screen;
         private final int rowHeight = 25;
         private final int headerHeight;
         private final ClickableWidget headerWidget;
         private Element focused;
 
-        public Entry(Feature feature, Screen screen, ClickableWidget headerWidget, FeatureConfigListWidget parent) {
-            super(parent);
-            this.feature = feature;
-            this.screen = screen;
+        public Entry(Feature feature, ClickableWidget headerWidget) {
             this.headerWidget = headerWidget;
             this.headerHeight = headerWidget.getHeight();
             for (Config<?> config : Managers.Config.getFeatureConfigs(feature)) {

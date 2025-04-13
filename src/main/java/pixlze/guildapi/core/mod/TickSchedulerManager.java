@@ -2,15 +2,20 @@ package pixlze.guildapi.core.mod;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
-import pixlze.guildapi.core.Manager;
+import pixlze.guildapi.core.components.Manager;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TickSchedulerManager extends Manager {
     private final Map<Runnable, Integer> tasks = new ConcurrentHashMap<>();
 
+
+    public TickSchedulerManager() {
+        super(List.of());
+    }
 
     @Override
     public void init() {

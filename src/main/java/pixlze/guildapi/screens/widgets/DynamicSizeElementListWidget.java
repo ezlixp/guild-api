@@ -13,6 +13,7 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 import pixlze.guildapi.utils.McUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,9 +21,10 @@ public abstract class DynamicSizeElementListWidget<E extends DynamicSizeElementL
     private static final Identifier MENU_LIST_BACKGROUND_TEXTURE = Identifier.ofVanilla("textures/gui/menu_list_background.png");
     private static final Identifier INWORLD_MENU_LIST_BACKGROUND_TEXTURE = Identifier.ofVanilla("textures/gui/inworld_menu_list_background.png");
     private final MinecraftClient client;
+    private final List<E> children = new ArrayList<>();
 
-    public DynamicSizeElementListWidget(Text message, MinecraftClient client) {
-        super(0, 0, 0, 0, Text.empty());
+    public DynamicSizeElementListWidget(MinecraftClient client, int width, int height, int y) {
+        super(0, y, width, height, Text.empty());
         this.client = client;
     }
 
@@ -33,6 +35,15 @@ public abstract class DynamicSizeElementListWidget<E extends DynamicSizeElementL
             height += getEntry(i).getHeight() + 4;
         }
         return height;
+    }
+
+    protected void addEntry(E entry) {
+        children.add(entry);
+        entry.parent = this;
+    }
+
+    public List<E> children() {
+        return children;
     }
 
     public void position(int width, ThreePartsLayoutWidget layout) {
@@ -57,8 +68,6 @@ public abstract class DynamicSizeElementListWidget<E extends DynamicSizeElementL
     protected E getEntry(int index) {
         return children().get(index);
     }
-
-    abstract public List<E> children();
 
     protected Entry<E> getEntryAtPosition(double mouseX, double mouseY) {
         if (mouseX < this.getX() || mouseX > this.getRight())
@@ -140,10 +149,6 @@ public abstract class DynamicSizeElementListWidget<E extends DynamicSizeElementL
 
     public abstract static class Entry<E extends Entry<E>> implements Element {
         DynamicSizeElementListWidget<E> parent;
-
-        public Entry(DynamicSizeElementListWidget<E> parent) {
-            this.parent = parent;
-        }
 
         public abstract int getHeight();
 

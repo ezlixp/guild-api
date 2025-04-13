@@ -1,4 +1,4 @@
-package pixlze.guildapi.core;
+package pixlze.guildapi.core.components;
 
 
 import pixlze.guildapi.GuildApi;
@@ -8,12 +8,14 @@ import pixlze.guildapi.core.config.ConfigManager;
 import pixlze.guildapi.core.features.FeatureManager;
 import pixlze.guildapi.core.json.JsonManager;
 import pixlze.guildapi.core.mod.TickSchedulerManager;
+import pixlze.guildapi.discord.DiscordSocketManager;
 import pixlze.guildapi.net.NetManager;
 
 public final class Managers {
     public static final JsonManager Json = new JsonManager();
 
     public static final NetManager Net = new NetManager();
+    public static final DiscordSocketManager DiscordSocket = new DiscordSocketManager();
 
     public static final FeatureManager Feature = new FeatureManager();
     public static final ConfigManager Config = new ConfigManager();
@@ -26,6 +28,7 @@ public final class Managers {
     public static void init() {
         Json.init();
         Net.init();
+        DiscordSocket.init();
         Feature.init();
         Config.init();
         Command.init();

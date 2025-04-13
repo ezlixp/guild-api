@@ -9,7 +9,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.core.Managers;
+import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.handlers.connection.event.WynncraftConnectionEvents;
 import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.net.type.Api;

@@ -5,7 +5,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ThreePartsLayoutWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
-import pixlze.guildapi.core.Managers;
+import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.screens.discord.widgets.DiscordChatWidget;
 import pixlze.guildapi.utils.McUtils;
 

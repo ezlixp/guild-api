@@ -2,55 +2,54 @@ package pixlze.guildapi.screens.discord.widgets;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.ElementListWidget;
+import net.minecraft.text.Text;
 import pixlze.guildapi.screens.discord.DiscordScreen;
+import pixlze.guildapi.screens.widgets.DynamicSizeElementListWidget;
 import pixlze.guildapi.utils.McUtils;
 
-import java.util.List;
-
-public class DiscordChatWidget extends ElementListWidget<DiscordChatWidget.Entry> {
+public class DiscordChatWidget extends DynamicSizeElementListWidget<DiscordChatWidget.Entry> {
 
     public DiscordChatWidget(MinecraftClient client, int width, DiscordScreen discordScreen) {
-        super(client, width, discordScreen.layout.getContentHeight(), discordScreen.layout.getHeaderHeight(), 25);
+        super(client, width, discordScreen.layout.getContentHeight(), discordScreen.layout.getHeaderHeight());
+        this.addMessage(Text.of("pixlze"), Text.of("testing"));
     }
 
-    public void addOption(Screen toScreen) {
-        this.addEntry(Entry.create(toScreen));
+    public void addMessage(Text author, Text content) {
+        this.addEntry(Entry.create(author, content, this.width));
     }
 
-    public static class Entry extends ElementListWidget.Entry<DiscordChatWidget.Entry> {
-        private final List<ClickableWidget> widgets;
+    public static class Entry extends DynamicSizeElementListWidget.Entry<DiscordChatWidget.Entry> {
+        private final ChatMessageWidget message;
 
-        private Entry(Screen toScreen) {
-            widgets = List.of(ButtonWidget.builder(toScreen.getTitle(), (button) -> {
-                McUtils.mc().setScreen(toScreen);
-            }).width(210).build());
+        private Entry(Text author, Text content, int width) {
+            message = new ChatMessageWidget(author, content, McUtils.mc().textRenderer, width);
         }
 
-        public static Entry create(Screen toScreen) {
-            return new Entry(toScreen);
-        }
-
-        @Override
-        public List<ClickableWidget> selectableChildren() {
-            return widgets;
+        public static Entry create(Text author, Text content, int width) {
+            return new Entry(author, content, width);
         }
 
         @Override
-        public List<ClickableWidget> children() {
-            return widgets;
+        public int getHeight() {
+            return message.getHeight();
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-            for (ClickableWidget child : children()) {
-                child.setPosition(x, y);
-                child.setHeight(entryHeight);
-                child.render(context, mouseX, mouseY, tickDelta);
-            }
+        public void render(DrawContext context, int index, int x, int y, int entryWidth, int entryHeight, int mouseX, int mouseY, float tickDelta) {
+            context.fill(x, y, x + entryWidth, y + entryHeight, 0xFFEEFFEE);
+            message.setPosition(x, y);
+            message.setWidth(entryWidth);
+            message.render(context, mouseX, mouseY, tickDelta);
+        }
+
+        @Override
+        public void setFocused(boolean focused) {
+
+        }
+
+        @Override
+        public boolean isFocused() {
+            return false;
         }
     }
 }

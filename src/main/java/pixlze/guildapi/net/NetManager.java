@@ -2,20 +2,25 @@ package pixlze.guildapi.net;
 
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.core.components.Manager;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.http.HttpClient;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class NetManager {
+public class NetManager extends Manager {
     public static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
     private final Map<String, Api> apis = new HashMap<>();
-    public SocketIOClient socket = new SocketIOClient();
-    public GuildApiClient guild = new GuildApiClient();
     public WynnApiClient wynn = new WynnApiClient();
+    public GuildApiClient guild = new GuildApiClient();
+
+    public NetManager() {
+        super(List.of());
+    }
 
     public void apiCrash(Text message, Api api) {
         McUtils.sendLocalMessage(message, Prepend.DEFAULT.get(), false);
@@ -33,7 +38,6 @@ public class NetManager {
     public void init() {
         registerApi(wynn);
         registerApi(guild);
-        registerApi(socket);
         initApis();
     }
 

@@ -8,15 +8,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.json.JSONObject;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.core.Managers;
+import pixlze.guildapi.core.components.Feature;
+import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.config.Config;
 import pixlze.guildapi.core.config.Configurable;
-import pixlze.guildapi.core.features.Feature;
 import pixlze.guildapi.core.features.FeatureState;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.core.handlers.discord.event.S2CDiscordEvents;
 import pixlze.guildapi.mc.mixin.accessors.SystemToastInvoker;
-import pixlze.guildapi.net.SocketIOClient;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.FontUtils;
 import pixlze.guildapi.utils.text.TextUtils;
@@ -87,7 +86,6 @@ public class DiscordBridgeFeature extends Feature {
             "^(?<guild1>.+?) formed an alliance with (?<guild2>.?)$",
             "^(?<username>.+?) revoked the alliance with (?<guild>.*?)$"
     ).map(Pattern::compile).toArray(Pattern[]::new);
-    private SocketIOClient socketIOClient;
 
     public DiscordBridgeFeature() {
         super("Discord Bridging");
@@ -98,7 +96,6 @@ public class DiscordBridgeFeature extends Feature {
 
     @Override
     public void init() {
-        socketIOClient = Managers.Net.socket;
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
         S2CDiscordEvents.MESSAGE.register(this::onDiscordMessage);
     }
@@ -110,12 +107,12 @@ public class DiscordBridgeFeature extends Feature {
 
     @Override
     public void onEnabled() {
-        socketIOClient.tryReady();
+        Managers.DiscordSocket.enable();
     }
 
     @Override
     public void onDisabled() {
-        socketIOClient.unready();
+        Managers.DiscordSocket.disable();
     }
 
     private void onWynnMessage(Text message) {
@@ -126,9 +123,9 @@ public class DiscordBridgeFeature extends Feature {
         Matcher guildMatcher = GUILD_PATTERN.matcher(m);
         if (!m.contains("\uE003") && guildMatcher.find()) {
             if (isGuildMessage(guildMatcher.group("content")))
-                socketIOClient.emit(socketIOClient.discordSocket, "wynnMessage", guildMatcher.group("content"));
+                Managers.DiscordSocket.emit("wynnMessage", guildMatcher.group("content"));
             else if (isHRMessage(guildMatcher.group("content")))
-                socketIOClient.emit(socketIOClient.discordSocket, "hrMessage", guildMatcher.group("content"));
+                Managers.DiscordSocket.emit("hrMessage", guildMatcher.group("content"));
         }
     }
 
