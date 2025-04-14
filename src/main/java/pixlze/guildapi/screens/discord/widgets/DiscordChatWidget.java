@@ -16,7 +16,9 @@ public class DiscordChatWidget extends DynamicSizeElementListWidget<DiscordChatW
     }
 
     public void addMessage(Text author, Text content) {
+        boolean sticky = this.getScrollY() == this.getMaxScrollY();
         this.addEntry(Entry.create(author, content, this.width));
+        if (sticky) this.setScrollY(this.getMaxScrollY());
     }
 
     @Override
