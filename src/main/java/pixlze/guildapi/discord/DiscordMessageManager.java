@@ -7,17 +7,20 @@ import pixlze.guildapi.screens.discord.DiscordChatScreen;
 import pixlze.guildapi.screens.discord.widgets.DiscordChatWidget;
 
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 
 public class DiscordMessageManager extends Manager {
     private final List<Pair<String, String>> messages = new ArrayList<>();
+    private final Deque<Integer> unconfirmedIndex = new LinkedList<>();
     private DiscordChatScreen curDiscordChatScreen;
 
     public DiscordMessageManager() {
         super(List.of());
     }
 
-    // TODO: add timestamps
+    // TODO: add timestamps, and add unconfirmed messages (greyed out)
     public void newMessage(String author, String content) {
         messages.add(new Pair<>(author, content));
         if (curDiscordChatScreen != null && curDiscordChatScreen.body != null)
