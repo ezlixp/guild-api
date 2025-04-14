@@ -1,7 +1,9 @@
 package pixlze.guildapi.screens.discord.widgets;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import pixlze.guildapi.screens.discord.DiscordChatScreen;
 import pixlze.guildapi.screens.widgets.DynamicSizeElementListWidget;
@@ -25,6 +27,16 @@ public class DiscordChatWidget extends DynamicSizeElementListWidget<DiscordChatW
             getEntry(i).message.setWidth(width);
         }
         this.setScrollY(this.getScrollY() > getMaxScrollY() ? getMaxScrollY():getScrollY());
+    }
+
+    @Override
+    protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+        super.renderWidget(context, mouseX, mouseY, delta);
+        if (getEntryCount() == 0) {
+            TextRenderer textRenderer = McUtils.mc().textRenderer;
+            OrderedText text = Text.of("Nothing to see here...").asOrderedText();
+            context.drawText(textRenderer, text, getX() + width / 2 - textRenderer.getWidth(text) / 2, getY() + height / 2 - McUtils.mc().textRenderer.fontHeight / 2, 0xAAAAAA, false);
+        }
     }
 
     @Override

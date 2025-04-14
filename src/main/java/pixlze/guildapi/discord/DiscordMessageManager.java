@@ -17,6 +17,7 @@ public class DiscordMessageManager extends Manager {
         super(List.of());
     }
 
+    // TODO: add timestamps
     public void newMessage(String author, String content) {
         messages.add(new Pair<>(author, content));
         if (curDiscordChatScreen != null && curDiscordChatScreen.body != null)
