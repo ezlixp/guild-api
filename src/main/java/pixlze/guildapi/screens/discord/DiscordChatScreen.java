@@ -27,6 +27,7 @@ public class DiscordChatScreen extends Screen {
         this.initFooter();
         this.layout.forEachChild(this::addDrawableChild);
         this.refreshWidgetPositions();
+        this.body.setScrollY(this.body.getMaxScrollY());
     }
 
     @Override

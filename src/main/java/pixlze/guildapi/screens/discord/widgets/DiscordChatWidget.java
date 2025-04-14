@@ -17,6 +17,21 @@ public class DiscordChatWidget extends DynamicSizeElementListWidget<DiscordChatW
         this.addEntry(Entry.create(author, content, this.width));
     }
 
+    @Override
+    public void position(int width, int height, int y) {
+        this.setDimensions(width, height);
+        this.setPosition(0, y);
+        for (int i = 0; i < getEntryCount(); i++) {
+            getEntry(i).message.setWidth(width);
+        }
+        this.setScrollY(this.getScrollY() > getMaxScrollY() ? getMaxScrollY():getScrollY());
+    }
+
+    @Override
+    protected double getDeltaYPerScroll() {
+        return 8;
+    }
+
     public static class Entry extends DynamicSizeElementListWidget.Entry<DiscordChatWidget.Entry> {
         private final ChatMessageWidget message;
 
@@ -36,7 +51,6 @@ public class DiscordChatWidget extends DynamicSizeElementListWidget<DiscordChatW
         @Override
         public void render(DrawContext context, int index, int x, int y, int entryWidth, int entryHeight, int mouseX, int mouseY, float tickDelta) {
             message.setPosition(x, y);
-            message.setWidth(entryWidth);
             message.render(context, mouseX, mouseY, tickDelta);
         }
 
