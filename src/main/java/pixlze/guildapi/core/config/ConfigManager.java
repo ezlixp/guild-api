@@ -1,5 +1,6 @@
 package pixlze.guildapi.core.config;
 
+import com.google.common.base.CaseFormat;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import pixlze.guildapi.GuildApi;
@@ -59,6 +60,11 @@ public class ConfigManager extends Manager {
             try {
                 Config<?> config = (Config<?>) field.get(feature);
                 config.setName(field.getName());
+                if (!field.getAnnotation(Configurable.class).i18nKey().isBlank())
+                    config.setTranslationKey(field.getAnnotation(Configurable.class).i18nKey());
+                else {
+                    config.setTranslationKey("feature." + GuildApi.MOD_ID + "." + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, feature.getClass().getSimpleName().replace("Feature", "")) + "." + field.getName());
+                }
                 config.setOwner(feature);
 
                 if (featureConfigObject.get(config.getName()) != null) {

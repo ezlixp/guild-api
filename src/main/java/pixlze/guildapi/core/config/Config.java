@@ -1,12 +1,14 @@
 package pixlze.guildapi.core.config;
 
 import com.google.common.reflect.TypeToken;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.ClassUtils;
+import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Feature;
 import pixlze.guildapi.utils.McUtils;
 
@@ -19,11 +21,17 @@ public class Config<T> {
     private T pending;
     private String name;
     private Feature owner;
+    private String i18nKey;
 
     public Config(T value) {
         this.value = value;
         this.type = new TypeToken<T>(getClass()) {
         }.getType();
+    }
+
+    public void setTranslationKey(String key) {
+        i18nKey = key;
+        GuildApi.LOGGER.info("{} key {}", this.getName(), key);
     }
 
     public T getValue() {
@@ -41,6 +49,7 @@ public class Config<T> {
     public void setPending(T value) {
         this.pending = value;
     }
+
 
     public void applyPending() {
         if (pending != null && !pending.equals(value)) {
@@ -63,20 +72,17 @@ public class Config<T> {
     }
 
     public TextWidget getTitleWidget() {
-        return new TextWidget(300, 25, Text.of(getName()), McUtils.mc().textRenderer);
+        return new TextWidget(Text.translatable(i18nKey + ".name"), McUtils.mc().textRenderer);
     }
 
     @SuppressWarnings("unchecked")
     public ClickableWidget getActionWidget() {
         if (getType().equals(Boolean.class)) {
-//            OptionToggleWidget out = new OptionToggleWidget(300, 25, (boolean) this.value);
-//            out.setOnToggled((toggled) -> setPending((T) toggled));
-//            return out;
             setPending(this.value);
             return ButtonWidget.builder(Text.of((boolean) this.pending ? "Yes":"No"), (button) -> {
                 this.setPending((T) (this.pending.equals(Boolean.TRUE) ? Boolean.FALSE:Boolean.TRUE));
                 button.setMessage(Text.of((boolean) this.pending ? "Yes":"No"));
-            }).dimensions(0, 0, 80, 25 - 4).build();
+            }).tooltip(Tooltip.of(Text.translatable(i18nKey + ".description"))).dimensions(0, 0, 80, 25 - 4).build();
         } else {
             TextFieldWidget out = new TextFieldWidget(McUtils.mc().textRenderer, 300, 25 - 4, Text.of("enter here"));
             out.setEditable(true);

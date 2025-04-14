@@ -1,0 +1,6 @@
+{
+  "features.guildapi.feature.featureEnabled.name": "Enabled",
+  "features.guildapi.feature.featureEnabled.description": "Should this feature be enabled?",
+  "feature.guildapi.discordBridge.useGui.name": "Use Toasts",
+  "feature.guildapi.discordBridge.useGui.description": "Should discord bridging messages be shown through a toast instead of in chat?"
+}

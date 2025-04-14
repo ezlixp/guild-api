@@ -1,12 +1,13 @@
 package pixlze.guildapi.core.components;
 
+import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.config.Config;
 import pixlze.guildapi.core.config.Configurable;
 
 public abstract class Feature {
-    @Configurable
+    @Configurable(i18nKey = "features." + GuildApi.MOD_ID + ".feature.featureEnabled")
     public final Config<Boolean> enabled = new Config<>(true);
-    
+
     private final String name;
 
     protected Feature(String name) {
