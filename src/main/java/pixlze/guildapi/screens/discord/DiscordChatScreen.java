@@ -1,17 +1,20 @@
 package pixlze.guildapi.screens.discord;
 
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.ThreePartsLayoutWidget;
-import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
+import org.lwjgl.glfw.GLFW;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.screens.discord.widgets.DiscordChatWidget;
 import pixlze.guildapi.utils.McUtils;
 
+import java.util.Map;
+
 public class DiscordChatScreen extends Screen {
     private final Screen parent;
     public final ThreePartsLayoutWidget layout = new ThreePartsLayoutWidget(this);
+    private final TextFieldWidget discordInput = new TextFieldWidget(McUtils.mc().textRenderer, this.width, 25, Text.of("Message to discord"));
     public DiscordChatWidget body;
 
     public DiscordChatScreen(Screen parent) {
@@ -21,13 +24,18 @@ public class DiscordChatScreen extends Screen {
 
     @Override
     public void init() {
+        // TODO: improve design, make text field expand for each new line added like discord, increase size of footer
         Managers.Discord.setDiscordScreen(this);
+//        discordInput.setDrawsBackground(false);
+        discordInput.setFocusUnlocked(false);
+        discordInput.setMaxLength(2000);
         this.initHeader();
         this.initBody();
         this.initFooter();
         this.layout.forEachChild(this::addDrawableChild);
         this.refreshWidgetPositions();
         this.body.setScrollY(this.body.getMaxScrollY());
+        this.setInitialFocus();
     }
 
     @Override
@@ -50,15 +58,49 @@ public class DiscordChatScreen extends Screen {
         Managers.Discord.addAll(this.body);
     }
 
+    @Override
+    protected void setInitialFocus() {
+        this.setInitialFocus(discordInput);
+    }
+
     protected void initFooter() {
-        this.layout.addFooter(ButtonWidget.builder(ScreenTexts.DONE, button -> this.close()).width(200).build());
+        discordInput.setWidth(this.width);
+        this.layout.addFooter(discordInput);
     }
 
     @Override
     protected void refreshWidgetPositions() {
+        discordInput.setWidth(this.width);
         this.layout.refreshPositions();
-        if (this.body != null) {
+        if (this.body != null)
             this.body.position(this.width, this.layout);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+            return true;
+        } else if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+            // TODO: disable input field if socket not on, and add tooltip
+            Managers.DiscordSocket.emit("discordOnlyWynnMessage", McUtils.playerName() + ": " + discordInput.getText());
+            Managers.DiscordSocket.emit("discordMessage", Map.of("Author", McUtils.playerName(), "Content", discordInput.getText(), "WynnGuildId", Managers.Net.guild.guildId));
+            discordInput.setText("");
+            this.body.setScrollY(this.body.getMaxScrollY());
+            return true;
+//        } else if (keyCode == GLFW.GLFW_KEY_UP) {
+//            this.setChatFromHistory(-1);
+//            return true;
+//        } else if (keyCode == GLFW.GLFW_KEY_DOWN) {
+//            this.setChatFromHistory(1);
+//            return true;
+//        } else if (keyCode == GLFW.GLFW_KEY_PAGE_UP) {
+//            this.client.inGameHud.getChatHud().scroll(this.client.inGameHud.getChatHud().getVisibleLineCount() - 1);
+//            return true;
+//        } else if (keyCode == GLFW.GLFW_KEY_PAGE_DOWN) {
+//            this.client.inGameHud.getChatHud().scroll(-this.client.inGameHud.getChatHud().getVisibleLineCount() + 1);
+//            return true;
+        } else {
+            return false;
         }
     }
 }
