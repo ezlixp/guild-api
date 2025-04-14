@@ -9,12 +9,12 @@ import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.screens.discord.widgets.DiscordChatWidget;
 import pixlze.guildapi.utils.McUtils;
 
-public class DiscordScreen extends Screen {
+public class DiscordChatScreen extends Screen {
     private final Screen parent;
     public final ThreePartsLayoutWidget layout = new ThreePartsLayoutWidget(this);
     public DiscordChatWidget body;
 
-    public DiscordScreen(Screen parent) {
+    public DiscordChatScreen(Screen parent) {
         super(Text.of("Discord"));
         this.parent = parent;
     }

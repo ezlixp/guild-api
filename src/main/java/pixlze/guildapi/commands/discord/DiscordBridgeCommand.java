@@ -12,7 +12,7 @@ import pixlze.guildapi.core.commands.ClientCommand;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.features.FeatureState;
 import pixlze.guildapi.features.discord.DiscordBridgeFeature;
-import pixlze.guildapi.screens.discord.DiscordScreen;
+import pixlze.guildapi.screens.discord.DiscordChatScreen;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
@@ -53,7 +53,7 @@ public class DiscordBridgeCommand extends ClientCommand {
                         }))
                 .executes(context -> {
                     Managers.Tick.scheduleNextTick(() -> {
-                        McUtils.mc().setScreen(new DiscordScreen(McUtils.mc().currentScreen));
+                        McUtils.mc().setScreen(new DiscordChatScreen(McUtils.mc().currentScreen));
                     });
                     return Command.SINGLE_SUCCESS;
                 });

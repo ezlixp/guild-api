@@ -3,7 +3,7 @@ package pixlze.guildapi.discord;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import pixlze.guildapi.core.components.Manager;
-import pixlze.guildapi.screens.discord.DiscordScreen;
+import pixlze.guildapi.screens.discord.DiscordChatScreen;
 import pixlze.guildapi.screens.discord.widgets.DiscordChatWidget;
 
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.List;
 
 public class DiscordMessageManager extends Manager {
     private final List<Pair<String, String>> messages = new ArrayList<>();
-    private DiscordScreen curDiscordScreen;
+    private DiscordChatScreen curDiscordChatScreen;
 
     public DiscordMessageManager() {
         super(List.of());
@@ -19,8 +19,8 @@ public class DiscordMessageManager extends Manager {
 
     public void newMessage(String author, String content) {
         messages.add(new Pair<>(author, content));
-        if (curDiscordScreen != null && curDiscordScreen.body != null)
-            addDiscordMessage(curDiscordScreen.body, author, content);
+        if (curDiscordChatScreen != null && curDiscordChatScreen.body != null)
+            addDiscordMessage(curDiscordChatScreen.body, author, content);
     }
 
     public void addAll(DiscordChatWidget body) {
@@ -37,8 +37,8 @@ public class DiscordMessageManager extends Manager {
         body.addMessage(Text.of(author), Text.of(content));
     }
 
-    public void setDiscordScreen(DiscordScreen to) {
-        curDiscordScreen = to;
+    public void setDiscordScreen(DiscordChatScreen to) {
+        curDiscordChatScreen = to;
     }
 
     @Override

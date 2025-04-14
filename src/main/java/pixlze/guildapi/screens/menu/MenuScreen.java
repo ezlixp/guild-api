@@ -4,7 +4,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ThreePartsLayoutWidget;
 import net.minecraft.text.Text;
 import pixlze.guildapi.screens.config.ConfigScreen;
-import pixlze.guildapi.screens.discord.DiscordScreen;
+import pixlze.guildapi.screens.discord.DiscordChatScreen;
 import pixlze.guildapi.screens.menu.widgets.MenuOptionsListWidget;
 import pixlze.guildapi.screens.widgets.FontSizeTextWidget;
 import pixlze.guildapi.utils.McUtils;
@@ -45,7 +45,7 @@ public class MenuScreen extends Screen {
 
     private void addOptions() {
         this.body.addOption(new ConfigScreen(this));
-        this.body.addOption(new DiscordScreen(this));
+        this.body.addOption(new DiscordChatScreen(this));
     }
 
     @Override

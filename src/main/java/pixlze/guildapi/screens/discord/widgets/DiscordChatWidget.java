@@ -3,14 +3,14 @@ package pixlze.guildapi.screens.discord.widgets;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
-import pixlze.guildapi.screens.discord.DiscordScreen;
+import pixlze.guildapi.screens.discord.DiscordChatScreen;
 import pixlze.guildapi.screens.widgets.DynamicSizeElementListWidget;
 import pixlze.guildapi.utils.McUtils;
 
 public class DiscordChatWidget extends DynamicSizeElementListWidget<DiscordChatWidget.Entry> {
 
-    public DiscordChatWidget(MinecraftClient client, int width, DiscordScreen discordScreen) {
-        super(client, width, discordScreen.layout.getContentHeight(), discordScreen.layout.getHeaderHeight());
+    public DiscordChatWidget(MinecraftClient client, int width, DiscordChatScreen discordChatScreen) {
+        super(client, width, discordChatScreen.layout.getContentHeight(), discordChatScreen.layout.getHeaderHeight());
     }
 
     public void addMessage(Text author, Text content) {
@@ -35,7 +35,6 @@ public class DiscordChatWidget extends DynamicSizeElementListWidget<DiscordChatW
 
         @Override
         public void render(DrawContext context, int index, int x, int y, int entryWidth, int entryHeight, int mouseX, int mouseY, float tickDelta) {
-            context.fill(x, y, x + entryWidth, y + entryHeight, 0xFFEEFFEE);
             message.setPosition(x, y);
             message.setWidth(entryWidth);
             message.render(context, mouseX, mouseY, tickDelta);

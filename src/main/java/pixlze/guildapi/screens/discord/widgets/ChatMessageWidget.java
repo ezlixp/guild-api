@@ -3,17 +3,27 @@ package pixlze.guildapi.screens.discord.widgets;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.AbstractTextWidget;
-import net.minecraft.screen.ScreenTexts;
+import net.minecraft.client.gui.widget.ScrollableWidget;
 import net.minecraft.text.OrderedText;
-import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
-import net.minecraft.util.Language;
+
+import java.util.List;
 
 public class ChatMessageWidget extends AbstractTextWidget {
-    private float horizontalAlignment = 0F;
+    private static final int PADDING = 4;
+    private final Text author;
+    private final Text content;
 
     public ChatMessageWidget(Text author, Text content, TextRenderer textRenderer, int width) {
-        super(0, 0, width, 9 + textRenderer.getWrappedLinesHeight(content, width), author.copy().append(" ").append(content), textRenderer);
+        super(0, 0, width, PADDING + textRenderer.fontHeight + 2 + 10 * textRenderer.wrapLines(content, width - 8 - ScrollableWidget.SCROLLBAR_WIDTH).size(), author.copy().append(" ").append(content), textRenderer);
+        this.author = author;
+        this.content = content;
+    }
+
+    @Override
+    public int getHeight() {
+        TextRenderer textRenderer = getTextRenderer();
+        return PADDING + textRenderer.fontHeight + 2 + 10 * textRenderer.wrapLines(content, this.getWidth() - 8 - ScrollableWidget.SCROLLBAR_WIDTH).size();
     }
 
     public ChatMessageWidget setTextColor(int textColor) {
@@ -23,19 +33,17 @@ public class ChatMessageWidget extends AbstractTextWidget {
 
     @Override
     public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-        Text text = this.getMessage();
         TextRenderer textRenderer = this.getTextRenderer();
-        int i = this.getWidth();
-        int j = textRenderer.getWidth(text);
-        int k = 4 + this.getX() + Math.round(this.horizontalAlignment * (float) (i - j));
-        int l = this.getY() + (this.getHeight() - 9) / 2;
-        OrderedText orderedText = j > i ? this.trim(text, i):text.asOrderedText();
-        context.drawTextWithShadow(textRenderer, orderedText, k, l, this.getTextColor());
-    }
 
-    private OrderedText trim(Text text, int width) {
-        TextRenderer textRenderer = this.getTextRenderer();
-        StringVisitable stringVisitable = textRenderer.trimToWidth(text, width - textRenderer.getWidth(ScreenTexts.ELLIPSIS));
-        return Language.getInstance().reorder(StringVisitable.concat(stringVisitable, ScreenTexts.ELLIPSIS));
+        int x = this.getX() + PADDING;
+        int y = this.getY() + PADDING;
+
+        context.drawTextWithShadow(textRenderer, author.copy().withColor(0x1524ABFF).asOrderedText(), x, y, this.getTextColor());
+        List<OrderedText> contentLines = textRenderer.wrapLines(content, this.getWidth() - 8 - ScrollableWidget.SCROLLBAR_WIDTH);
+        y += 2;
+        for (OrderedText line : contentLines) {
+            y += 10;
+            context.drawTextWithShadow(textRenderer, line, x, y, this.getTextColor());
+        }
     }
 }

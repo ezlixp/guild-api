@@ -163,6 +163,10 @@ public abstract class AbstractSocketManager extends Manager {
     public void init() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(ClientCommandManager.literal("reconnect").executes((context) -> {
+                if (isDisabled()) {
+                    McUtils.sendLocalMessage(Text.literal("§cCannot connect to chat server at this time. Please join a world first."), Prepend.GUILD.getWithStyle(ColourUtils.RED), true);
+                    return 0;
+                }
                 if (doConnect()) {
                     if (!socket.connected()) {
                         McUtils.sendLocalMessage(Text.literal("§eConnecting to chat server..."),
