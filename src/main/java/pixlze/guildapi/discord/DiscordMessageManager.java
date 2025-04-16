@@ -48,6 +48,7 @@ public class DiscordMessageManager extends Manager {
 
     public void clearMessages() {
         messages.clear();
+        unconfirmedIndex.clear();
     }
 
     private synchronized void addDiscordMessage(DiscordChatWidget body, String author, String content, boolean confirmed) {
