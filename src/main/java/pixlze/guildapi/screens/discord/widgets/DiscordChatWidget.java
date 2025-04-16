@@ -15,9 +15,9 @@ public class DiscordChatWidget extends DynamicSizeElementListWidget<DiscordChatW
         super(client, width, discordChatScreen.layout.getContentHeight(), discordChatScreen.layout.getHeaderHeight());
     }
 
-    public void addMessage(Text author, Text content) {
+    public void addMessage(Text author, Text content, boolean confirmed) {
         boolean sticky = this.getScrollY() == this.getMaxScrollY();
-        this.addEntry(Entry.create(author, content, this.width));
+        this.addEntry(Entry.create(author, content, this.width, confirmed));
         if (sticky) this.setScrollY(this.getMaxScrollY());
     }
 
@@ -49,12 +49,16 @@ public class DiscordChatWidget extends DynamicSizeElementListWidget<DiscordChatW
     public static class Entry extends DynamicSizeElementListWidget.Entry<DiscordChatWidget.Entry> {
         private final ChatMessageWidget message;
 
-        private Entry(Text author, Text content, int width) {
-            message = new ChatMessageWidget(author, content, McUtils.mc().textRenderer, width);
+        private Entry(Text author, Text content, int width, boolean confirmed) {
+            message = new ChatMessageWidget(author, content, McUtils.mc().textRenderer, width, confirmed);
         }
 
-        public static Entry create(Text author, Text content, int width) {
-            return new Entry(author, content, width);
+        public static Entry create(Text author, Text content, int width, boolean confirmed) {
+            return new Entry(author, content, width, confirmed);
+        }
+
+        public void confirm() {
+            message.confirm();
         }
 
         @Override

@@ -61,11 +61,11 @@ public abstract class DynamicSizeElementListWidget<E extends DynamicSizeElementL
         return 10;
     }
 
-    protected int getEntryCount() {
+    public int getEntryCount() {
         return children().size();
     }
 
-    protected E getEntry(int index) {
+    public E getEntry(int index) {
         return children().get(index);
     }
 

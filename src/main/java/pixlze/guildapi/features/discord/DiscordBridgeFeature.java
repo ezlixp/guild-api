@@ -139,7 +139,7 @@ public class DiscordBridgeFeature extends Feature {
                                 .fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE)).append(": "))
                         .append(Text.literal(TextUtils.highlightUser(message.get("Content").toString()))
                                 .setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), true);
-                Managers.Discord.newMessage(message.get("Author").toString(), message.get("Content").toString());
+                Managers.Discord.newMessage(message.get("Author").toString(), message.get("Content").toString(), true);
             } catch (Exception e) {
                 GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
             }
@@ -147,11 +147,15 @@ public class DiscordBridgeFeature extends Feature {
             try {
                 Text description = Text.literal(message.get("Content").toString());
                 TextRenderer textRenderer = McUtils.mc().textRenderer;
-                List<OrderedText> lines = textRenderer.wrapLines(description, (int) (McUtils.mc().getWindow().getScaledWidth() * 0.25));
+                List<OrderedText> lines = textRenderer.wrapLines(description, (int) (McUtils.mc().getWindow()
+                        .getScaledWidth() * 0.25));
                 Objects.requireNonNull(textRenderer);
-                int width = Math.max(50, lines.stream().mapToInt(textRenderer::getWidth).max().orElse((int) (McUtils.mc().getWindow().getScaledWidth() * 0.25)));
-                McUtils.mc().getToastManager().add(SystemToastInvoker.create(SystemToast.Type.PERIODIC_NOTIFICATION, Text.literal(message.get("Author").toString()), lines, width + 30));
-                Managers.Discord.newMessage(message.get("Author").toString(), message.get("Content").toString());
+                int width = Math.max(50, lines.stream().mapToInt(textRenderer::getWidth).max()
+                        .orElse((int) (McUtils.mc().getWindow().getScaledWidth() * 0.25)));
+                McUtils.mc().getToastManager()
+                        .add(SystemToastInvoker.create(SystemToast.Type.PERIODIC_NOTIFICATION, Text.literal(message.get("Author")
+                                .toString()), lines, width + 30));
+                Managers.Discord.newMessage(message.get("Author").toString(), message.get("Content").toString(), true);
             } catch (Exception e) {
                 GuildApi.LOGGER.info("discord message toast error: {} {}", e, e.getMessage());
             }

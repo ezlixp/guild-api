@@ -14,16 +14,26 @@ public class ChatMessageWidget extends AbstractTextWidget {
     private final Text author;
     private final Text content;
 
-    public ChatMessageWidget(Text author, Text content, TextRenderer textRenderer, int width) {
-        super(0, 0, width, PADDING + textRenderer.fontHeight + 2 + 10 * textRenderer.wrapLines(content, width - 8 - ScrollableWidget.SCROLLBAR_WIDTH).size(), author.copy().append(" ").append(content), textRenderer);
+    public ChatMessageWidget(Text author, Text content, TextRenderer textRenderer, int width, boolean confirmed) {
+        super(0, 0, width, PADDING + textRenderer.fontHeight + 2 + 10 * textRenderer.wrapLines(content, width - 8 - ScrollableWidget.SCROLLBAR_WIDTH)
+                .size(), author.copy().append(" ").append(content), textRenderer);
         this.author = author;
         this.content = content;
+        if (!confirmed) {
+            this.setTextColor(0xAAAAAA);
+        }
+    }
+
+
+    public void confirm() {
+        this.setTextColor(0xFFFFFF);
     }
 
     @Override
     public int getHeight() {
         TextRenderer textRenderer = getTextRenderer();
-        return PADDING + textRenderer.fontHeight + 2 + 10 * textRenderer.wrapLines(content, this.getWidth() - 8 - ScrollableWidget.SCROLLBAR_WIDTH).size();
+        return PADDING + textRenderer.fontHeight + 2 + 10 * textRenderer.wrapLines(content, this.getWidth() - 8 - ScrollableWidget.SCROLLBAR_WIDTH)
+                .size();
     }
 
     public ChatMessageWidget setTextColor(int textColor) {
@@ -38,7 +48,8 @@ public class ChatMessageWidget extends AbstractTextWidget {
         int x = this.getX() + PADDING;
         int y = this.getY() + PADDING;
 
-        context.drawTextWithShadow(textRenderer, author.copy().withColor(0x1524ABFF).asOrderedText(), x, y, this.getTextColor());
+        context.drawTextWithShadow(textRenderer, author.copy().withColor(0x1524ABFF)
+                .asOrderedText(), x, y, this.getTextColor());
         List<OrderedText> contentLines = textRenderer.wrapLines(content, this.getWidth() - 8 - ScrollableWidget.SCROLLBAR_WIDTH);
         y += 2;
         for (OrderedText line : contentLines) {

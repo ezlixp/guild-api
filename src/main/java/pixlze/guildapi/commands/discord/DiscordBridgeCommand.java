@@ -34,7 +34,7 @@ public class DiscordBridgeCommand extends ClientCommand {
         return base.then(ClientCommandManager.argument("message", StringArgumentType.greedyString())
                         .executes((context) -> {
                             String message = StringArgumentType.getString(context, "message");
-                            message = message.replaceAll("[\u200C\uE087\uE013\u2064\uE071\uE012\uE000\uE089\uE088\uE07F\uE08B\uE07E\uE080ÁÀ֎]", "");
+                            message = Managers.Discord.stripIllegal(message);
                             if (message.isBlank()) return 0;
                             if (Managers.DiscordSocket.isDisabled() || !Managers.DiscordSocket.socket.connected()) {
                                 McUtils.sendLocalMessage(Text.literal("Chat server not connected. Type /reconnect to try to connect.")

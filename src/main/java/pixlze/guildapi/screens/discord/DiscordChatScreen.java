@@ -25,7 +25,6 @@ public class DiscordChatScreen extends Screen {
     @Override
     public void init() {
         // TODO: improve design, make text field expand for each new line added like discord, increase size of footer
-        Managers.Discord.setDiscordScreen(this);
 //        discordInput.setDrawsBackground(false);
         discordInput.setFocusUnlocked(false);
         discordInput.setMaxLength(2000);
@@ -46,7 +45,7 @@ public class DiscordChatScreen extends Screen {
 
     @Override
     public void removed() {
-        Managers.Discord.setDiscordScreen(null);
+        Managers.Discord.setDiscordChat(null);
     }
 
     protected void initHeader() {
@@ -55,6 +54,7 @@ public class DiscordChatScreen extends Screen {
 
     protected void initBody() {
         this.body = this.layout.addBody(new DiscordChatWidget(McUtils.mc(), this.width, this));
+        Managers.Discord.setDiscordChat(this.body);
         Managers.Discord.addAll(this.body);
     }
 
@@ -82,8 +82,11 @@ public class DiscordChatScreen extends Screen {
             return true;
         } else if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
             // TODO: disable input field if socket not on, and add tooltip
-            Managers.DiscordSocket.emit("discordOnlyWynnMessage", McUtils.playerName() + ": " + discordInput.getText());
-            Managers.DiscordSocket.emit("discordMessage", Map.of("Author", McUtils.playerName(), "Content", discordInput.getText(), "WynnGuildId", Managers.Net.guild.guildId));
+            String author = McUtils.playerName();
+            String content = Managers.Discord.stripIllegal(discordInput.getText());
+            Managers.DiscordSocket.emit("discordOnlyWynnMessage", author + ": " + content);
+            Managers.DiscordSocket.emit("discordMessage", Map.of("Author", author, "Content", content, "WynnGuildId", Managers.Net.guild.guildId));
+            Managers.Discord.newMessage(author, content, false);
             discordInput.setText("");
             this.body.setScrollY(this.body.getMaxScrollY());
             return true;
