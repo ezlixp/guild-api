@@ -25,7 +25,7 @@ public class DiscordChatScreen extends Screen {
     @Override
     public void init() {
         // TODO: improve design, make text field expand for each new line added like discord, increase size of footer
-//        discordInput.setDrawsBackground(false);
+        // edit box widget
         discordInput.setFocusUnlocked(false);
         discordInput.setMaxLength(2000);
         this.initHeader();
