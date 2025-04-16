@@ -8,7 +8,6 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.ClassUtils;
-import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Feature;
 import pixlze.guildapi.utils.McUtils;
 
@@ -31,7 +30,6 @@ public class Config<T> {
 
     public void setTranslationKey(String key) {
         i18nKey = key;
-        GuildApi.LOGGER.info("{} key {}", this.getName(), key);
     }
 
     public T getValue() {
