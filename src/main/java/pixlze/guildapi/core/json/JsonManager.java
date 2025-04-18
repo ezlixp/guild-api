@@ -34,7 +34,7 @@ public class JsonManager extends Manager {
                 GuildApi.LOGGER.warn("config is not a json object");
             }
         } catch (IOException e) {
-            GuildApi.LOGGER.error("Config load error: {} {}", e, e.getMessage());
+            GuildApi.LOGGER.error("json load error: {} {}", e, e.getMessage());
         }
         return configObject;
     }

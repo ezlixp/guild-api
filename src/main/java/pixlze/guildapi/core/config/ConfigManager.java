@@ -31,6 +31,10 @@ public class ConfigManager extends Manager {
         saveConfig();
     }
 
+    public JsonObject getConfigObject() {
+        return configObject;
+    }
+
     public synchronized void saveConfig() {
         configObject = new JsonObject();
 

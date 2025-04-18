@@ -39,6 +39,7 @@ public class GuildApi implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        System.setProperty("java.awt.headless", "false");
         development = FabricLoader.getInstance().isDevelopmentEnvironment();
         if (FabricLoader.getInstance().getModContainer(MOD_ID).isPresent()) {
             MOD_CONTAINER = FabricLoader.getInstance().getModContainer(MOD_ID).get();
