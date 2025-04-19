@@ -54,10 +54,11 @@ public class GuildApiClient extends Api {
             append(Text.literal(" to retry.")
                     .setStyle(Style.EMPTY.withColor(Formatting.RED)));
     private final Text successMessage = Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN));
-    private final String apiBasePath = "api/v2/";
+    private final String apiBasePath = "api/v3/";
     public String guildPrefix = "";
     public String guildId = "none";
     private String token;
+    private String refreshToken;
     private JsonObject refreshTokenObject;
     private final File refreshTokenFile;
     private JsonObject wynnPlayerInfo;
@@ -66,6 +67,7 @@ public class GuildApiClient extends Api {
         super("guild", List.of(WynnJoinApi.class));
         instance = this;
         baseURL = "https://ico-server.onrender.com/";
+        baseURL = "http://localhost:3000/";
         refreshTokenFile = new File(CACHE_DIR, "webapi.json");
     }
 
@@ -112,8 +114,7 @@ public class GuildApiClient extends Api {
         return token;
     }
 
-    private CompletableFuture<Pair<String, String>> login() {
-        // left: token, right: refresh
+    public void login() {
         CompletableFuture<Pair<String, String>> tokenRequest = new CompletableFuture<>();
         try {
             startLocalServer(tokenRequest);
@@ -122,26 +123,49 @@ public class GuildApiClient extends Api {
             GuildApi.LOGGER.error("its cooked: {} {}", e, e.getMessage());
             tokenRequest.completeExceptionally(e);
         }
-        return tokenRequest;
+        tokenRequest.whenCompleteAsync((res, exception) -> {
+            if (exception != null) {
+                GuildApi.LOGGER.error("login error: {} {}", exception, exception.getMessage());
+                return;
+            }
+            this.token = res.getLeft();
+            this.refreshToken = res.getRight();
+            super.enable();
+        });
     }
 
-    private void handleHttpCallback(HttpExchange exchange, CompletableFuture<Pair<String, String>> tokenRequest) throws java.io.IOException {
+    private void handleHttpCallback(HttpExchange exchange, CompletableFuture<Pair<String, String>> tokenRequest) {
         String query = exchange.getRequestURI().getQuery();
         Map<String, String> params = parseQuery(query);
         String code = params.get("code");
-        GuildApi.LOGGER.info(code);
 
-        String html = "<html><body><h2>Authorization complete</h2>"
-                + "<p>You can now close this window and return to the app.</p>"
-                + "</body></html>";
-        byte[] bytes = html.getBytes(StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
-        exchange.sendResponseHeaders(200, bytes.length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(bytes);
-        }
-
-        exchange.getHttpContext().getServer().stop(0);
+        JsonObject requestBody = new JsonObject();
+        requestBody.add("code", Managers.Json.toJsonElement(code));
+        requestBody.add("mcUsername", Managers.Json.toJsonElement(McUtils.playerName()));
+        post("auth/get-token", requestBody, true).whenCompleteAsync((res, exception) -> {
+            try {
+                NetUtils.applyDefaultCallback(res, exception, (resOK) -> {
+                            JsonObject resBody = resOK.getAsJsonObject();
+                            tokenRequest.complete(new Pair<>(resBody.get("token").getAsString(), resBody.get("refreshToken").getAsString()));
+                        },
+                        NetUtils.defaultFailed("login", true)
+                );
+            } catch (Exception e) {
+                ExceptionUtils.defaultException("handle login callback", e);
+            }
+            try {
+                String html = "You can now close this window and return to the minecraft";
+                byte[] bytes = html.getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().add("Content-Type", "text/plain; charset=UTF-8");
+                exchange.sendResponseHeaders(200, bytes.length);
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(bytes);
+                }
+            } catch (Exception e) {
+                ExceptionUtils.defaultException("send success", e);
+            }
+            exchange.getHttpContext().getServer().stop(0);
+        });
     }
 
     private Map<String, String> parseQuery(String q) {
@@ -253,6 +277,7 @@ public class GuildApiClient extends Api {
             GuildApi.LOGGER.warn("skipped api get because api service were crashed");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
                     .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
+            out.completeExceptionally(new Exception("API is disabled"));
             return out;
         }
         HttpRequest.Builder builder = HttpRequest.newBuilder().uri(URI.create(baseURL + path))
@@ -267,13 +292,14 @@ public class GuildApiClient extends Api {
         return out;
     }
 
-    public CompletableFuture<HttpResponse<String>> post(String path, JsonObject body) {
+    public CompletableFuture<HttpResponse<String>> post(String path, JsonObject body, boolean skipDisableCheck) {
         CompletableFuture<HttpResponse<String>> out = new CompletableFuture<>();
         path = apiBasePath + path;
-        if (isDisabled()) {
+        if (isDisabled() && !skipDisableCheck) {
             GuildApi.LOGGER.warn("skipped api post because api service were crashed");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
                     .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
+            out.completeExceptionally(new Exception("API is disabled."));
             return out;
         }
         HttpRequest.Builder builder = HttpRequest.newBuilder()
@@ -297,6 +323,7 @@ public class GuildApiClient extends Api {
             GuildApi.LOGGER.warn("Skipped api delete because api services weren't enabled");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
                     .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
+            out.completeExceptionally(new Exception("API is disabled"));
             return out;
         }
         HttpRequest.Builder builder = HttpRequest.newBuilder()
