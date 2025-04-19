@@ -12,6 +12,7 @@ import net.minecraft.util.Pair;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.net.type.Api;
+import pixlze.guildapi.utils.ColourUtils;
 import pixlze.guildapi.utils.ExceptionUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.NetUtils;
@@ -48,11 +49,11 @@ public class GuildApiClient extends Api {
     private static final Pattern GUILD_JOIN_PATTERN = Pattern.compile("^§.You have joined §.(?<guild>.+)§.!$");
     private static final Text LOGIN_MESSAGE_NEW = Text.literal("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands.\n§aClick ")
             .append(Text.literal("here").setStyle(
-                    Style.EMPTY.withUnderline(true)
+                    Style.EMPTY.withUnderline(true).withColor(ColourUtils.GREEN.getColor())
                             .withClickEvent(
                                     new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                                             "/gapi login")))).
-            append(Text.literal(" to authenticate and enable most features."));
+            append(Text.literal("§a to authenticate and enable most features."));
     private static final Text LOGIN_MESSAGE = Text.literal("§cCould not connect to guild server. Click ")
             .append(Text.literal("here").setStyle(
                     Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
