@@ -44,7 +44,7 @@ public class DiscordBlockClientCommand extends ListClientCommand {
             super.endpoint = ENDPOINT;
             setExtra(McUtils.playerUUID());
 
-            guildApiClient.get(ENDPOINT + McUtils.playerUUID()).whenCompleteAsync((res, error) -> {
+            guildApiClient.get(ENDPOINT + McUtils.playerUUID(), false).whenCompleteAsync((res, error) -> {
                 try {
                     NetUtils.applyDefaultCallback(res, error, (resOK) -> {
                         List<JsonElement> blocked = resOK.getAsJsonArray().asList();
