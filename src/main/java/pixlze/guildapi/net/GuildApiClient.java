@@ -63,7 +63,7 @@ public class GuildApiClient extends Api {
     private JsonObject wynnPlayerInfo;
 
     public GuildApiClient() {
-        super("guild", List.of(WynnApiClient.class));
+        super("guild", List.of(WynnJoinApi.class));
         instance = this;
         baseURL = "https://ico-server.onrender.com/";
         refreshTokenFile = new File(CACHE_DIR, "webapi.json");
