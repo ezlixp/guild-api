@@ -8,7 +8,7 @@ import pixlze.guildapi.core.components.Managers;
 
 public class RefreshTokenResetTestCommand extends ClientCommand {
     public RefreshTokenResetTestCommand() {
-        super("resetToken");
+        super("resetRefresh");
     }
 
     @Override
