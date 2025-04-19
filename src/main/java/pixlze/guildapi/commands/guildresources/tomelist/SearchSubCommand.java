@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
 import pixlze.guildapi.core.commands.ClientCommand;
 import pixlze.guildapi.core.components.Managers;
+import pixlze.guildapi.utils.ExceptionUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.NetUtils;
 import pixlze.guildapi.utils.type.Prepend;
@@ -44,7 +45,7 @@ class SearchSubCommand extends ClientCommand {
                         McUtils.sendLocalMessage(Text.literal("§cCould not fetch tome list. Reason: " + error), Prepend.DEFAULT.get(), false);
                 });
             } catch (Exception e) {
-                NetUtils.defaultException("tomelist search", e);
+                ExceptionUtils.defaultException("tomelist search", e);
             }
         });
     }
