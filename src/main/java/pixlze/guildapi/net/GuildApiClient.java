@@ -46,6 +46,7 @@ public class GuildApiClient extends Api {
     private static final String CALLBACK_PATH = "/callback/";
     private static final String REDIRECT_URI = "http://localhost:" + PORT + CALLBACK_PATH;
     private static final String CLIENT_ID = "1091532517292642367";
+    private static final String UNLINKED_ERROR = "User with the provided uuid was not found.";
     private static final Pattern GUILD_JOIN_PATTERN = Pattern.compile("^§.You have joined §.(?<guild>.+)§.!$");
     private static final Text LOGIN_MESSAGE_NEW = Text.literal("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands.\n§aType /link in your guild's discord bridging channel, then, \nclick ")
             .append(Text.literal("here").setStyle(
@@ -55,6 +56,13 @@ public class GuildApiClient extends Api {
                                             "/gapi login")))).
             append(Text.literal("§a to authenticate and enable most features."));
     private static final Text LOGIN_MESSAGE = Text.literal("§cCould not connect to guild server. Click ")
+            .append(Text.literal("here").setStyle(
+                    Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
+                            .withClickEvent(
+                                    new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                            "/gapi login")))).
+            append(Text.literal("§c to re-authenticate."));
+    private static final Text LINK_MESSAGE = Text.literal("§cYou have not linked a discord account. Type /link in your guild's discord bridging channel, then\nclick ")
             .append(Text.literal("here").setStyle(
                     Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
                             .withClickEvent(
@@ -134,6 +142,10 @@ public class GuildApiClient extends Api {
         McUtils.sendLocalMessage(LOGIN_MESSAGE, Prepend.DEFAULT.get(), false);
     }
 
+    public void promptLink() {
+        McUtils.sendLocalMessage(LINK_MESSAGE, Prepend.DEFAULT.get(), false);
+    }
+
     public void login() {
         CompletableFuture<Pair<String, String>> tokenRequest = new CompletableFuture<>();
         try {
@@ -171,10 +183,15 @@ public class GuildApiClient extends Api {
                             JsonObject resBody = resOK.getAsJsonObject();
                             tokenRequest.complete(new Pair<>(resBody.get("token").getAsString(), resBody.get("refreshToken").getAsString()));
                         },
-                        NetUtils.defaultFailed("login", true)
+                        (error) -> {
+                            if (error.equals(UNLINKED_ERROR)) {
+                                promptLink();
+                            } else NetUtils.defaultFailed("Login", true).accept(error);
+                        }
                 );
             } catch (Exception e) {
-                ExceptionUtils.defaultException("handle login callback", e);
+                GuildApi.LOGGER.error("handle login callback failed: {} {}", e, e.getMessage());
+                promptLogin();
             }
             try {
                 String html = "You can now close this window and return to the minecraft";
