@@ -41,7 +41,6 @@ public class DiscordBlockClientCommand extends ListClientCommand {
 
     private void onApiLoaded(Api api) {
         if (api.getClass().equals(GuildApiClient.class)) {
-            super.endpoint = ENDPOINT;
             setExtra(McUtils.playerUUID());
 
             guildApiClient.get(ENDPOINT + McUtils.playerUUID(), false).whenCompleteAsync((res, error) -> {
