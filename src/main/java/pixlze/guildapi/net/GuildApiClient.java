@@ -11,7 +11,11 @@ import net.minecraft.util.Pair;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.net.type.Api;
+import pixlze.guildapi.utils.ExceptionUtils;
 import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.NetUtils;
+import pixlze.guildapi.utils.text.TextUtils;
+import pixlze.guildapi.utils.text.type.TextParseOptions;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.awt.*;
@@ -37,6 +41,7 @@ public class GuildApiClient extends Api {
     private static final String CALLBACK_PATH = "/callback/";
     private static final String REDIRECT_URI = "http://localhost:" + PORT + CALLBACK_PATH;
     private static final String CLIENT_ID = "1091532517292642367";
+    private static final Pattern GUILD_JOIN_PATTERN = Pattern.compile("^§.You have joined §.(?<guild>.+)§.!$");
     private static GuildApiClient instance;
     private final Text retryMessage = Text.literal("Could not connect to guild server. Click ")
             .setStyle(Style.EMPTY.withColor(Formatting.RED))
@@ -64,14 +69,22 @@ public class GuildApiClient extends Api {
     }
 
 
+    private void onWynnMessage(Text message) {
+        if (GUILD_JOIN_PATTERN.matcher(TextUtils.parseStyled(message, TextParseOptions.DEFAULT)).find()) {
+            GuildApi.LOGGER.info("joining guild");
+//            reloadWynnInfo();
+            // §3You have joined §bIdiot Co§3!
+        }
+    }
+
     @Override
     public void init() {
         refreshTokenObject = Managers.Json.loadJsonFromFile(refreshTokenFile);
+
     }
 
     @Override
     protected void ready() {
-        wynnPlayerInfo = Managers.Net.wynn.wynnPlayerInfo;
         try {
             String refreshKey = refreshTokenObject.get("do not share").getAsString();
         } catch (NullPointerException exception) {
@@ -80,7 +93,6 @@ public class GuildApiClient extends Api {
         } catch (Exception e) {
             GuildApi.LOGGER.error("get refresh key error: {} {}", e, e.getMessage());
         }
-        super.enable();
     }
 
     protected void unready() {
@@ -163,9 +175,6 @@ public class GuildApiClient extends Api {
         server.createContext(CALLBACK_PATH, exchange -> handleHttpCallback(exchange, tokenRequest));
         server.setExecutor(null);
         server.start();
-    }
-
-    private void handleCallback(HttpExchange httpExchange) {
     }
 
     private CompletableFuture<HttpResponse<String>> tryToken(HttpRequest.Builder builder) {
