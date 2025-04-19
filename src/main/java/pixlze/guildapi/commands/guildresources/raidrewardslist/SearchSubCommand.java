@@ -37,7 +37,7 @@ class SearchSubCommand extends ClientCommand {
     }
 
     private void search(String username) {
-        Managers.Net.guild.get(ENDPOINT + Managers.Net.guild.guildId + "/" + username).whenCompleteAsync((res, exception) -> {
+        Managers.Net.guild.get(ENDPOINT + Managers.Net.guild.guildId + "/" + username, true).whenCompleteAsync((res, exception) -> {
             try {
                 NetUtils.applyDefaultCallback(res, exception, (response) -> {
                     JsonObject resObject = response.getAsJsonObject();

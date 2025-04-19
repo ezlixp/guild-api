@@ -83,7 +83,6 @@ public class GuildApiClient extends Api {
     @Override
     public void init() {
         refreshTokenObject = Managers.Json.loadJsonFromFile(refreshTokenFile);
-
     }
 
     @Override
@@ -270,10 +269,10 @@ public class GuildApiClient extends Api {
         callback.complete(response);
     }
 
-    public CompletableFuture<HttpResponse<String>> get(String path) {
+    public CompletableFuture<HttpResponse<String>> get(String path, boolean skipDisableCheck) {
         path = apiBasePath + path;
         CompletableFuture<HttpResponse<String>> out = new CompletableFuture<>();
-        if (isDisabled()) {
+        if (isDisabled() && !skipDisableCheck) {
             GuildApi.LOGGER.warn("skipped api get because api service were crashed");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
                     .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);

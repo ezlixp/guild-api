@@ -34,7 +34,7 @@ public class AutoUpdateFeature extends Feature {
     private void onApiLoaded(Api loaded) {
         if (Managers.Feature.getFeatureState(this) != FeatureState.ENABLED) return;
         if (!completed && loaded.getClass().equals(GuildApiClient.class)) {
-            Managers.Net.guild.get("mod/update").whenCompleteAsync((res, err) -> {
+            Managers.Net.guild.get("mod/update", true).whenCompleteAsync((res, err) -> {
                 try {
                     NetUtils.applyDefaultCallback(res, err, (resOK) -> {
                         GuildApi.LOGGER.info("auto update result: {}", resOK);

@@ -124,7 +124,7 @@ public class ListClientCommand extends ClientCommand {
     private void listItems(int page, boolean reload) {
         CompletableFuture<JsonElement> response = new CompletableFuture<>();
         if (reload) {
-            Managers.Net.guild.get(endpoint + getExtra()).whenCompleteAsync((res, exception) -> {
+            Managers.Net.guild.get(endpoint + getExtra(), true).whenCompleteAsync((res, exception) -> {
                 try {
                     NetUtils.applyDefaultCallback(res, exception, response::complete, (error) -> response.completeExceptionally(null));
                 } catch (Exception e) {
