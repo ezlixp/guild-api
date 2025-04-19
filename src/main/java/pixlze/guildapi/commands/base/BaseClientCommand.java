@@ -24,7 +24,7 @@ public class BaseClientCommand extends ClientCommand {
 
     @Override
     protected List<ClientCommand> getSubCommands() {
-        ArrayList<ClientCommand> out = new ArrayList<>(List.of(new ClientCommandHelpCommand(), new InfoCommand(), new OpenConfigSubComand()));
+        ArrayList<ClientCommand> out = new ArrayList<>(List.of(new ClientCommandHelpCommand(), new InfoCommand(), new OpenConfigSubComand(), new AuthSubCommand()));
         if (GuildApi.isDevelopment() || GuildApi.isTesting()) {
             out.add(new TestCommandHelpCommand());
         }
