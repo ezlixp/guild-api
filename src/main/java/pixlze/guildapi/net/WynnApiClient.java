@@ -10,30 +10,24 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Managers;
-import pixlze.guildapi.core.handlers.connection.event.WynncraftConnectionEvents;
-import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.net.type.Api;
-import pixlze.guildapi.utils.JsonUtils;
 import pixlze.guildapi.utils.McUtils;
-import pixlze.guildapi.utils.text.TextUtils;
-import pixlze.guildapi.utils.text.type.TextParseOptions;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 public class WynnApiClient extends Api {
     private static WynnApiClient instance;
     public JsonObject wynnPlayerInfo;
     private boolean reloading = false;
-    private final Pattern GUILD_JOIN_PATTERN = Pattern.compile("^§.You have joined §.(?<guild>.+)§.!$");
+
 
     protected WynnApiClient() {
-        super("wynn", new LinkedList<>());
+        super("wynn", List.of(WynnJoinApi.class));
         instance = this;
     }
 
@@ -58,15 +52,6 @@ public class WynnApiClient extends Api {
                         return Command.SINGLE_SUCCESS;
                     }));
         });
-        WynnChatMessage.EVENT.register(this::onWynnMessage);
-        WynncraftConnectionEvents.JOIN.register(this::onWynnJoin);
-    }
-
-    private void onWynnMessage(Text message) {
-        if (GUILD_JOIN_PATTERN.matcher(TextUtils.parseStyled(message, TextParseOptions.DEFAULT)).find()) {
-            GuildApi.LOGGER.info("joining guild");
-            reloadWynnInfo();
-        }
     }
 
     public void initWynnPlayerInfo(boolean print) {
@@ -78,7 +63,7 @@ public class WynnApiClient extends Api {
                         .build();
                 HttpResponse<String> response = NetManager.HTTP_CLIENT.send(request,
                         HttpResponse.BodyHandlers.ofString());
-                wynnPlayerInfo = JsonUtils.toJsonObject(response.body());
+                wynnPlayerInfo = Managers.Json.toJsonObject(response.body());
                 if (wynnPlayerInfo.get("Error") != null) {
                     String message = wynnPlayerInfo.get("Error").getAsString();
                     wynnPlayerInfo = null;
@@ -115,7 +100,8 @@ public class WynnApiClient extends Api {
         initWynnPlayerInfo(false);
     }
 
-    private void onWynnJoin() {
+    @Override
+    protected void ready() {
         if (wynnPlayerInfo == null || !Objects.equals(McUtils.playerUUID(), wynnPlayerInfo.get("uuid").getAsString())) {
             reloadWynnInfo();
         } else {

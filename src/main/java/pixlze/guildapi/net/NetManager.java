@@ -15,8 +15,9 @@ import java.util.Map;
 public class NetManager extends Manager {
     public static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
     private final Map<String, Api> apis = new HashMap<>();
-    public WynnApiClient wynn = new WynnApiClient();
-    public GuildApiClient guild = new GuildApiClient();
+    private final WynnJoinApi join = new WynnJoinApi();
+    public final WynnApiClient wynn = new WynnApiClient();
+    public final GuildApiClient guild = new GuildApiClient();
 
     public NetManager() {
         super(List.of());
@@ -36,6 +37,7 @@ public class NetManager extends Manager {
     }
 
     public void init() {
+        registerApi(join);
         registerApi(wynn);
         registerApi(guild);
         initApis();
