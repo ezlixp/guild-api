@@ -6,9 +6,10 @@ import pixlze.guildapi.core.components.Feature;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.config.Config;
 import pixlze.guildapi.core.features.FeatureState;
-import pixlze.guildapi.net.GuildApiClient;
+import pixlze.guildapi.net.WynnJoinApi;
 import pixlze.guildapi.net.event.NetEvents;
 import pixlze.guildapi.net.type.Api;
+import pixlze.guildapi.utils.ExceptionUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.NetUtils;
 import pixlze.guildapi.utils.type.Prepend;
@@ -33,7 +34,7 @@ public class AutoUpdateFeature extends Feature {
 
     private void onApiLoaded(Api loaded) {
         if (Managers.Feature.getFeatureState(this) != FeatureState.ENABLED) return;
-        if (!completed && loaded.getClass().equals(GuildApiClient.class)) {
+        if (!completed && loaded.getClass().equals(WynnJoinApi.class)) {
             Managers.Net.guild.get("mod/update", true).whenCompleteAsync((res, err) -> {
                 try {
                     NetUtils.applyDefaultCallback(res, err, (resOK) -> {
@@ -47,7 +48,7 @@ public class AutoUpdateFeature extends Feature {
                         }
                     }, NetUtils.defaultFailed("mod update check", false));
                 } catch (Exception e) {
-                    NetUtils.defaultException("auto update", e);
+                    ExceptionUtils.defaultException("auto update", e);
                 }
             });
             completed = true;
