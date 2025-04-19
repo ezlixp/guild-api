@@ -3,6 +3,7 @@ package pixlze.guildapi.utils;
 import com.google.gson.JsonElement;
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.http.HttpResponse;
@@ -21,9 +22,9 @@ public class NetUtils {
             throw (Exception) exception;
         }
         if (response.statusCode() / 100 == 2) {
-            onSuccess.accept(JsonUtils.toJsonElement(response.body()));
+            onSuccess.accept(Managers.Json.toJsonElement(response.body()));
         } else {
-            onFailed.accept(JsonUtils.toJsonObject(response.body()).get("error").getAsString());
+            onFailed.accept(Managers.Json.toJsonObject(response.body()).get("errorMessage").getAsString());
         }
     }
 
@@ -35,6 +36,7 @@ public class NetUtils {
         };
     }
 
+    @Deprecated
     public static void defaultException(String name, Exception e) {
         McUtils.sendLocalMessage(Text.literal("§cSomething went wrong. Check logs for more details."), Prepend.DEFAULT.get(), false);
         GuildApi.LOGGER.error("{} exception: {} {}", name, e, e.getMessage());
