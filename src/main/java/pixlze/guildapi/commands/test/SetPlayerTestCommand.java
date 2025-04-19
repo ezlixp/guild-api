@@ -20,6 +20,8 @@ public class SetPlayerTestCommand extends ClientCommand {
             McUtils.devName = StringArgumentType.getString(context, "username");
             Managers.DiscordSocket.disable();
             Managers.Net.wynn.reloadWynnInfo();
+            Managers.Net.guild.disable();
+            Managers.Net.guild.enable();
             Managers.DiscordSocket.initSocket();
             return Command.SINGLE_SUCCESS;
         }));
