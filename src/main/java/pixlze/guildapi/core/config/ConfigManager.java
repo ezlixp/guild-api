@@ -7,7 +7,6 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Feature;
 import pixlze.guildapi.core.components.Manager;
 import pixlze.guildapi.core.components.Managers;
-import pixlze.guildapi.utils.JsonUtils;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -42,7 +41,7 @@ public class ConfigManager extends Manager {
             JsonObject curConfig = new JsonObject();
             for (Config<?> config : entry.getValue()) {
                 config.applyPending();
-                curConfig.add(config.getName(), JsonUtils.toJsonElement(config.getValue().toString()));
+                curConfig.add(config.getName(), Managers.Json.toJsonElement(config.getValue().toString()));
             }
             configObject.add(entry.getKey().getClass().getSimpleName(), curConfig);
         }

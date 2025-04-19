@@ -11,7 +11,6 @@ import pixlze.guildapi.core.commands.ClientCommand;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.models.Models;
 import pixlze.guildapi.utils.ColourUtils;
-import pixlze.guildapi.utils.JsonUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.NetUtils;
 import pixlze.guildapi.utils.type.Prepend;
@@ -35,7 +34,7 @@ class AddSubCommand extends ClientCommand {
                 McUtils.sendLocalMessage(Text.literal("§cYou can't block yourself."), Prepend.GUILD.getWithStyle(ColourUtils.RED), true);
                 return 0;
             }
-            Managers.Net.guild.post(ENDPOINT + McUtils.playerUUID(), JsonUtils.toJsonObject("{toBlock:\"" + toBlock + "\"}")).whenCompleteAsync((res, exception) -> {
+            Managers.Net.guild.post(ENDPOINT + McUtils.playerUUID(), Managers.Json.toJsonObject("{toBlock:\"" + toBlock + "\"}"), false).whenCompleteAsync((res, exception) -> {
                 try {
                     NetUtils.applyDefaultCallback(res, exception, (resOK) -> {
                         McUtils.sendLocalMessage(Text.literal("§aSuccessfully blocked \"" + toBlock + "\".\n" +

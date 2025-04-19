@@ -49,4 +49,12 @@ public class JsonManager extends Manager {
         }
         return true;
     }
+
+    public JsonElement toJsonElement(String convert) {
+        return GSON.fromJson(convert, JsonElement.class);
+    }
+
+    public JsonObject toJsonObject(String convert) {
+        return GSON.fromJson(convert, JsonObject.class);
+    }
 }

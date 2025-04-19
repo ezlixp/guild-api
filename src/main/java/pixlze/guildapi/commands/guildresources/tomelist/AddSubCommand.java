@@ -7,7 +7,6 @@ import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.commands.ClientCommand;
 import pixlze.guildapi.core.components.Managers;
-import pixlze.guildapi.utils.JsonUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.NetUtils;
 import pixlze.guildapi.utils.type.Prepend;
@@ -22,7 +21,7 @@ class AddSubCommand extends ClientCommand {
     @Override
     protected LiteralArgumentBuilder<FabricClientCommandSource> getCommand(LiteralArgumentBuilder<FabricClientCommandSource> base) {
         return base.executes((context) -> {
-            Managers.Net.guild.post(ENDPOINT + Managers.Net.guild.guildId, JsonUtils.toJsonObject("{\"username\":\"" + McUtils.playerName() + "\"}")).whenCompleteAsync((res, exception) -> {
+            Managers.Net.guild.post(ENDPOINT + Managers.Net.guild.guildId, Managers.Json.toJsonObject("{\"username\":\"" + McUtils.playerName() + "\"}"), false).whenCompleteAsync((res, exception) -> {
                 try {
                     NetUtils.applyDefaultCallback(res, exception, (response) -> McUtils.sendLocalMessage(Text.literal("§aSuccessfully added to the tome queue"), Prepend.DEFAULT.get(), false),
                             (error) -> {
