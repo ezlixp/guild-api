@@ -36,6 +36,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
+import static pixlze.guildapi.GuildApi.MOD_VERSION;
+
 public class GuildApiClient extends Api {
     private static final File CACHE_DIR = GuildApi.getModStorageDir("apicache");
     private static final int PORT = 2424;
@@ -43,18 +45,23 @@ public class GuildApiClient extends Api {
     private static final String REDIRECT_URI = "http://localhost:" + PORT + CALLBACK_PATH;
     private static final String CLIENT_ID = "1091532517292642367";
     private static final Pattern GUILD_JOIN_PATTERN = Pattern.compile("^§.You have joined §.(?<guild>.+)§.!$");
-    private static GuildApiClient instance;
-    private final Text retryMessage = Text.literal("Could not connect to guild server. Click ")
-            .setStyle(Style.EMPTY.withColor(Formatting.RED))
+    private static final Text LOGIN_MESSAGE_NEW = Text.literal("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands.\n§aClick ")
+            .append(Text.literal("here").setStyle(
+                    Style.EMPTY.withUnderline(true)
+                            .withClickEvent(
+                                    new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                            "/gapi login")))).
+            append(Text.literal(" to authenticate and enable most features."));
+    private static final Text LOGIN_MESSAGE = Text.literal("§cCould not connect to guild server. Click ")
             .append(Text.literal("here").setStyle(
                     Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
                             .withClickEvent(
                                     new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                            "/retryLastFailed")))).
-            append(Text.literal(" to retry.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.RED)));
-    private final Text successMessage = Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN));
-    private final String apiBasePath = "api/v3/";
+                                            "/gapi login")))).
+            append(Text.literal("§c to re-authenticate."));
+    private static final Text SUCCESS_MESSAGE = Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN));
+    private static final String API_BASE_PATH = "api/v3/";
+    private static GuildApiClient instance;
     public String guildPrefix = "";
     public String guildId = "none";
     private String token;
@@ -64,7 +71,7 @@ public class GuildApiClient extends Api {
     private JsonObject wynnPlayerInfo;
 
     public GuildApiClient() {
-        super("guild", List.of(WynnJoinApi.class));
+        super("guild", List.of(WynnApiClient.class, WynnJoinApi.class));
         instance = this;
         baseURL = "https://ico-server.onrender.com/";
         baseURL = "http://localhost:3000/";
@@ -87,13 +94,18 @@ public class GuildApiClient extends Api {
 
     @Override
     protected void ready() {
+        wynnPlayerInfo = Managers.Net.wynn.wynnPlayerInfo;
+        guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
+        guildId = wynnPlayerInfo.get("guild").getAsJsonObject().get("uuid").getAsString();
         try {
             String refreshKey = refreshTokenObject.get("do not share").getAsString();
+            McUtils.sendLocalMessage(LOGIN_MESSAGE, Prepend.DEFAULT.get(), false);
         } catch (NullPointerException exception) {
             GuildApi.LOGGER.warn("expected nullpointer: {} {}", exception, exception.getMessage());
-            login();
+            McUtils.sendLocalMessage(LOGIN_MESSAGE_NEW, Prepend.DEFAULT.get(), false);
         } catch (Exception e) {
-            GuildApi.LOGGER.error("get refresh key error: {} {}", e, e.getMessage());
+            ExceptionUtils.defaultException("login", e);
+            McUtils.sendLocalMessage(LOGIN_MESSAGE, Prepend.DEFAULT.get(), false);
         }
     }
 
@@ -129,6 +141,8 @@ public class GuildApiClient extends Api {
             }
             this.token = res.getLeft();
             this.refreshToken = res.getRight();
+            this.refreshTokenObject.addProperty("do not share", refreshToken);
+            Managers.Json.saveJsonAsFile(refreshTokenFile, refreshTokenObject);
             super.enable();
         });
     }
@@ -270,7 +284,7 @@ public class GuildApiClient extends Api {
     }
 
     public CompletableFuture<HttpResponse<String>> get(String path, boolean skipDisableCheck) {
-        path = apiBasePath + path;
+        path = API_BASE_PATH + path;
         CompletableFuture<HttpResponse<String>> out = new CompletableFuture<>();
         if (isDisabled() && !skipDisableCheck) {
             GuildApi.LOGGER.warn("skipped api get because api service were crashed");
@@ -293,7 +307,7 @@ public class GuildApiClient extends Api {
 
     public CompletableFuture<HttpResponse<String>> post(String path, JsonObject body, boolean skipDisableCheck) {
         CompletableFuture<HttpResponse<String>> out = new CompletableFuture<>();
-        path = apiBasePath + path;
+        path = API_BASE_PATH + path;
         if (isDisabled() && !skipDisableCheck) {
             GuildApi.LOGGER.warn("skipped api post because api service were crashed");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
@@ -317,7 +331,7 @@ public class GuildApiClient extends Api {
 
     public CompletableFuture<HttpResponse<String>> delete(String path) {
         CompletableFuture<HttpResponse<String>> out = new CompletableFuture<>();
-        path = apiBasePath + path;
+        path = API_BASE_PATH + path;
         if (isDisabled()) {
             GuildApi.LOGGER.warn("Skipped api delete because api services weren't enabled");
             McUtils.sendLocalMessage(Text.literal("A request was skipped.")
@@ -340,7 +354,7 @@ public class GuildApiClient extends Api {
 
 
     private void successMessage() {
-        McUtils.sendLocalMessage(successMessage, Prepend.DEFAULT.get(), false);
+        McUtils.sendLocalMessage(SUCCESS_MESSAGE, Prepend.DEFAULT.get(), false);
     }
 
     public String getBaseURL() {
