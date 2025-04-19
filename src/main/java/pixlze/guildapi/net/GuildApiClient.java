@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
 
 public class GuildApiClient extends Api {
     private static final File CACHE_DIR = GuildApi.getModStorageDir("apicache");
