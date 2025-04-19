@@ -52,46 +52,48 @@ public class WynnApiClient extends Api {
                         return Command.SINGLE_SUCCESS;
                     }));
         });
+        this.ready();
     }
 
     public void initWynnPlayerInfo(boolean print) {
-        if (McUtils.mc().player != null) {
-            try {
-                URI uri = URI.create("https://api.wynncraft.com/v3/player/" + McUtils.playerName());
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(uri)
-                        .build();
-                HttpResponse<String> response = NetManager.HTTP_CLIENT.send(request,
-                        HttpResponse.BodyHandlers.ofString());
-                wynnPlayerInfo = Managers.Json.toJsonObject(response.body());
-                if (wynnPlayerInfo.get("Error") != null) {
-                    String message = wynnPlayerInfo.get("Error").getAsString();
-                    wynnPlayerInfo = null;
-                    throw new Exception(message);
-                }
-                GuildApi.LOGGER.info("successfully loaded wynn player info");
-                if (GuildApi.isDevelopment() || GuildApi.isTesting())
-                    McUtils.devUUID = wynnPlayerInfo.get("uuid").getAsString();
-                if (print)
-                    McUtils.sendLocalMessage(
-                            Text.literal("Success!")
-                                    .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get(), false);
-                super.enable();
-            } catch (Exception e) {
-                GuildApi.LOGGER.error("wynn player load error: {} {}", e, e.getMessage());
-                Managers.Net.apiCrash(
-                        Text.literal("Wynncraft api fetch for " + McUtils.playerName() + " failed. Click ")
-                                .setStyle(Style.EMPTY.withColor(Formatting.RED))
-                                .append(Text.literal("here")
-                                        .setStyle(Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
-                                                .withClickEvent(
-                                                        new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                                                "/reloadWynnInfo"))))
-                                .append(Text.literal(" to retry.").setStyle(Style.EMPTY.withColor(Formatting.RED))),
-                        this);
+        try {
+            URI uri = URI.create("https://api.wynncraft.com/v3/player/" + McUtils.playerName());
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(uri)
+                    .build();
+            HttpResponse<String> response = NetManager.HTTP_CLIENT.send(request,
+                    HttpResponse.BodyHandlers.ofString());
+            wynnPlayerInfo = Managers.Json.toJsonObject(response.body());
+            if (wynnPlayerInfo.get("Error") != null) {
+                String message = wynnPlayerInfo.get("Error").getAsString();
+                wynnPlayerInfo = null;
+                throw new Exception(message);
             }
-        } else {
-            GuildApi.LOGGER.warn("null player found when initializing wynn api");
+
+            // asserts that the necessary fields for guildapiclient exist
+            wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
+            wynnPlayerInfo.get("guild").getAsJsonObject().get("uuid").getAsString();
+
+            GuildApi.LOGGER.info("successfully loaded wynn player info");
+            if (GuildApi.isDevelopment() || GuildApi.isTesting())
+                McUtils.devUUID = wynnPlayerInfo.get("uuid").getAsString();
+            if (print)
+                McUtils.sendLocalMessage(
+                        Text.literal("Success!")
+                                .setStyle(Style.EMPTY.withColor(Formatting.GREEN)), Prepend.DEFAULT.get(), false);
+            super.enable();
+        } catch (Exception e) {
+            GuildApi.LOGGER.error("wynn player load error: {} {}", e, e.getMessage());
+            Managers.Net.apiCrash(
+                    Text.literal("Wynncraft api fetch for " + McUtils.playerName() + " failed. Click ")
+                            .setStyle(Style.EMPTY.withColor(Formatting.RED))
+                            .append(Text.literal("here")
+                                    .setStyle(Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
+                                            .withClickEvent(
+                                                    new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                                            "/reloadWynnInfo"))))
+                            .append(Text.literal(" to retry.").setStyle(Style.EMPTY.withColor(Formatting.RED))),
+                    this);
         }
     }
 
