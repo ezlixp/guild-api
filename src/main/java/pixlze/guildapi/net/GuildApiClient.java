@@ -1,6 +1,7 @@
 package pixlze.guildapi.net;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import net.minecraft.text.ClickEvent;
@@ -98,14 +99,16 @@ public class GuildApiClient extends Api {
         guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
         guildId = wynnPlayerInfo.get("guild").getAsJsonObject().get("uuid").getAsString();
         try {
-            String refreshKey = refreshTokenObject.get("do not share").getAsString();
-            McUtils.sendLocalMessage(LOGIN_MESSAGE, Prepend.DEFAULT.get(), false);
+            refreshToken = refreshTokenObject.get("do not share").getAsString();
+            if (!getGuildServerToken())
+                promptLogin();
+            else this.enable();
         } catch (NullPointerException exception) {
             GuildApi.LOGGER.warn("expected nullpointer: {} {}", exception, exception.getMessage());
             McUtils.sendLocalMessage(LOGIN_MESSAGE_NEW, Prepend.DEFAULT.get(), false);
         } catch (Exception e) {
             ExceptionUtils.defaultException("login", e);
-            McUtils.sendLocalMessage(LOGIN_MESSAGE, Prepend.DEFAULT.get(), false);
+            promptLogin();
         }
     }
 
@@ -113,6 +116,7 @@ public class GuildApiClient extends Api {
         wynnPlayerInfo = null;
         guildId = null;
         token = null;
+        refreshToken = null;
         super.unready();
     }
 
@@ -123,6 +127,10 @@ public class GuildApiClient extends Api {
     public String getToken(boolean refresh) {
         if (token == null || refresh) getGuildServerToken();
         return token;
+    }
+
+    public void promptLogin() {
+        McUtils.sendLocalMessage(LOGIN_MESSAGE, Prepend.DEFAULT.get(), false);
     }
 
     public void login() {
@@ -141,8 +149,7 @@ public class GuildApiClient extends Api {
             }
             this.token = res.getLeft();
             this.refreshToken = res.getRight();
-            this.refreshTokenObject.addProperty("do not share", refreshToken);
-            Managers.Json.saveJsonAsFile(refreshTokenFile, refreshTokenObject);
+            this.saveRefreshToken();
             super.enable();
         });
     }
@@ -153,6 +160,7 @@ public class GuildApiClient extends Api {
         String code = params.get("code");
 
         JsonObject requestBody = new JsonObject();
+        requestBody.add("grant_type", Managers.Json.toJsonElement("authorization_code"));
         requestBody.add("code", Managers.Json.toJsonElement(code));
         requestBody.add("mcUsername", Managers.Json.toJsonElement(McUtils.playerName()));
         post("auth/get-token", requestBody, true).whenCompleteAsync((res, exception) -> {
@@ -244,35 +252,34 @@ public class GuildApiClient extends Api {
     }
 
     private boolean getGuildServerToken() {
+        try {
+            JsonObject requestBody = new JsonObject();
+            requestBody.add("grant_type", Managers.Json.toJsonElement("refresh_token"));
+            requestBody.add("refreshToken", Managers.Json.toJsonElement(refreshToken));
+            HttpRequest.Builder builder = HttpRequest.newBuilder()
+                    .uri(URI.create(baseURL + API_BASE_PATH + "auth/get-token"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()));
+            if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
+            HttpResponse<String> response = NetManager.HTTP_CLIENT.send(builder.build(),
+                    HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() / 100 == 2) {
+                GuildApi.LOGGER.info("Api token refresh call successful: {}", response.statusCode());
+                JsonObject responseObject = Managers.Json.toJsonObject(response.body());
+                token = responseObject.get("token").getAsString();
+                refreshToken = responseObject.get("refreshToken").getAsString();
+                saveRefreshToken();
+                return true;
+            }
+            GuildApi.LOGGER.error("get token error: status {} {}", response.statusCode(), response.body());
+        } catch (JsonSyntaxException e) {
+            GuildApi.LOGGER.error("Json syntax exception: {}", (Object) e.getStackTrace());
+        } catch (Exception e) {
+            GuildApi.LOGGER.error("get token error: {}", e.getMessage());
+        }
+        if (!this.isDisabled())
+            Managers.Net.apiCrash(LOGIN_MESSAGE, this);
         return false;
-//        if (wynnPlayerInfo != null) {
-//            try {
-//                JsonObject requestBody = new JsonObject();
-//                requestBody.add("validationKey", validationKey);
-//                requestBody.add("username", JsonUtils.toJsonElement(McUtils.playerName()));
-//                HttpRequest.Builder builder = HttpRequest.newBuilder()
-//                        .uri(URI.create(baseURL + apiBasePath + "guilds/auth/get-token/" + guildId))
-//                        .header("Content-Type", "application/json")
-//                        .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()));
-//                if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
-//                HttpResponse<String> response = NetManager.HTTP_CLIENT.send(builder.build(),
-//                        HttpResponse.BodyHandlers.ofString());
-//                if (response.statusCode() / 100 == 2) {
-//                    GuildApi.LOGGER.info("Api token refresh call successful: {}", response.statusCode());
-//                    JsonObject responseObject = JsonUtils.toJsonObject(response.body());
-//                    token = responseObject.get("token").getAsString();
-//                    return true;
-//                }
-//                GuildApi.LOGGER.error("get token error: status {} {}", response.statusCode(), response.body());
-//            } catch (JsonSyntaxException e) {
-//                GuildApi.LOGGER.error("Json syntax exception: {}", (Object) e.getStackTrace());
-//            } catch (Exception e) {
-//                GuildApi.LOGGER.error("get token error: {}", e.getMessage());
-//            }
-//        } else {
-//            GuildApi.LOGGER.warn("wynn player not initialized, can't refresh token");
-//        }
-//        return false;
     }
 
     private void applyCallback(CompletableFuture<HttpResponse<String>> callback, HttpResponse<String> response, Throwable exception) {
@@ -287,9 +294,8 @@ public class GuildApiClient extends Api {
         path = API_BASE_PATH + path;
         CompletableFuture<HttpResponse<String>> out = new CompletableFuture<>();
         if (isDisabled() && !skipDisableCheck) {
-            GuildApi.LOGGER.warn("skipped api get because api service were crashed");
-            McUtils.sendLocalMessage(Text.literal("A request was skipped.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
+            GuildApi.LOGGER.warn("skipped api call because not logged in");
+            promptLogin();
             out.completeExceptionally(new Exception("API is disabled"));
             return out;
         }
@@ -310,8 +316,7 @@ public class GuildApiClient extends Api {
         path = API_BASE_PATH + path;
         if (isDisabled() && !skipDisableCheck) {
             GuildApi.LOGGER.warn("skipped api post because api service were crashed");
-            McUtils.sendLocalMessage(Text.literal("A request was skipped.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
+            promptLogin();
             out.completeExceptionally(new Exception("API is disabled."));
             return out;
         }
@@ -334,9 +339,7 @@ public class GuildApiClient extends Api {
         path = API_BASE_PATH + path;
         if (isDisabled()) {
             GuildApi.LOGGER.warn("Skipped api delete because api services weren't enabled");
-            McUtils.sendLocalMessage(Text.literal("A request was skipped.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
-            out.completeExceptionally(new Exception("API is disabled"));
+            promptLogin();
             return out;
         }
         HttpRequest.Builder builder = HttpRequest.newBuilder()
@@ -361,5 +364,19 @@ public class GuildApiClient extends Api {
         return baseURL;
     }
 
+    private void saveRefreshToken() {
+        this.refreshTokenObject.addProperty("do not share", refreshToken);
+        Managers.Json.saveJsonAsFile(refreshTokenFile, refreshTokenObject);
+    }
 
+    /** only used for test command */
+    public void resetToken() {
+        this.token = null;
+    }
+
+    /** only used for test command */
+    public void resetRefreshToken() {
+        this.token = null;
+        this.refreshToken = null;
+    }
 }
