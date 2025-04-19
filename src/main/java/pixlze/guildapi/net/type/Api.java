@@ -74,5 +74,7 @@ public abstract class Api {
         return !enabled;
     }
 
-    public abstract void init();
+    public void init() {
+        this.ready();
+    }
 }
