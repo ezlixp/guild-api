@@ -48,7 +48,7 @@ public class GuildApiClient extends Api {
     private static final String CLIENT_ID = "1091532517292642367";
     private static final String UNLINKED_ERROR = "Could not validate account linking.";
     private static final Pattern GUILD_JOIN_PATTERN = Pattern.compile("^§.You have joined §.(?<guild>.+)§.!$");
-    private static final Text LOGIN_MESSAGE_NEW = Text.literal("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands.\n§aType /link in your guild's discord bridging channel, then, \nclick ")
+    private static final Text LOGIN_MESSAGE_NEW = Text.literal("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands.\n§aType /link in your guild's discord bridging channel, then, click ")
             .append(Text.literal("here").setStyle(
                     Style.EMPTY.withUnderline(true).withColor(ColourUtils.GREEN.getColor())
                             .withClickEvent(
@@ -62,7 +62,7 @@ public class GuildApiClient extends Api {
                                     new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                                             "/gapi login")))).
             append(Text.literal("§c to re-authenticate."));
-    private static final Text LINK_MESSAGE = Text.literal("§cYou have not linked a discord account. Type /link in your guild's discord bridging channel, then\nclick ")
+    private static final Text LINK_MESSAGE = Text.literal("§cYou have not linked a discord account. Type /link in your guild's discord bridging channel, then click ")
             .append(Text.literal("here").setStyle(
                     Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
                             .withClickEvent(
