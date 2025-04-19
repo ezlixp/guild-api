@@ -36,10 +36,6 @@ public abstract class Api {
 
     private void dependencyLoaded() {
         --missingDeps;
-        tryReady();
-    }
-
-    public void tryReady() {
         if (missingDeps == 0) {
             ready();
         }
