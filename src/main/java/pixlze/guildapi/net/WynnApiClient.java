@@ -27,7 +27,7 @@ public class WynnApiClient extends Api {
 
 
     protected WynnApiClient() {
-        super("wynn", List.of(WynnJoinApi.class));
+        super("wynn", List.of());
         instance = this;
     }
 
