@@ -46,7 +46,7 @@ public class GuildApiClient extends Api {
     private static final String CALLBACK_PATH = "/callback/";
     private static final String REDIRECT_URI = "http://localhost:" + PORT + CALLBACK_PATH;
     private static final String CLIENT_ID = "1091532517292642367";
-    private static final String UNLINKED_ERROR = "User with the provided uuid was not found.";
+    private static final String UNLINKED_ERROR = "Could not validate account linking.";
     private static final Pattern GUILD_JOIN_PATTERN = Pattern.compile("^§.You have joined §.(?<guild>.+)§.!$");
     private static final Text LOGIN_MESSAGE_NEW = Text.literal("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands.\n§aType /link in your guild's discord bridging channel, then, \nclick ")
             .append(Text.literal("here").setStyle(
