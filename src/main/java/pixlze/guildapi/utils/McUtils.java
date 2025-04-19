@@ -17,14 +17,12 @@ public class McUtils {
 
     public static String playerName() {
         if (GuildApi.isDevelopment() || GuildApi.isTesting()) return devName;
-        return player().getName().getString();
+        return mc().getSession().getUsername();
     }
 
     public static String playerUUID() {
         if (GuildApi.isDevelopment() || GuildApi.isTesting()) return devUUID;
-        if (player() != null)
-            return player().getUuidAsString();
-        return null;
+        return mc().getSession().getUuidOrNull().toString();
     }
 
     public static PlayerEntity player() {
