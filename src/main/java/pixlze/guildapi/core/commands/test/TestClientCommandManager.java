@@ -18,6 +18,8 @@ public class TestClientCommandManager extends Manager {
         registerCommand(new GuildRaidTestCommand());
         registerCommand(new SetPlayerTestCommand());
         registerCommand(new TomeRewardTestCommand());
+        registerCommand(new TokenResetTestCommand());
+        registerCommand(new RefreshTokenResetTestCommand());
     }
 
     private void registerCommand(ClientCommand command) {
