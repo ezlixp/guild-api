@@ -26,7 +26,6 @@ public class DiscordSocketManager extends AbstractSocketManager {
 
     public DiscordSocketManager() {
         super(List.of());
-        NetEvents.LOADED.register(this::onApiLoaded);
     }
 
     private void onApiLoaded(Api api) {
@@ -95,6 +94,7 @@ public class DiscordSocketManager extends AbstractSocketManager {
     @Override
     public void init() {
         super.init();
+        NetEvents.LOADED.register(this::onApiLoaded);
         WorldStateEvents.CHANGE.register(this::worldStateChanged);
     }
 }
