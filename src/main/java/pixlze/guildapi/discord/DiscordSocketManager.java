@@ -88,6 +88,11 @@ public class DiscordSocketManager extends AbstractSocketManager {
     }
 
     @Override
+    protected String disabledMessage() {
+        return "§cCannot connect to chat server at this time. Please enable discord bridging and try again.";
+    }
+
+    @Override
     public void init() {
         super.init();
         WorldStateEvents.CHANGE.register(this::worldStateChanged);
