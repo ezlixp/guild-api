@@ -1,6 +1,7 @@
 package pixlze.guildapi.screens.discord;
 
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.ThreePartsLayoutWidget;
 import net.minecraft.text.Text;
@@ -26,6 +27,7 @@ public class DiscordChatScreen extends Screen {
     public void init() {
         // TODO: improve design, make text field expand for each new line added like discord, increase size of footer
         // edit box widget
+        discordInput.setFocused(false);
         discordInput.setFocusUnlocked(false);
         discordInput.setMaxLength(2000);
         this.initHeader();
@@ -60,7 +62,11 @@ public class DiscordChatScreen extends Screen {
 
     @Override
     protected void setInitialFocus() {
-        this.setInitialFocus(discordInput);
+        if (!Managers.DiscordSocket.isDisabled())
+            this.setInitialFocus(discordInput);
+        else {
+            discordInput.setTooltip(Tooltip.of(Text.of("Discord bridging is not enabled. Please enable the feature and try again. If it is enabled, try typing /reconnect in chat.")));
+        }
     }
 
     protected void initFooter() {
