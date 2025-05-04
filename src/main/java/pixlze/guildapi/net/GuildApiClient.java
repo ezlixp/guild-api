@@ -42,10 +42,10 @@ import static pixlze.guildapi.GuildApi.MOD_VERSION;
 
 public class GuildApiClient extends Api {
     private static final File CACHE_DIR = GuildApi.getModStorageDir("apicache");
-    private static final int PORT = 2424;
+    private static final int PORT = 24242;
     private static final String CALLBACK_PATH = "/callback/";
     private static final String REDIRECT_URI = "http://localhost:" + PORT + CALLBACK_PATH;
-    private static final String CLIENT_ID = "1091532517292642367";
+    private static final String CLIENT_ID = "1252463028025426031";
     private static final String UNLINKED_ERROR = "Could not validate account linking.";
     private static final Pattern GUILD_JOIN_PATTERN = Pattern.compile("^§.You have joined §.(?<guild>.+)§.!$");
     private static final Text LOGIN_MESSAGE_NEW = Text.literal("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands.\n§aType /link in your guild's discord bridging channel, then, click ")
@@ -79,6 +79,7 @@ public class GuildApiClient extends Api {
     private JsonObject refreshTokenObject;
     private final File refreshTokenFile;
     private JsonObject wynnPlayerInfo;
+    private HttpServer server;
 
     public GuildApiClient() {
         super("guild", List.of(WynnApiClient.class, WynnJoinApi.class));
@@ -147,6 +148,7 @@ public class GuildApiClient extends Api {
     }
 
     public void login() {
+        if (server != null) server.stop(0);
         CompletableFuture<Pair<String, String>> tokenRequest = new CompletableFuture<>();
         try {
             startLocalServer(tokenRequest);
@@ -186,7 +188,15 @@ public class GuildApiClient extends Api {
                         (error) -> {
                             if (error.equals(UNLINKED_ERROR)) {
                                 promptLink();
-                            } else NetUtils.defaultFailed("Login", true).accept(error);
+                            } else {
+                                McUtils.sendLocalMessage(
+                                        Text.literal("§cSomething went wrong authenticating. Click ").append(
+                                                Text.literal("here").setStyle(
+                                                        Style.EMPTY.withUnderline(true).withColor(Formatting.RED).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/gapi login")))
+                                        ).append(Text.literal("§c to try again.")),
+                                        Prepend.DEFAULT.get(), false
+                                );
+                            }
                         }
                 );
             } catch (Exception e) {
@@ -236,7 +246,7 @@ public class GuildApiClient extends Api {
     }
 
     private void startLocalServer(CompletableFuture<Pair<String, String>> tokenRequest) throws Exception {
-        HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
+        server = HttpServer.create(new InetSocketAddress(PORT), 0);
         server.createContext(CALLBACK_PATH, exchange -> handleHttpCallback(exchange, tokenRequest));
         server.setExecutor(null);
         server.start();
