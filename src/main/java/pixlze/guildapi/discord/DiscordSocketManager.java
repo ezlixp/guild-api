@@ -1,5 +1,6 @@
 package pixlze.guildapi.discord;
 
+import io.socket.client.Ack;
 import io.socket.client.IO;
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
@@ -23,6 +24,7 @@ import java.util.Objects;
 
 public class DiscordSocketManager extends AbstractSocketManager {
     public String guildId;
+    public boolean onWorld;
 
     public DiscordSocketManager() {
         super(List.of());
@@ -30,6 +32,10 @@ public class DiscordSocketManager extends AbstractSocketManager {
 
     private void onApiLoaded(Api api) {
         if (api.getClass().equals(GuildApiClient.class)) initSocket();
+    }
+
+    private void onApiUnloaded(Api api) {
+        if (api.getClass().equals(GuildApiClient.class)) disable();
     }
 
     @Override
@@ -55,11 +61,10 @@ public class DiscordSocketManager extends AbstractSocketManager {
     }
 
     private void worldStateChanged(WorldState state) {
-        if (state == WorldState.WORLD) {
-            this.initSocket();
-        } else {
-            this.disable();
-        }
+        if (state == WorldState.WORLD)
+            Managers.DiscordSocket.emit("sync", (Ack) args -> onWorld = true);
+        else
+            onWorld = false;
     }
 
     public void initSocket() {
@@ -95,6 +100,7 @@ public class DiscordSocketManager extends AbstractSocketManager {
     public void init() {
         super.init();
         NetEvents.LOADED.register(this::onApiLoaded);
+        NetEvents.DISABLED.register(this::onApiUnloaded);
         WorldStateEvents.CHANGE.register(this::worldStateChanged);
     }
 }
