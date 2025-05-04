@@ -5,6 +5,8 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerListHeaderS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -45,5 +47,14 @@ public class ClientPacketListenerMixin {
     private void onPlayerListHeader(PlayerListHeaderS2CPacket packet, CallbackInfo ci) {
         if (!MinecraftClient.getInstance().isOnThread()) return;
         PlayerInfoChangedEvents.FOOTER.invoker().footerChanged(packet.footer());
+    }
+
+    // for /class
+    @Inject(method = "onPlayerPositionLook", at = @At("HEAD"))
+    private void onPlayerPositionLook(PlayerPositionLookS2CPacket packet, CallbackInfo ci) {
+        if (!MinecraftClient.getInstance().isOnThread()) return;
+        if (!packet.relatives().isEmpty()) return;
+
+        PlayerInfoChangedEvents.POSITION.invoker().positionChanged(new Vec3d(packet.change().position().x, packet.change().position().y, packet.change().position().z));
     }
 }

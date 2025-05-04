@@ -121,7 +121,7 @@ public class DiscordBridgeFeature extends Feature {
         if (GuildApi.isDevelopment()) m = m.replaceAll("&", "§");
         GuildApi.LOGGER.info("received: {}", m);
         Matcher guildMatcher = GUILD_PATTERN.matcher(m);
-        if (!m.contains("\uE003") && guildMatcher.find()) {
+        if (Managers.DiscordSocket.onWorld && !m.contains("\uE003") && guildMatcher.find()) {
             if (isGuildMessage(guildMatcher.group("content")))
                 Managers.DiscordSocket.emit("wynnMessage", guildMatcher.group("content"));
             else if (isHRMessage(guildMatcher.group("content")))
