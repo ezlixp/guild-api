@@ -6,6 +6,7 @@ import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import org.json.JSONObject;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Feature;
@@ -14,7 +15,7 @@ import pixlze.guildapi.core.config.Config;
 import pixlze.guildapi.core.config.Configurable;
 import pixlze.guildapi.core.features.FeatureState;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
-import pixlze.guildapi.core.handlers.discord.event.S2CDiscordEvents;
+import pixlze.guildapi.core.handlers.discord.event.S2CSocketEvents;
 import pixlze.guildapi.mc.mixin.accessors.SystemToastInvoker;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.FontUtils;
@@ -32,7 +33,7 @@ public class DiscordBridgeFeature extends Feature {
     private final Pattern GUILD_PATTERN = Pattern.compile("^§[b8c]((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§[b8c] (?<content>.*)$");
     private final Pattern[] GUILD_WHITELIST_PATTERNS = Stream.of(
             // Basic guild chat message
-            "^.*§[38](?<header>.+?)(§[38])?:§[b8] (?<content>.*)$",
+            "^(?<pill>.*)§[38](?<header>.+?)(§[38])?:§[b8] (?<content>.*)$",
             // Guild raid finished
             "^§[e8](?<player1>.*?)§[b8], §[e8](?<player2>.*?)§[b8], §[e8](?<player3>.*?)§[b8], and §[e8](?<player4>.*?)§[b8] finished §[38](?<raid>.*?)§[b8].*$",
             // Giving out resources
@@ -97,7 +98,8 @@ public class DiscordBridgeFeature extends Feature {
     @Override
     public void init() {
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
-        S2CDiscordEvents.MESSAGE.register(this::onDiscordMessage);
+        S2CSocketEvents.DISCORD_MESSAGE.register(this::onDiscordMessage);
+        S2CSocketEvents.WYNN_MIRROR.register(this::onWynnMirror);
     }
 
     @Override
@@ -158,6 +160,21 @@ public class DiscordBridgeFeature extends Feature {
                 Managers.Discord.newMessage(message.get("Author").toString(), message.get("Content").toString(), true);
             } catch (Exception e) {
                 GuildApi.LOGGER.info("discord message toast error: {} {}", e, e.getMessage());
+            }
+        }
+    }
+
+    private void onWynnMirror(String message) {
+        if (!Managers.DiscordSocket.onWorld || GuildApi.isTesting()) {
+            Matcher matcher = GUILD_WHITELIST_PATTERNS[0].matcher(message);
+            if (matcher.find()) {
+                String pill = matcher.group("pill");
+                String leftover = message.substring(pill.length());
+                McUtils.sendLocalMessage(Text.empty()
+                        .append(Text.literal(pill).setStyle(Style.EMPTY.withFont(Identifier.of("banner/pill"))))
+                        .append(Text.literal(leftover).setStyle(Style.EMPTY)), Prepend.GUILD.get(), true);
+            } else {
+                McUtils.sendLocalMessage(Text.literal(message), Prepend.GUILD.get(), true);
             }
         }
     }

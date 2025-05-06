@@ -25,10 +25,6 @@ public class ConnectionHandler {
     }
 
     public void onConnected(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client) {
-        if (GuildApi.isDevelopment()) {
-            connect();
-            return;
-        }
         if (handler.getConnection().getAddress() instanceof InetSocketAddress address) {
             GuildApi.LOGGER.info("ip: {}", address.getHostName());
             if (!isConnected && WYNNCRAFT_SERVER_PATTERN.matcher(address.getHostName()).matches()) {
@@ -38,7 +34,8 @@ public class ConnectionHandler {
                 WynncraftConnectionEvents.CHANGE.invoker().interact();
             }
         }
-
+        if (GuildApi.isDevelopment())
+            connect();
     }
 
     private void onDisconnected(ClientPlayNetworkHandler clientPlayNetworkHandler, MinecraftClient minecraftClient) {

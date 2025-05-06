@@ -30,10 +30,10 @@ public class WorldStateModel {
     }
 
     private void connecting() {
-        if (GuildApi.isDevelopment()) {
-            setState(WorldState.WORLD);
-            return;
-        }
+//        if (GuildApi.isDevelopment()) {
+//            setState(WorldState.WORLD);
+//            return;
+//        }
         setState(WorldState.CONNECTING);
         currentTabListFooter = Text.empty();
     }
