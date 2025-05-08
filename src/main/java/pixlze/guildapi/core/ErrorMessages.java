@@ -4,6 +4,10 @@ public class ErrorMessages {
     // authentication
     public static final String API_DISABLED_ERROR = "API is disabled";
     public static final String INVALID_TOKEN = "Invalid token provided.";
+    public static final String INVALID_REFRESH = "Invalid refresh token.";
+    public static final String NO_TOKEN = "No token provided.";
+    public static final String NO_REFRESH = "No refresh token provided.";
+    public static final String UNPRIVILEGED_TOKEN = "Token does not have access to selected resource.";
 
     // blocked list
     public static final String FULL_BLOCKED_LIST = "The blocked user list is currently full.";

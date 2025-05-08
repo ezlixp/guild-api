@@ -11,6 +11,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
 import org.json.JSONObject;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.core.ErrorMessages;
 import pixlze.guildapi.core.components.Manager;
 import pixlze.guildapi.utils.ColourUtils;
 import pixlze.guildapi.utils.McUtils;
@@ -105,7 +106,7 @@ public abstract class AbstractSocketManager extends Manager {
             if (err[0] instanceof JSONObject error) {
                 try {
                     String message = error.getString("message");
-                    if (message.equals("Invalid token provided") || message.equals("No token provided"))
+                    if (message.equals(ErrorMessages.INVALID_TOKEN) || message.equals(ErrorMessages.NO_TOKEN))
                         options.extraHeaders.put("Authorization", Collections.singletonList("bearer " + getToken()));
                 } catch (Exception e) {
                     GuildApi.LOGGER.error("connect error: {} {}", e, e.getMessage());
