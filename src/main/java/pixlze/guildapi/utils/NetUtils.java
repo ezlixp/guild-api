@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Managers;
+import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.http.HttpResponse;
@@ -18,13 +19,15 @@ public class NetUtils {
      * @throws Exception throws an exception on fatal api errors
      */
     public static void applyDefaultCallback(HttpResponse<String> response, Throwable exception, Consumer<JsonElement> onSuccess, Consumer<String> onFailed) throws Exception {
+        if (exception != null && exception.getMessage().equals(GuildApiClient.API_DISABLED_ERROR)) return;
         if (exception != null) {
             throw (Exception) exception;
         }
         if (response.statusCode() / 100 == 2) {
             onSuccess.accept(Managers.Json.toJsonElement(response.body()));
         } else {
-            onFailed.accept(Managers.Json.toJsonObject(response.body()).get("errorMessage").getAsString());
+            String error = Managers.Json.toJsonObject(response.body()).get("errorMessage").getAsString();
+            onFailed.accept(error);
         }
     }
 
