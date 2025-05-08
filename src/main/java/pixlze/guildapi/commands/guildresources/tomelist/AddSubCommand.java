@@ -25,7 +25,7 @@ class AddSubCommand extends ClientCommand {
                 try {
                     NetUtils.applyDefaultCallback(res, exception, (response) -> McUtils.sendLocalMessage(Text.literal("§aSuccessfully added to the tome queue"), Prepend.DEFAULT.get(), false),
                             (error) -> {
-                                if (error.equals("User already in tome list.")) {
+                                if (error.equals("The provided username is already in the tome list.")) {
                                     McUtils.sendLocalMessage(Text.literal("§eYou are already in the tome list. Wait until you receive a tome to re-add yourself."), Prepend.DEFAULT.get(), false);
                                     return;
                                 }
