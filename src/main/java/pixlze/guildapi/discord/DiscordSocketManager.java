@@ -31,7 +31,8 @@ public class DiscordSocketManager extends AbstractSocketManager {
     }
 
     private void onApiLoaded(Api api) {
-        if (api.getClass().equals(GuildApiClient.class)) initSocket();
+        if (api.getClass().equals(GuildApiClient.class) && Managers.Feature.getFeatureState(Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)) == FeatureState.ENABLED)
+            initSocket();
     }
 
     private void onApiUnloaded(Api api) {
