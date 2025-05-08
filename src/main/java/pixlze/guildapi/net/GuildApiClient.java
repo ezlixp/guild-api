@@ -10,6 +10,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.core.ErrorMessages;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.ColourUtils;
@@ -47,7 +48,6 @@ public class GuildApiClient extends Api {
     private static final String REDIRECT_URI = "http://localhost:" + PORT + CALLBACK_PATH;
     private static final String CLIENT_ID = "1252463028025426031";
     private static final String UNLINKED_ERROR = "Could not validate account linking.";
-    public static final String API_DISABLED_ERROR = "API is disabled";
     private static final Pattern GUILD_JOIN_PATTERN = Pattern.compile("^§.You have joined §.(?<guild>.+)§.!$");
     private static final Text LOGIN_MESSAGE_NEW = Text.literal("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands.\n§aType /link in your guild's discord bridging channel, then, click ")
             .append(Text.literal("here").setStyle(
@@ -260,7 +260,7 @@ public class GuildApiClient extends Api {
             if (exception != null) {
                 out.completeExceptionally(exception);
             } else {
-                if (res.statusCode() == 401) {
+                if (res.statusCode() == 400) {
                     GuildApi.LOGGER.info("Refreshing api token");
                     if (!getGuildServerToken()) {
                         out.complete(res);
@@ -326,7 +326,7 @@ public class GuildApiClient extends Api {
         if (isDisabled() && !skipDisableCheck) {
             GuildApi.LOGGER.warn("skipped api call because not logged in");
             promptLogin();
-            out.completeExceptionally(new Exception(API_DISABLED_ERROR));
+            out.completeExceptionally(new Exception(ErrorMessages.API_DISABLED_ERROR));
             return out;
         }
         HttpRequest.Builder builder = HttpRequest.newBuilder().uri(URI.create(baseURL + path))
@@ -347,7 +347,7 @@ public class GuildApiClient extends Api {
         if (isDisabled() && !skipDisableCheck) {
             GuildApi.LOGGER.warn("skipped api post because api service were crashed");
             promptLogin();
-            out.completeExceptionally(new Exception(API_DISABLED_ERROR));
+            out.completeExceptionally(new Exception(ErrorMessages.API_DISABLED_ERROR));
             return out;
         }
         HttpRequest.Builder builder = HttpRequest.newBuilder()

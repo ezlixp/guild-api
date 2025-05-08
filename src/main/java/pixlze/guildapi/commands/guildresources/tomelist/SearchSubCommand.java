@@ -7,6 +7,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
+import pixlze.guildapi.core.ErrorMessages;
 import pixlze.guildapi.core.commands.ClientCommand;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.utils.ExceptionUtils;
@@ -39,7 +40,7 @@ class SearchSubCommand extends ClientCommand {
                     JsonObject resBody = response.getAsJsonObject();
                     McUtils.sendLocalMessage(Text.literal(resBody.get("username").getAsString() + " is at position " + resBody.get("position").getAsString() + " in the tome queue.").withColor(0xFFFFFF), Prepend.DEFAULT.get(), false);
                 }, (error) -> {
-                    if (error.equals("Specified user could not be found in tome list."))
+                    if (error.equals(ErrorMessages.TOME_NOT_FOUND))
                         McUtils.sendLocalMessage(Text.literal("§eCould not find \"" + username + "\" in the tome queue."), Prepend.DEFAULT.get(), false);
                     else
                         McUtils.sendLocalMessage(Text.literal("§cCould not fetch tome list. Reason: " + error), Prepend.DEFAULT.get(), false);

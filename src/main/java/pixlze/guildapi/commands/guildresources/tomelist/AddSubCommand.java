@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
+import pixlze.guildapi.core.ErrorMessages;
 import pixlze.guildapi.core.commands.ClientCommand;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.utils.ExceptionUtils;
@@ -25,7 +26,7 @@ class AddSubCommand extends ClientCommand {
                 try {
                     NetUtils.applyDefaultCallback(res, exception, (response) -> McUtils.sendLocalMessage(Text.literal("§aSuccessfully added to the tome queue"), Prepend.DEFAULT.get(), false),
                             (error) -> {
-                                if (error.equals("The provided username is already in the tome list.")) {
+                                if (error.equals(ErrorMessages.TOME_DUPLICATE)) {
                                     McUtils.sendLocalMessage(Text.literal("§eYou are already in the tome list. Wait until you receive a tome to re-add yourself."), Prepend.DEFAULT.get(), false);
                                     return;
                                 }

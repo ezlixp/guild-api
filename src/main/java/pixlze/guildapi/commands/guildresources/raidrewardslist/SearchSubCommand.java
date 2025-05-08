@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.core.ErrorMessages;
 import pixlze.guildapi.core.commands.ClientCommand;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.utils.McUtils;
@@ -51,7 +52,7 @@ class SearchSubCommand extends ClientCommand {
                                     .append(" ¼²")
                             , Prepend.DEFAULT.get(), false);
                 }, (error) -> {
-                    if (error.equals("Specified user could not be found in raid rewards list."))
+                    if (error.equals(ErrorMessages.NOT_IN_RAID_LIST))
                         McUtils.sendLocalMessage(Text.literal("§eCould not find \"" + username + "\" in the raid rewards list."), Prepend.DEFAULT.get(), false);
                     else
                         McUtils.sendLocalMessage(Text.literal("§cCould not fetch raid rewards list. Reason: " + error), Prepend.DEFAULT.get(), false);

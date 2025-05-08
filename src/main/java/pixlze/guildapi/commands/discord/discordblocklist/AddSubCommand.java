@@ -7,10 +7,12 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.core.ErrorMessages;
 import pixlze.guildapi.core.commands.ClientCommand;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.models.Models;
 import pixlze.guildapi.utils.ColourUtils;
+import pixlze.guildapi.utils.ExceptionUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.NetUtils;
 import pixlze.guildapi.utils.type.Prepend;
@@ -41,9 +43,9 @@ class AddSubCommand extends ClientCommand {
                                 "All purple discord messages from them will be hidden."), Prepend.GUILD.getWithStyle(ColourUtils.GREEN), true);
                         Models.DiscordMessage.block(toBlock);
                     }, (error) -> {
-                        if (error.equals("Blocked list full.")) {
+                        if (error.equals(ErrorMessages.FULL_BLOCKED_LIST)) {
                             McUtils.sendLocalMessage(Text.literal("§cMy brother in christ why do you want to block more than 50 people."), Prepend.GUILD.getWithStyle(ColourUtils.RED), true);
-                        } else if (error.equals("User already in block list.")) {
+                        } else if (error.equals(ErrorMessages.ALREADY_IN_BLOCKED_LIST)) {
                             McUtils.sendLocalMessage(Text.literal("§e" + toBlock + " has already been blocked."), Prepend.GUILD.getWithStyle(ColourUtils.YELLOW), true);
                         } else {
                             McUtils.sendLocalMessage(Text.literal("§cSomething went wrong: " + error), Prepend.DEFAULT.get(), false);
@@ -51,7 +53,7 @@ class AddSubCommand extends ClientCommand {
                         }
                     });
                 } catch (Exception e) {
-                    NetUtils.defaultException("add blocked", e);
+                    ExceptionUtils.defaultException("add blocked", e);
                 }
             });
             return Command.SINGLE_SUCCESS;

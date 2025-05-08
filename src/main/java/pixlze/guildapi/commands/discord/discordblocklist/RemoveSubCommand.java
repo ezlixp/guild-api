@@ -6,10 +6,12 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
+import pixlze.guildapi.core.ErrorMessages;
 import pixlze.guildapi.core.commands.ClientCommand;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.models.Models;
 import pixlze.guildapi.utils.ColourUtils;
+import pixlze.guildapi.utils.ExceptionUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.NetUtils;
 import pixlze.guildapi.utils.type.Prepend;
@@ -39,12 +41,12 @@ public class RemoveSubCommand extends ClientCommand {
                                 "Messages from them will be shown again."), Prepend.GUILD.getWithStyle(ColourUtils.GREEN), true);
                         Models.DiscordMessage.unblock(toRemove);
                     }, (error) -> {
-                        if (error.equals("Blocked user not found.")) {
+                        if (error.equals(ErrorMessages.NOT_IN_BLOCKED_LIST)) {
                             McUtils.sendLocalMessage(Text.literal("§e" + toRemove + " was not blocked."), Prepend.GUILD.getWithStyle(ColourUtils.YELLOW), true);
                         }
                     });
                 } catch (Exception e) {
-                    NetUtils.defaultException("remove blocked", e);
+                    ExceptionUtils.defaultException("remove blocked", e);
                 }
             });
             return Command.SINGLE_SUCCESS;
