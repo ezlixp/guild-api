@@ -9,7 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DiscordMessageManager extends Manager {
+    public static final String GUILD_MESSAGE = "\uD83C\uDD56";
+    public static final String DISCORD_MESSAGE = "\uD83C\uDD53";
     private final List<Pair<String, String>> messages = new ArrayList<>();
+    // 🅖 first means guild 🅓 first means discord
     private final ArrayList<Integer> unconfirmedIndex = new ArrayList<>();
     private DiscordChatWidget curDiscordChat;
 
@@ -18,9 +21,10 @@ public class DiscordMessageManager extends Manager {
     }
 
     // TODO: add timestamps, and add unconfirmed messages (greyed out)
-    public synchronized void newMessage(String author, String content, boolean confirmed) {
+    public synchronized void newMessage(String author, String content, boolean confirmed, String type) {
         content = stripIllegal(content);
         if (!confirmed) unconfirmedIndex.add(messages.size());
+        author = type + author;
         if (curDiscordChat != null) {
             if (confirmed && !unconfirmedIndex.isEmpty() && author.equals(messages.get(unconfirmedIndex.getFirst())
                     .getLeft()) && content.equals(messages.get(unconfirmedIndex.getFirst()).getRight())) {
@@ -54,7 +58,7 @@ public class DiscordMessageManager extends Manager {
     }
 
     private synchronized void addDiscordMessage(DiscordChatWidget body, String author, String content, boolean confirmed) {
-        body.addMessage(Text.of(author), Text.of(content), confirmed);
+        body.addMessage(Text.of(author.substring(2)), Text.of(content), confirmed, author.startsWith(GUILD_MESSAGE));
     }
 
     public void setDiscordChat(DiscordChatWidget to) {

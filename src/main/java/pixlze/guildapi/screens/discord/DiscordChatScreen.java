@@ -7,6 +7,7 @@ import net.minecraft.client.gui.widget.ThreePartsLayoutWidget;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import pixlze.guildapi.core.components.Managers;
+import pixlze.guildapi.discord.DiscordMessageManager;
 import pixlze.guildapi.screens.discord.widgets.DiscordChatWidget;
 import pixlze.guildapi.utils.McUtils;
 
@@ -93,7 +94,7 @@ public class DiscordChatScreen extends Screen {
             if (content.isBlank()) return true;
             Managers.DiscordSocket.emit("discordOnlyWynnMessage", author + ": " + content);
             Managers.DiscordSocket.emit("discordMessage", Map.of("Author", author, "Content", content, "WynnGuildId", Managers.Net.guild.guildId));
-            Managers.Discord.newMessage(author, content, false);
+            Managers.Discord.newMessage(author, content, false, DiscordMessageManager.DISCORD_MESSAGE);
             discordInput.setText("");
             this.body.setScrollY(this.body.getMaxScrollY());
             return true;

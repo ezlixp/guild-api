@@ -13,8 +13,9 @@ public class ChatMessageWidget extends AbstractTextWidget {
     private static final int PADDING = 4;
     private final Text author;
     private final Text content;
+    private final int colour;
 
-    public ChatMessageWidget(Text author, Text content, TextRenderer textRenderer, int width, boolean confirmed) {
+    public ChatMessageWidget(Text author, Text content, TextRenderer textRenderer, int width, boolean confirmed, boolean isGuild) {
         super(0, 0, width, PADDING + textRenderer.fontHeight + 2 + 10 * textRenderer.wrapLines(content, width - 8 - ScrollableWidget.SCROLLBAR_WIDTH)
                 .size(), author.copy().append(" ").append(content), textRenderer);
         this.author = author;
@@ -22,6 +23,7 @@ public class ChatMessageWidget extends AbstractTextWidget {
         if (!confirmed) {
             this.setTextColor(0xAAAAAA);
         }
+        colour = isGuild ? 0x24ABFF:0x9003FC;
     }
 
 
@@ -48,7 +50,7 @@ public class ChatMessageWidget extends AbstractTextWidget {
         int x = this.getX() + PADDING;
         int y = this.getY() + PADDING;
 
-        context.drawTextWithShadow(textRenderer, author.copy().withColor(0x1524ABFF)
+        context.drawTextWithShadow(textRenderer, author.copy().withColor(colour)
                 .asOrderedText(), x, y, this.getTextColor());
         List<OrderedText> contentLines = textRenderer.wrapLines(content, this.getWidth() - 8 - ScrollableWidget.SCROLLBAR_WIDTH);
         y += 2;

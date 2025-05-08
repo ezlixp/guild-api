@@ -16,6 +16,7 @@ import pixlze.guildapi.core.config.Configurable;
 import pixlze.guildapi.core.features.FeatureState;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.core.handlers.discord.event.S2CSocketEvents;
+import pixlze.guildapi.discord.DiscordMessageManager;
 import pixlze.guildapi.mc.mixin.accessors.SystemToastInvoker;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.FontUtils;
@@ -141,7 +142,7 @@ public class DiscordBridgeFeature extends Feature {
                                 .fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE)).append(": "))
                         .append(Text.literal(TextUtils.highlightUser(message.get("Content").toString()))
                                 .setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), true);
-                Managers.Discord.newMessage(message.get("Author").toString(), message.get("Content").toString(), true);
+                Managers.Discord.newMessage(message.get("Author").toString(), message.get("Content").toString(), true, DiscordMessageManager.DISCORD_MESSAGE);
             } catch (Exception e) {
                 GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
             }
@@ -157,7 +158,7 @@ public class DiscordBridgeFeature extends Feature {
                 McUtils.mc().getToastManager()
                         .add(SystemToastInvoker.create(SystemToast.Type.PERIODIC_NOTIFICATION, Text.literal(message.get("Author")
                                 .toString()), lines, width + 30));
-                Managers.Discord.newMessage(message.get("Author").toString(), message.get("Content").toString(), true);
+                Managers.Discord.newMessage(message.get("Author").toString(), message.get("Content").toString(), true, DiscordMessageManager.DISCORD_MESSAGE);
             } catch (Exception e) {
                 GuildApi.LOGGER.info("discord message toast error: {} {}", e, e.getMessage());
             }
@@ -173,8 +174,10 @@ public class DiscordBridgeFeature extends Feature {
                 McUtils.sendLocalMessage(Text.empty()
                         .append(Text.literal(pill).setStyle(Style.EMPTY.withFont(Identifier.of("banner/pill"))))
                         .append(Text.literal(leftover).setStyle(Style.EMPTY)), Prepend.GUILD.get(), true);
+                Managers.Discord.newMessage(matcher.group("header"), matcher.group("content"), true, DiscordMessageManager.GUILD_MESSAGE);
             } else {
                 McUtils.sendLocalMessage(Text.literal(message), Prepend.GUILD.get(), true);
+                Managers.Discord.newMessage("⚠ Info", message, true, DiscordMessageManager.GUILD_MESSAGE);
             }
         }
     }
