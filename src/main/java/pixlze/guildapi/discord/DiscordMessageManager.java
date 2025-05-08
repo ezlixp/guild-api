@@ -31,6 +31,8 @@ public class DiscordMessageManager extends Manager {
                 messages.add(new Pair<>(author, content));
                 addDiscordMessage(curDiscordChat, author, content, confirmed);
             }
+        } else {
+            messages.add(new Pair<>(author, content));
         }
     }
 
