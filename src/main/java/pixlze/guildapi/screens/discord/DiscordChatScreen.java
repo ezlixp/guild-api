@@ -90,6 +90,7 @@ public class DiscordChatScreen extends Screen {
             // TODO: disable input field if socket not on, and add tooltip
             String author = McUtils.playerName();
             String content = Managers.Discord.stripIllegal(discordInput.getText());
+            if (content.isBlank()) return true;
             Managers.DiscordSocket.emit("discordOnlyWynnMessage", author + ": " + content);
             Managers.DiscordSocket.emit("discordMessage", Map.of("Author", author, "Content", content, "WynnGuildId", Managers.Net.guild.guildId));
             Managers.Discord.newMessage(author, content, false);
