@@ -97,7 +97,7 @@ public class DiscordSocketManager extends AbstractSocketManager {
 
     @Override
     protected String disabledMessage() {
-        return "§cCannot connect to chat server at this time. Please enable discord bridging and try again.";
+        return "§cCannot connect to chat server at this time. Please enable discord bridging or re-authenticate and try again.";
     }
 
     @Override
