@@ -116,6 +116,7 @@ public class DiscordBridgeFeature extends Feature {
     @Override
     public void onDisabled() {
         Managers.DiscordSocket.disable();
+        Managers.Discord.clearMessages();
     }
 
     private void onWynnMessage(Text message) {
