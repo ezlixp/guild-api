@@ -212,6 +212,7 @@ public class DiscordBridgeFeature extends Feature {
     public String highlightMessage(String message) {
         String[] phrases = highlight.getValue().split(",");
         for (String phrase : phrases) {
+            if (phrase.isBlank()) continue;
             message = message.replaceAll("(?i)(" + phrase + ")", "§e$1§r");
         }
         return message;
