@@ -41,7 +41,7 @@ public class ConfigManager extends Manager {
             JsonObject curConfig = new JsonObject();
             for (Config<?> config : entry.getValue()) {
                 config.applyPending();
-                curConfig.add(config.getName(), Managers.Json.toJsonElement(config.getValue().toString()));
+                curConfig.addProperty(config.getName(), config.getValue().toString());
             }
             configObject.add(entry.getKey().getClass().getSimpleName(), curConfig);
         }

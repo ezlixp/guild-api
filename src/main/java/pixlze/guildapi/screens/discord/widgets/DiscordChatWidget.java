@@ -15,7 +15,7 @@ public class DiscordChatWidget extends DynamicSizeElementListWidget<DiscordChatW
         super(client, width, discordChatScreen.layout.getContentHeight(), discordChatScreen.layout.getHeaderHeight());
     }
 
-    public void addMessage(Text author, Text content, boolean confirmed, boolean isGuild) {
+    public void addMessage(String author, String content, boolean confirmed, boolean isGuild) {
         boolean sticky = this.getScrollY() == this.getMaxScrollY();
         this.addEntry(Entry.create(author, content, this.width, confirmed, isGuild));
         if (sticky) this.setScrollY(this.getMaxScrollY());
@@ -49,11 +49,11 @@ public class DiscordChatWidget extends DynamicSizeElementListWidget<DiscordChatW
     public static class Entry extends DynamicSizeElementListWidget.Entry<DiscordChatWidget.Entry> {
         private final ChatMessageWidget message;
 
-        private Entry(Text author, Text content, int width, boolean confirmed, boolean isGuild) {
+        private Entry(String author, String content, int width, boolean confirmed, boolean isGuild) {
             message = new ChatMessageWidget(author, content, McUtils.mc().textRenderer, width, confirmed, isGuild);
         }
 
-        public static Entry create(Text author, Text content, int width, boolean confirmed, boolean isGuild) {
+        public static Entry create(String author, String content, int width, boolean confirmed, boolean isGuild) {
             return new Entry(author, content, width, confirmed, isGuild);
         }
 

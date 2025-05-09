@@ -1,6 +1,5 @@
 package pixlze.guildapi.discord;
 
-import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import pixlze.guildapi.core.components.Manager;
 import pixlze.guildapi.screens.discord.widgets.DiscordChatWidget;
@@ -58,7 +57,7 @@ public class DiscordMessageManager extends Manager {
     }
 
     private synchronized void addDiscordMessage(DiscordChatWidget body, String author, String content, boolean confirmed) {
-        body.addMessage(Text.of(author.substring(2)), Text.of(content), confirmed, author.startsWith(GUILD_MESSAGE));
+        body.addMessage(author.substring(2), content, confirmed, author.startsWith(GUILD_MESSAGE));
     }
 
     public void setDiscordChat(DiscordChatWidget to) {
