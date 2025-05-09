@@ -88,6 +88,7 @@ public class GuildApiClient extends Api {
         baseURL = "https://ico-server.onrender.com/";
         baseURL = "http://localhost:3000/";
         refreshTokenFile = new File(CACHE_DIR, "webapi.json");
+
     }
 
 
@@ -95,6 +96,9 @@ public class GuildApiClient extends Api {
         if (GUILD_JOIN_PATTERN.matcher(TextUtils.parseStyled(message, TextParseOptions.DEFAULT)).find()) {
             GuildApi.LOGGER.info("joining guild");
 //            reloadWynnInfo();
+            // need to reset socket too
+            // disable everything and have something wait until wynn api reloads
+            // just have the user  on lock for 2 minutes using a special kind of disable
             // §3You have joined §bIdiot Co§3!
         }
     }
@@ -111,7 +115,7 @@ public class GuildApiClient extends Api {
         guildId = wynnPlayerInfo.get("guild").getAsJsonObject().get("uuid").getAsString();
         try {
             refreshToken = refreshTokenObject.get("do not share").getAsString();
-            if (!getGuildServerToken())
+            if (!fetchGuildServerToken())
                 promptLogin();
             else this.enable();
         } catch (NullPointerException exception) {
@@ -136,7 +140,7 @@ public class GuildApiClient extends Api {
     }
 
     public String getToken(boolean refresh) {
-        if (token == null || refresh) getGuildServerToken();
+        if (token == null || refresh) fetchGuildServerToken();
         return token;
     }
 
@@ -150,6 +154,7 @@ public class GuildApiClient extends Api {
 
     public void login() {
         if (server != null) server.stop(0);
+        if (fetchGuildServerToken()) return;
         CompletableFuture<Pair<String, String>> tokenRequest = new CompletableFuture<>();
         try {
             startLocalServer(tokenRequest);
@@ -262,7 +267,7 @@ public class GuildApiClient extends Api {
             } else {
                 if (res.statusCode() == 400) {
                     GuildApi.LOGGER.info("Refreshing api token");
-                    if (!getGuildServerToken()) {
+                    if (!fetchGuildServerToken()) {
                         out.complete(res);
                         return;
                     }
@@ -281,7 +286,7 @@ public class GuildApiClient extends Api {
         return out;
     }
 
-    private boolean getGuildServerToken() {
+    private boolean fetchGuildServerToken() {
         try {
             JsonObject requestBody = new JsonObject();
             requestBody.add("grant_type", Managers.Json.toJsonElement("refresh_token"));

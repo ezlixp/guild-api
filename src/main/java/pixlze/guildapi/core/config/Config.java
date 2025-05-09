@@ -85,6 +85,7 @@ public class Config<T> {
             TextFieldWidget out = new TextFieldWidget(McUtils.mc().textRenderer, 300, 25 - 4, Text.of("enter here"));
             out.setEditable(true);
             out.write(this.value.toString());
+            out.setTooltip(Tooltip.of(Text.translatable(i18nKey + ".description")));
             out.setChangedListener((to) -> {
                 tryParseStringValue(to).ifPresent(this::setPending);
             });

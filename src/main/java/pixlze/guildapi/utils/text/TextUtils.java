@@ -96,6 +96,7 @@ public class TextUtils {
         return out;
     }
 
+    @Deprecated
     public static String highlightUser(String message) {
         return message.replaceAll("(?i)(" + McUtils.playerName() + ")", "§e$1§d");
     }

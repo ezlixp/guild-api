@@ -96,6 +96,9 @@ public class DiscordBridgeFeature extends Feature {
     @Configurable
     public final Config<Boolean> useGui = new Config<>(false);
 
+    @Configurable
+    public final Config<String> highlight = new Config<>("");
+
     @Override
     public void init() {
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
@@ -134,14 +137,19 @@ public class DiscordBridgeFeature extends Feature {
     }
 
     private void onDiscordMessage(JSONObject message) {
-        if (Managers.Feature.getFeatureState(this) == FeatureState.DISABLED) return;
+        if (Managers.Feature.getFeatureState(this) == FeatureState.DISABLED) {
+            GuildApi.LOGGER.warn("received discord message with disabled feature.");
+            return;
+        }
         if (!useGui.getValue()) {
             try {
+                String author = message.get("Author").toString();
+                String content = message.get("Content").toString();
                 McUtils.sendLocalMessage(Text.empty().append(FontUtils.BannerPillFont.parseStringWithFill("discord")
                                 .fillStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE))).append(" ")
-                        .append(Text.literal(message.get("Author").toString())
+                        .append(Text.literal(highlightMessage(author))
                                 .fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE)).append(": "))
-                        .append(Text.literal(TextUtils.highlightUser(message.get("Content").toString()))
+                        .append(Text.literal(highlightMessage(content))
                                 .setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), true);
                 Managers.Discord.newMessage(message.get("Author").toString(), message.get("Content").toString(), true, DiscordMessageManager.DISCORD_MESSAGE);
             } catch (Exception e) {
@@ -167,6 +175,10 @@ public class DiscordBridgeFeature extends Feature {
     }
 
     private void onWynnMirror(String message) {
+        if (Managers.Feature.getFeatureState(this) == FeatureState.DISABLED) {
+            GuildApi.LOGGER.warn("received wynn mirror with disabled feature.");
+            return;
+        }
         if (!Managers.DiscordSocket.onWorld || GuildApi.isTesting()) {
             Matcher matcher = GUILD_WHITELIST_PATTERNS[0].matcher(message);
             if (matcher.find()) {
@@ -195,5 +207,13 @@ public class DiscordBridgeFeature extends Feature {
             if (hrMessagePatter.matcher(message).find()) return true;
         }
         return false;
+    }
+
+    public String highlightMessage(String message) {
+        String[] phrases = highlight.getValue().split(",");
+        for (String phrase : phrases) {
+            message = message.replaceAll("(?i)(" + phrase + ")", "§e$1§r");
+        }
+        return message;
     }
 }
