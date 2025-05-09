@@ -89,6 +89,7 @@ public class Config<T> {
             out.setChangedListener((to) -> {
                 tryParseStringValue(to).ifPresent(this::setPending);
             });
+            out.setMaxLength(100);
             return out;
         }
     }
