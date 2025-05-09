@@ -211,10 +211,31 @@ public class DiscordBridgeFeature extends Feature {
 
     public String highlightMessage(String message) {
         String[] phrases = highlight.getValue().split(",");
+        int[] diff = new int[message.length() + 1];
         for (String phrase : phrases) {
             if (phrase.isBlank()) continue;
-            message = message.replaceAll("(?i)(" + phrase + ")", "§e$1§r");
+            int index = 0;
+            while ((index = message.indexOf(phrase, index)) != -1) {
+                diff[index]++;
+                diff[index + phrase.length()]--;
+                index += phrase.length();
+            }
         }
-        return message;
+
+        StringBuilder out = new StringBuilder();
+        boolean sectioned = false;
+        int sum = 0;
+        for (int i = 0; i < message.length(); i++) {
+            sum += diff[i];
+            if (sum > 0 && !sectioned) {
+                sectioned = true;
+                out.append("§e");
+            } else if (sum <= 0 && sectioned) {
+                sectioned = false;
+                out.append("§r");
+            }
+            out.append(message.charAt(i));
+        }
+        return out.toString();
     }
 }
