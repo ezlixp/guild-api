@@ -80,9 +80,9 @@ public class Config<T> {
             return ButtonWidget.builder(Text.of((boolean) this.pending ? "Yes":"No"), (button) -> {
                 this.setPending((T) (this.pending.equals(Boolean.TRUE) ? Boolean.FALSE:Boolean.TRUE));
                 button.setMessage(Text.of((boolean) this.pending ? "Yes":"No"));
-            }).tooltip(Tooltip.of(Text.translatable(i18nKey + ".description"))).dimensions(0, 0, 80, 25 - 4).build();
+            }).tooltip(Tooltip.of(Text.translatable(i18nKey + ".description"))).dimensions(0, 0, 100, 25 - 4).build();
         } else {
-            TextFieldWidget out = new TextFieldWidget(McUtils.mc().textRenderer, 300, 25 - 4, Text.of("enter here"));
+            TextFieldWidget out = new TextFieldWidget(McUtils.mc().textRenderer, 100, 25 - 4, Text.of("enter here"));
             out.setEditable(true);
             out.write(this.value.toString());
             out.setTooltip(Tooltip.of(Text.translatable(i18nKey + ".description")));

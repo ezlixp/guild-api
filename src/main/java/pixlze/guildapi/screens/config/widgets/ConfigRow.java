@@ -37,7 +37,7 @@ public class ConfigRow extends AbstractParentElement {
         this.width = rowWidth;
         this.height = rowHeight;
         title.setPosition(x + 20, y + 1);
-        action.setPosition(x + rowWidth - action.getWidth() - 4, y);
+        action.setPosition(x + rowWidth - action.getWidth() - 20, y);
         title.setHeight(rowHeight - 4);
         action.setHeight(rowHeight - 4);
         title.render(context, mouseX, mouseY, delta);
