@@ -61,7 +61,7 @@ public class FeatureConfigListWidget extends DynamicSizeElementListWidget<Featur
 
         @Override
         public void render(DrawContext context, int index, int x, int y, int entryWidth, int entryHeight, int mouseX, int mouseY, float tickDelta) {
-            context.fill(x, y, x + entryWidth, y + entryHeight, 0x8000FF00 + index * 100);
+//            context.fill(x, y, x + entryWidth, y + entryHeight, 0x8000FF00 + index * 100);
             headerWidget.setPosition(x, y);
             headerWidget.setWidth(entryWidth);
             headerWidget.render(context, mouseX, mouseY, tickDelta);
