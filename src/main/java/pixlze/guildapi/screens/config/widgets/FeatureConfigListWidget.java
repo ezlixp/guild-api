@@ -86,9 +86,10 @@ public class FeatureConfigListWidget extends DynamicSizeElementListWidget<Featur
                     if (button == 0) {
                         this.setDragging(true);
                     }
+                    return true;
                 }
             }
-            return optional.isPresent();
+            return false;
         }
 
         @Override
