@@ -25,7 +25,12 @@ public class ConfigManager extends Manager {
     }
 
     public void init() {
-        configObject = Managers.Json.loadJsonFromFile(configFile);
+        try {
+            configObject = Managers.Json.loadJsonFromFile(configFile).getAsJsonObject();
+        } catch (Exception e) {
+            configObject = new JsonObject();
+            GuildApi.LOGGER.warn("config load error: {} {}", e, e.getMessage());
+        }
         Managers.Feature.getFeatures().forEach(this::registerFeature);
         saveConfig();
     }

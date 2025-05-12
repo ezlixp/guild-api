@@ -105,7 +105,12 @@ public class GuildApiClient extends Api {
 
     @Override
     public void init() {
-        refreshTokenObject = Managers.Json.loadJsonFromFile(refreshTokenFile);
+        try {
+            refreshTokenObject = Managers.Json.loadJsonFromFile(refreshTokenFile).getAsJsonObject();
+        } catch (Exception e) {
+            GuildApi.LOGGER.warn("refresh token load error: {} {}", e, e.getMessage());
+            refreshTokenObject = new JsonObject();
+        }
     }
 
     @Override

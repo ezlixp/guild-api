@@ -24,22 +24,18 @@ public class JsonManager extends Manager {
 
     }
 
-    public JsonObject loadJsonFromFile(File file) {
-        JsonObject configObject = new JsonObject();
+    public JsonElement loadJsonFromFile(File file) {
+        JsonElement element;
         try (FileReader reader = new FileReader(file)) {
-            JsonElement jsonElement = JsonParser.parseReader(reader);
-            if (jsonElement.isJsonObject()) {
-                configObject = jsonElement.getAsJsonObject();
-            } else {
-                GuildApi.LOGGER.warn("config is not a json object");
-            }
+            element = JsonParser.parseReader(reader);
+            return element;
         } catch (IOException e) {
             GuildApi.LOGGER.error("json load error: {} {}", e, e.getMessage());
         }
-        return configObject;
+        return null;
     }
 
-    public boolean saveJsonAsFile(File file, JsonObject config) {
+    public boolean saveJsonAsFile(File file, JsonElement config) {
         FileUtils.mkdir(file.getParentFile());
         try (FileWriter writer = new FileWriter(file)) {
             JsonWriter jsonWriter = new JsonWriter(writer);
@@ -56,5 +52,19 @@ public class JsonManager extends Manager {
 
     public JsonObject toJsonObject(String convert) {
         return GSON.fromJson(convert, JsonObject.class);
+    }
+
+    public String escapeUnsafeJsonChars(String input) {
+        if (input == null) {
+            return null;
+        }
+        String out = input.replace("\\", "\\\\");
+        out = out.replace("\"", "\\\"");
+        out = out.replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t")
+                .replace("\b", "\\b")
+                .replace("\f", "\\f");
+        return out;
     }
 }
