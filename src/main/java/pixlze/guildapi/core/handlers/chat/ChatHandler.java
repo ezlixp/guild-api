@@ -64,7 +64,7 @@ public final class ChatHandler extends Handler {
                 processCollected();
             }
             lastCollected.addLast(message);
-            while (lastCollected.size() > 5) lastCollected.removeFirst();
+            while (lastCollected.size() > 50) lastCollected.removeFirst();
             postChatLine(message);
         }
     }
