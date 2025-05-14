@@ -47,7 +47,7 @@ public class NotificationManager extends Manager {
         for (Notification<NotificationTrigger.CHAT> chat : getNotifications(NotificationTrigger.CHAT.class)) {
             JsonObject obj = new JsonObject();
             obj.addProperty("triggerBy", "CHAT");
-            obj.add("trigger", chat.trigger);
+            obj.addProperty("trigger", chat.trigger.toString());
             obj.addProperty("display", chat.displayText);
             allNotifications.add(obj);
         }
