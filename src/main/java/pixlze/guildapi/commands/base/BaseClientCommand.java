@@ -4,6 +4,9 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.commands.base.screen.OpenConfigSubComand;
+import pixlze.guildapi.commands.base.screen.OpenMenuSubComand;
+import pixlze.guildapi.commands.base.screen.OpenNotificationsSubComand;
 import pixlze.guildapi.core.commands.ClientCommand;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.screens.menu.MenuScreen;
@@ -24,7 +27,10 @@ public class BaseClientCommand extends ClientCommand {
 
     @Override
     protected List<ClientCommand> getSubCommands() {
-        ArrayList<ClientCommand> out = new ArrayList<>(List.of(new ClientCommandHelpCommand(), new InfoCommand(), new OpenConfigSubComand(), new AuthSubCommand()));
+        ArrayList<ClientCommand> out = new ArrayList<>(List.of(
+                new ClientCommandHelpCommand(), new InfoCommand(), new AuthSubCommand(),
+                new OpenMenuSubComand(), new OpenConfigSubComand(), new OpenNotificationsSubComand()
+        ));
         if (GuildApi.isDevelopment() || GuildApi.isTesting()) {
             out.add(new TestCommandHelpCommand());
         }

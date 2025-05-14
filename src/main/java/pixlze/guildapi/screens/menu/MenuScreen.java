@@ -6,6 +6,7 @@ import net.minecraft.text.Text;
 import pixlze.guildapi.screens.config.ConfigScreen;
 import pixlze.guildapi.screens.discord.DiscordChatScreen;
 import pixlze.guildapi.screens.menu.widgets.MenuOptionsListWidget;
+import pixlze.guildapi.screens.notifications.NotificationsEditScreen;
 import pixlze.guildapi.screens.widgets.FontSizeTextWidget;
 import pixlze.guildapi.utils.McUtils;
 
@@ -46,6 +47,7 @@ public class MenuScreen extends Screen {
     private void addOptions() {
         this.body.addOption(new ConfigScreen(this));
         this.body.addOption(new DiscordChatScreen(this));
+        this.body.addOption(new NotificationsEditScreen(this));
     }
 
     @Override
