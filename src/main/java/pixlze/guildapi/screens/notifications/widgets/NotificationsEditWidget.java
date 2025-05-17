@@ -5,12 +5,12 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.widget.ElementListWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
+import pixlze.guildapi.core.notifications.Notification;
+import pixlze.guildapi.core.notifications.NotificationTrigger;
 import pixlze.guildapi.screens.notifications.NotificationsEditScreen;
-import pixlze.guildapi.utils.McUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 public class NotificationsEditWidget extends ElementListWidget<NotificationsEditWidget.Entry> {
     public NotificationsEditWidget(MinecraftClient client, int width, NotificationsEditScreen notificationsScreen) {
@@ -18,7 +18,15 @@ public class NotificationsEditWidget extends ElementListWidget<NotificationsEdit
     }
 
     public void addNotification() {
-        this.addEntry(Entry.create());
+        this.addEntry(new Entry(this));
+    }
+
+    public void addNotification(Notification<NotificationTrigger.CHAT> notif) {
+        this.addEntry(new Entry(this, notif));
+    }
+
+    public void removeNotification(double mouseX, double mouseY) {
+        this.removeEntry(this.getEntryAtPosition(mouseX, mouseY));
     }
 
     @Override
@@ -41,17 +49,23 @@ public class NotificationsEditWidget extends ElementListWidget<NotificationsEdit
         return this.getRight() - 6;
     }
 
-    public static class Entry extends ElementListWidget.Entry<NotificationsEditWidget.Entry> implements ParentElement {
-        private final TextFieldWidget regex;
-        private final TextFieldWidget display;
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
 
-        private Entry() {
-            regex = new TextFieldWidget(McUtils.mc().textRenderer, 210, 0, Text.literal("Notification Regex"));
-            display = new TextFieldWidget(McUtils.mc().textRenderer, 210, 0, Text.literal("Notification Display"));
+    public static class Entry extends ElementListWidget.Entry<NotificationsEditWidget.Entry> implements ParentElement {
+        private final NotificationsEditWidget parent;
+        private final NotificationWidget widget;
+
+        public Entry(NotificationsEditWidget parent) {
+            this.parent = parent;
+            widget = NotificationWidget.of(parent);
         }
 
-        public static Entry create() {
-            return new Entry();
+        public Entry(NotificationsEditWidget parent, Notification<NotificationTrigger.CHAT> notif) {
+            this.parent = parent;
+            widget = NotificationWidget.of(parent, notif);
         }
 
         @Override
@@ -60,19 +74,21 @@ public class NotificationsEditWidget extends ElementListWidget<NotificationsEdit
         }
 
         @Override
-        public List<? extends TextFieldWidget> children() {
-            return List.of(regex, display);
+        public List<NotificationWidget> children() {
+            return List.of(widget);
         }
 
         @Override
         public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-            regex.setHeight(entryHeight);
-            display.setHeight(entryHeight);
-            regex.setPosition(x + 20, y);
-            display.setPosition(x + entryWidth - 20 - 210, y);
+            widget.setHeight(entryHeight);
+            widget.setPosition(x + entryWidth / 2 - widget.getWidth() / 2, y);
 
-            regex.render(context, mouseX, mouseY, tickDelta);
-            display.render(context, mouseX, mouseY, tickDelta);
+            widget.render(context, mouseX, mouseY, tickDelta);
+        }
+
+        @Override
+        public boolean isMouseOver(double mouseX, double mouseY) {
+            return Objects.equals(parent.getEntryAtPosition(mouseX, mouseY), this);
         }
     }
 }
