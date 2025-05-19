@@ -2,9 +2,11 @@ package pixlze.guildapi.screens.notifications.widgets;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.widget.ElementListWidget;
+import org.jetbrains.annotations.Nullable;
 import pixlze.guildapi.core.notifications.Notification;
 import pixlze.guildapi.core.notifications.NotificationTrigger;
 import pixlze.guildapi.screens.notifications.NotificationsEditScreen;
@@ -49,11 +51,6 @@ public class NotificationsEditWidget extends ElementListWidget<NotificationsEdit
         return this.getRight() - 6;
     }
 
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return super.mouseClicked(mouseX, mouseY, button);
-    }
-
     public static class Entry extends ElementListWidget.Entry<NotificationsEditWidget.Entry> implements ParentElement {
         private final NotificationsEditWidget parent;
         private final NotificationWidget widget;
@@ -66,6 +63,15 @@ public class NotificationsEditWidget extends ElementListWidget<NotificationsEdit
         public Entry(NotificationsEditWidget parent, Notification<NotificationTrigger.CHAT> notif) {
             this.parent = parent;
             widget = NotificationWidget.of(parent, notif);
+        }
+
+        @Override
+        public void setFocused(@Nullable Element focused) {
+            super.setFocused(focused);
+            if (focused == null) {
+                widget.setFocused(false);
+                widget.setFocused(null);
+            }
         }
 
         @Override
