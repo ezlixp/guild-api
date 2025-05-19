@@ -8,7 +8,7 @@ import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import org.jetbrains.annotations.Nullable;
 import pixlze.guildapi.core.notifications.Notification;
-import pixlze.guildapi.core.notifications.NotificationTrigger;
+import pixlze.guildapi.core.notifications.Trigger;
 import pixlze.guildapi.screens.notifications.NotificationsEditScreen;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class NotificationsEditWidget extends ElementListWidget<NotificationsEdit
         this.addEntry(new Entry(this));
     }
 
-    public void addNotification(Notification<NotificationTrigger.CHAT> notif) {
+    public void addNotification(Notification<Trigger.CHAT> notif) {
         this.addEntry(new Entry(this, notif));
     }
 
@@ -60,9 +60,14 @@ public class NotificationsEditWidget extends ElementListWidget<NotificationsEdit
             widget = NotificationWidget.of(parent);
         }
 
-        public Entry(NotificationsEditWidget parent, Notification<NotificationTrigger.CHAT> notif) {
+        public Entry(NotificationsEditWidget parent, Notification<Trigger.CHAT> notif) {
             this.parent = parent;
             widget = NotificationWidget.of(parent, notif);
+        }
+
+        @Nullable
+        public Notification<Trigger.CHAT> getNotification() {
+            return widget.getNotification();
         }
 
         @Override

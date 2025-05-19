@@ -7,6 +7,8 @@ import net.minecraft.client.gui.widget.ThreePartsLayoutWidget;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import pixlze.guildapi.core.components.Managers;
+import pixlze.guildapi.core.notifications.Notification;
+import pixlze.guildapi.core.notifications.Trigger;
 import pixlze.guildapi.screens.notifications.widgets.NotificationsEditWidget;
 import pixlze.guildapi.utils.McUtils;
 
@@ -27,6 +29,13 @@ public class NotificationsEditScreen extends Screen {
         this.initFooter();
         this.layout.forEachChild(this::addDrawableChild);
         this.refreshWidgetPositions();
+        this.addNotifications();
+    }
+
+    private void addNotifications() {
+        for (Notification<Trigger.CHAT> notification : Managers.Notification.getNotifications(Trigger.CHAT.class)) {
+            body.addNotification(notification);
+        }
     }
 
     @Override
@@ -37,7 +46,7 @@ public class NotificationsEditScreen extends Screen {
 
     @Override
     public void removed() {
-        Managers.Discord.setDiscordChat(null);
+        Managers.Notification.saveNotifications(body.children());
     }
 
     protected void initHeader() {

@@ -5,7 +5,7 @@ import pixlze.guildapi.core.components.Handler;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.core.notifications.Notification;
-import pixlze.guildapi.core.notifications.NotificationTrigger;
+import pixlze.guildapi.core.notifications.Trigger;
 import pixlze.guildapi.utils.text.TextUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
 
@@ -16,8 +16,8 @@ public class NotificationHandler extends Handler {
     }
 
     private void onWynnMessage(Text message) {
-        for (Notification<NotificationTrigger.CHAT> notification : Managers.Notification.getNotifications(NotificationTrigger.CHAT.class)) {
-            notification.apply(new NotificationTrigger.CHAT(TextUtils.parseStyled(message, TextParseOptions.DEFAULT)));
+        for (Notification<Trigger.CHAT> notification : Managers.Notification.getNotifications(Trigger.CHAT.class)) {
+            notification.apply(new Trigger.CHAT(TextUtils.parseStyled(message, TextParseOptions.DEFAULT)));
         }
     }
 }

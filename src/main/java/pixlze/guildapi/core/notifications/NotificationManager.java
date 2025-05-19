@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Manager;
 import pixlze.guildapi.core.components.Managers;
+import pixlze.guildapi.screens.notifications.widgets.NotificationsEditWidget;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.Map;
 
 public class NotificationManager extends Manager {
     private static final File NOTIFICATIONS_DIR = GuildApi.getModStorageDir("notifications");
-    private final Map<Class<? extends NotificationTrigger>, List<Notification<? extends NotificationTrigger>>> notifications = new HashMap<>();
+    private final Map<Class<? extends Trigger>, List<Notification<? extends Trigger>>> notifications = new HashMap<>();
 
     private final File notificationsFile;
     private JsonArray notificationsArray;
@@ -37,14 +38,25 @@ public class NotificationManager extends Manager {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends NotificationTrigger> List<Notification<T>> getNotifications(Class<T> clazz) {
+    public <T extends Trigger> List<Notification<T>> getNotifications(Class<T> clazz) {
         List<?> temp = notifications.getOrDefault(clazz, new ArrayList<>());
         return (List<Notification<T>>) temp;
     }
 
+    public void saveNotifications(List<NotificationsEditWidget.Entry> entries) {
+        List<Notification<Trigger.CHAT>> notifs = getNotifications(Trigger.CHAT.class);
+        notifs.clear();
+        for (NotificationsEditWidget.Entry entry : entries) {
+            Notification<Trigger.CHAT> notif = entry.getNotification();
+            if (notif != null)
+                notifs.add(notif);
+        }
+        saveNotifications();
+    }
+
     private void saveNotifications() {
         JsonArray allNotifications = new JsonArray();
-        for (Notification<NotificationTrigger.CHAT> chat : getNotifications(NotificationTrigger.CHAT.class)) {
+        for (Notification<Trigger.CHAT> chat : getNotifications(Trigger.CHAT.class)) {
             JsonObject obj = new JsonObject();
             obj.addProperty("triggerBy", "CHAT");
             obj.addProperty("trigger", chat.trigger.toString());
@@ -65,13 +77,13 @@ public class NotificationManager extends Manager {
                     String trigger = asObject.get("trigger").getAsString();
                     String display = asObject.get("display").getAsString();
                     if (type.equals("CHAT")) {
-                        Notification<NotificationTrigger.CHAT> notification = Notification.ofChat(trigger, display);
-                        if (notifications.containsKey(NotificationTrigger.CHAT.class))
-                            notifications.get(NotificationTrigger.CHAT.class).add(notification);
+                        Notification<Trigger.CHAT> notification = Notification.ofChat(trigger, display);
+                        if (notifications.containsKey(Trigger.CHAT.class))
+                            notifications.get(Trigger.CHAT.class).add(notification);
                         else {
-                            List<Notification<NotificationTrigger.CHAT>> temp = new ArrayList<>();
+                            List<Notification<Trigger.CHAT>> temp = new ArrayList<>();
                             temp.add(notification);
-                            notifications.put(NotificationTrigger.CHAT.class, (List<Notification<? extends NotificationTrigger>>) (List<?>) temp);
+                            notifications.put(Trigger.CHAT.class, (List<Notification<? extends Trigger>>) (List<?>) temp);
                         }
                     } else
                         GuildApi.LOGGER.warn("illegal notification trigger type: {}", type);

@@ -6,12 +6,12 @@ import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.notifications.Notification;
-import pixlze.guildapi.core.notifications.NotificationTrigger;
+import pixlze.guildapi.core.notifications.Trigger;
+import pixlze.guildapi.screens.widgets.AllowSectionSignTextField;
 import pixlze.guildapi.utils.McUtils;
 
 import java.util.List;
@@ -19,8 +19,8 @@ import java.util.List;
 public class NotificationWidget extends ClickableWidget implements ParentElement {
     private Element focused;
     private boolean dragging = false;
-    private final TextFieldWidget regex;
-    private final TextFieldWidget display;
+    private final AllowSectionSignTextField regex;
+    private final AllowSectionSignTextField display;
     private final ButtonWidget remove;
     private final NotificationsEditWidget widget;
 
@@ -28,8 +28,8 @@ public class NotificationWidget extends ClickableWidget implements ParentElement
         super(0, 0, width, height, text);
         this.widget = widget;
 
-        this.regex = new TextFieldWidget(McUtils.mc().textRenderer, 150, height, Text.literal("Notification Regex"));
-        this.display = new TextFieldWidget(McUtils.mc().textRenderer, 150, height, Text.literal("Notification Display"));
+        this.regex = new AllowSectionSignTextField(McUtils.mc().textRenderer, 150, height, Text.literal("Notification Regex"));
+        this.display = new AllowSectionSignTextField(McUtils.mc().textRenderer, 150, height, Text.literal("Notification Display"));
         this.remove = ButtonWidget.builder(Text.literal("Remove"), button -> {
             this.widget.removeNotification(button.getX() + (double) button.getWidth() / 2, button.getY() + (double) button.getHeight() / 2);
             GuildApi.LOGGER.info("hi");
@@ -37,19 +37,31 @@ public class NotificationWidget extends ClickableWidget implements ParentElement
 
         this.regex.write(regex);
         this.display.write(display);
+        this.regex.setPlaceholder(Text.literal("§7Regex"));
+        this.display.setPlaceholder(Text.literal("§7Display"));
 
     }
 
     private NotificationWidget(NotificationsEditWidget widget) {
-        this(widget, "", "", 400, 21, Text.literal("Notification"));
+        this(widget, "", "");
+    }
+
+    private NotificationWidget(NotificationsEditWidget widget, String regex, String display) {
+        this(widget, regex, display, 400, 21, Text.literal("Notification"));
     }
 
     public static NotificationWidget of(NotificationsEditWidget widget) {
         return new NotificationWidget(widget);
     }
 
-    public static NotificationWidget of(NotificationsEditWidget widget, Notification<NotificationTrigger.CHAT> notification) {
-        return new NotificationWidget(widget, notification.trigger.toString(), notification.displayText, 0, 0, Text.literal("Notification"));
+    public static NotificationWidget of(NotificationsEditWidget widget, Notification<Trigger.CHAT> notification) {
+        return new NotificationWidget(widget, notification.trigger.toString(), notification.displayText);
+    }
+
+    @Nullable
+    public Notification<Trigger.CHAT> getNotification() {
+        if (regex.getText().isBlank() && display.getText().isBlank()) return null;
+        return Notification.ofChat(regex.getText(), display.getText());
     }
 
     @Override

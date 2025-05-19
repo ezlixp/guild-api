@@ -6,7 +6,7 @@ import pixlze.guildapi.utils.McUtils;
 
 import java.util.function.Function;
 
-public class Notification<E extends NotificationTrigger> {
+public class Notification<E extends Trigger> {
     private final Function<E, Boolean> doTrigger;
     private final MutableText display;
     public final Object trigger;
@@ -19,7 +19,7 @@ public class Notification<E extends NotificationTrigger> {
         this.trigger = trigger;
     }
 
-    public static Notification<NotificationTrigger.CHAT> ofChat(String triggerText, String display) {
+    public static Notification<Trigger.CHAT> ofChat(String triggerText, String display) {
         return new Notification<>((message) -> message.message.contains(triggerText), display, triggerText);
     }
 
