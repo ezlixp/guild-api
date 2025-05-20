@@ -2,10 +2,10 @@ package pixlze.guildapi.screens.notifications.widgets;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.widget.ContainerWidget;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import pixlze.guildapi.core.notifications.Notification;
@@ -17,9 +17,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public class NotificationWidget extends ClickableWidget implements ParentElement {
+public class NotificationWidget extends ContainerWidget {
     private Element focused;
-    private boolean dragging = false;
     private final AllowSectionSignTextField regex;
     private final AllowSectionSignTextField display;
     private final ButtonWidget remove;
@@ -66,23 +65,8 @@ public class NotificationWidget extends ClickableWidget implements ParentElement
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return ParentElement.super.mouseClicked(mouseX, mouseY, button);
-    }
-
-    @Override
     public List<ClickableWidget> children() {
         return List.of(regex, display, remove);
-    }
-
-    @Override
-    public boolean isDragging() {
-        return dragging;
-    }
-
-    @Override
-    public void setDragging(boolean dragging) {
-        this.dragging = dragging;
     }
 
     @Override
@@ -126,5 +110,15 @@ public class NotificationWidget extends ClickableWidget implements ParentElement
     @Override
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {
         this.appendDefaultNarrations(builder);
+    }
+
+    @Override
+    protected int getContentsHeightWithPadding() {
+        return 0;
+    }
+
+    @Override
+    protected double getDeltaYPerScroll() {
+        return 0;
     }
 }
