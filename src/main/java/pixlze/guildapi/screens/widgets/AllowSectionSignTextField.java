@@ -16,6 +16,7 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
+import pixlze.guildapi.utils.text.TextUtils;
 
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -174,7 +175,7 @@ public class AllowSectionSignTextField extends ClickableWidget {
         return out.toString();
     }
 
-    private String trimToWidth(String text, int maxWidth) {
+    private String trimToWidth(Style curStyle, String text, int maxWidth) {
         StringBuilder out = new StringBuilder();
         int curWidth = 0;
         for (int i = 0; i < text.length(); i++) {
@@ -182,28 +183,30 @@ public class AllowSectionSignTextField extends ClickableWidget {
             if (curWidth > maxWidth) break;
             if (c == '§') {
                 if (i + 1 < text.length()) {
-                    if (Formatting.byCode(text.charAt(i + 1)) != null) {
+                    Formatting fmt = Formatting.byCode(text.charAt(i + 1));
+                    if (fmt != null) {
                         out.append(c);
                         out.append(text.charAt(i + 1));
                         ++i;
+                        curStyle = curStyle.withFormatting(fmt);
                     } else {
-                        curWidth += textRenderer.getWidth("&");
+                        curWidth += textRenderer.getWidth(Text.literal("&").fillStyle(curStyle));
                         if (curWidth <= maxWidth) out.append(c);
                     }
                 } else {
-                    curWidth += textRenderer.getWidth("&");
+                    curWidth += textRenderer.getWidth(Text.literal("&").fillStyle(curStyle));
                     if (curWidth <= maxWidth) out.append(c);
                 }
             } else {
-                curWidth += textRenderer.getWidth(String.valueOf(c));
+                curWidth += textRenderer.getWidth(Text.literal(String.valueOf(c)).fillStyle(curStyle));
                 if (curWidth <= maxWidth) out.append(c);
             }
         }
         return out.toString();
     }
 
-    private String trimToWidth(String text, int maxWidth, boolean backwards) {
-        if (!backwards) return trimToWidth(text, maxWidth);
+    private String trimToWidth(Style curStyle, String text, int maxWidth, boolean backwards) {
+        if (!backwards) return trimToWidth(curStyle, text, maxWidth);
         StringBuilder out = new StringBuilder();
         int curWidth = 0;
         for (int i = text.length() - 1; i >= 0; i--) {
@@ -211,20 +214,22 @@ public class AllowSectionSignTextField extends ClickableWidget {
             if (curWidth > maxWidth) break;
             if (c == '§') {
                 if (i - 1 >= 0) {
-                    if (Formatting.byCode(text.charAt(i - 1)) != null) {
+                    Formatting fmt = Formatting.byCode(text.charAt(i - 1));
+                    if (fmt != null) {
                         out.append(c);
                         out.append(text.charAt(i - 1));
                         --i;
+                        curStyle = curStyle.withFormatting(fmt);
                     } else {
-                        curWidth += textRenderer.getWidth("&");
+                        curWidth += textRenderer.getWidth(Text.literal("&").fillStyle(curStyle));
                         if (curWidth <= maxWidth) out.append(c);
                     }
                 } else {
-                    curWidth += textRenderer.getWidth("&");
+                    curWidth += textRenderer.getWidth(Text.literal("&").fillStyle(curStyle));
                     if (curWidth <= maxWidth) out.append(c);
                 }
             } else {
-                curWidth += textRenderer.getWidth(String.valueOf(c));
+                curWidth += textRenderer.getWidth(Text.literal(String.valueOf(c)).fillStyle(curStyle));
                 if (curWidth <= maxWidth) out.append(c);
             }
         }
@@ -530,8 +535,9 @@ public class AllowSectionSignTextField extends ClickableWidget {
             i -= 4;
         }
 
-        String string = trimToWidth(this.text.substring(this.firstCharacterIndex), this.getInnerWidth());
-        this.setCursor(trimToWidth(string, i).length() + this.firstCharacterIndex, Screen.hasShiftDown());
+
+        String string = trimToWidth(computeInheritedStyle(this.text, this.firstCharacterIndex), this.text.substring(this.firstCharacterIndex), this.getInnerWidth());
+        this.setCursor(trimToWidth(computeInheritedStyle(this.text, this.firstCharacterIndex), string, i).length() + this.firstCharacterIndex, Screen.hasShiftDown());
     }
 
     @Override
@@ -547,11 +553,10 @@ public class AllowSectionSignTextField extends ClickableWidget {
             }
 
             int colour = this.editable ? this.editableColor:this.uneditableColor;
-            if (this.firstCharacterIndex > 0)
-                if (this.text.charAt(this.firstCharacterIndex - 1) == '§' && Formatting.byCode(this.text.charAt(this.firstCharacterIndex)) != null)
-                    ++this.firstCharacterIndex;
+            if (TextUtils.isFormatting(this.text, this.firstCharacterIndex - 1))
+                ++this.firstCharacterIndex;
             int selectionStartIdx = this.selectionStart - this.firstCharacterIndex;
-            String visibleText = trimToWidth(this.text.substring(this.firstCharacterIndex), this.getInnerWidth());
+            String visibleText = trimToWidth(computeInheritedStyle(this.text, this.firstCharacterIndex), this.text.substring(this.firstCharacterIndex), this.getInnerWidth());
             boolean pointerVisible = selectionStartIdx >= 0 && selectionStartIdx <= visibleText.length();
             boolean blinkingPointer = this.isFocused() && (Util.getMeasuringTimeMs() - this.lastSwitchFocusTime) / 300L % 2L == 0L && pointerVisible;
             int textStartX = this.drawsBackground ? this.getX() + 4:this.getX();
@@ -604,21 +609,21 @@ public class AllowSectionSignTextField extends ClickableWidget {
                 }
             }
 
-//            if (selectionEndIdx != selectionStartIdx) {
-//                int selectionEndX = textStartX + getWidth(visibleText.substring(0, selectionEndIdx));
-//                if (selectionStartIdx > 0 && selectionStartIdx < visibleText.length() && visibleText.charAt(selectionStartIdx - 1) == '§') {
-//                    if (Formatting.byCode(visibleText.charAt(selectionStartIdx)) != null) {
-//                        if (selectionStartIdx < selectionEndIdx)
-//                            selectionEndX += 2 * getWidth("&");
-//                    }
-//                }
-//                if (selectionEndIdx > 0 && selectionEndIdx < visibleText.length() && visibleText.charAt(selectionEndIdx - 1) == '§') {
-//                    if (Formatting.byCode(visibleText.charAt(selectionEndIdx)) != null) {
-//                        selectionEndX -= getWidth("&");
-//                    }
-//                }
-//                this.drawSelectionHighlight(context, pointerX, textStartY - 1, selectionEndX - 1, textStartY + 1 + 9);
-//            }
+            if (selectionEndIdx != selectionStartIdx) {
+                int selectionEndX = textStartX + getWidth(visibleText.substring(0, selectionEndIdx));
+                if (selectionStartIdx > 0 && selectionStartIdx < visibleText.length() && visibleText.charAt(selectionStartIdx - 1) == '§') {
+                    if (Formatting.byCode(visibleText.charAt(selectionStartIdx)) != null) {
+                        if (selectionStartIdx < selectionEndIdx)
+                            selectionEndX += 2 * getWidth("&");
+                    }
+                }
+                if (selectionEndIdx > 0 && selectionEndIdx < visibleText.length() && visibleText.charAt(selectionEndIdx - 1) == '§') {
+                    if (Formatting.byCode(visibleText.charAt(selectionEndIdx)) != null) {
+                        selectionEndX -= getWidth("&");
+                    }
+                }
+                this.drawSelectionHighlight(context, pointerX, textStartY - 1, selectionEndX - 1, textStartY + 1 + 9);
+            }
         }
     }
 
@@ -706,17 +711,16 @@ public class AllowSectionSignTextField extends ClickableWidget {
     }
 
     private void updateFirstCharacterIndex(int cursor) {
-        // 1026
         if (this.textRenderer != null) {
             this.firstCharacterIndex = Math.min(this.firstCharacterIndex, this.text.length());
             while (this.firstCharacterIndex < this.text.length() - 1 && this.text.charAt(this.firstCharacterIndex) == '§' && Formatting.byCode(this.text.charAt(this.firstCharacterIndex + 1)) != null)
                 ++this.firstCharacterIndex;
             int i = this.getInnerWidth();
-            String visibleText = trimToWidth(this.text.substring(this.firstCharacterIndex), i);
+            String visibleText = trimToWidth(computeInheritedStyle(this.text, this.firstCharacterIndex), this.text.substring(this.firstCharacterIndex), i);
             int endingAbsolutePos = visibleText.length() + this.firstCharacterIndex;
             if (cursor == this.firstCharacterIndex) {
                 // if the cursor is at the first character, move one width to the right
-                this.firstCharacterIndex = this.firstCharacterIndex - trimToWidth(this.text.substring(0, this.firstCharacterIndex + visibleText.length()), i, true).length();
+                this.firstCharacterIndex = this.firstCharacterIndex - trimToWidth(Style.EMPTY, this.text.substring(0, this.firstCharacterIndex + visibleText.length()), i, true).length();
             }
 
             if (cursor > endingAbsolutePos) {
@@ -756,7 +760,7 @@ public class AllowSectionSignTextField extends ClickableWidget {
         builder.put(NarrationPart.TITLE, this.getNarrationMessage());
     }
 
-    public void setPlaceholder(Text placeholder) {
+    public void setPlaceholder(@Nullable Text placeholder) {
         this.placeholder = placeholder;
     }
 }

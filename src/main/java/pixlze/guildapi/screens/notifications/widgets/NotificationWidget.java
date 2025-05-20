@@ -28,8 +28,8 @@ public class NotificationWidget extends ClickableWidget implements ParentElement
         super(0, 0, width, height, text);
         this.widget = widget;
 
-        this.regex = new AllowSectionSignTextField(McUtils.mc().textRenderer, 150, height, Text.literal("Notification Regex"));
-        this.display = new AllowSectionSignTextField(McUtils.mc().textRenderer, 150, height, Text.literal("Notification Display"));
+        this.regex = new AllowSectionSignTextField(McUtils.mc().textRenderer, 125, height, Text.literal("Notification Regex"));
+        this.display = new AllowSectionSignTextField(McUtils.mc().textRenderer, 125, height, Text.literal("Notification Display"));
         this.remove = ButtonWidget.builder(Text.literal("Remove"), button -> {
             this.widget.removeNotification(button.getX() + (double) button.getWidth() / 2, button.getY() + (double) button.getHeight() / 2);
             GuildApi.LOGGER.info("hi");
@@ -41,7 +41,8 @@ public class NotificationWidget extends ClickableWidget implements ParentElement
         this.display.write(display);
         this.regex.setPlaceholder(Text.literal("§7Regex"));
         this.display.setPlaceholder(Text.literal("§7Display"));
-
+        this.regex.setDrawsBackground(false);
+        this.display.setDrawsBackground(false);
     }
 
     private NotificationWidget(NotificationsEditWidget widget) {
@@ -106,9 +107,14 @@ public class NotificationWidget extends ClickableWidget implements ParentElement
 
     @Override
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-        this.regex.setPosition(this.getX(), this.getY());
-        this.display.setPosition(this.getX() + this.regex.getWidth(), this.getY());
-        this.remove.setPosition(this.getRight() - this.remove.getWidth(), this.getY());
+        context.fill(this.regex.getX() - 4, this.regex.getY() - (this.height - 8) / 2, this.regex.getX() + this.regex.getWidth(), this.regex.getY() + this.regex.getHeight() - (this.height - 8) / 2, 0xAA000000);
+        context.fill(this.display.getX() - 4, this.display.getY() - (this.height - 8) / 2, this.display.getX() + this.display.getWidth(), this.display.getY() + this.display.getHeight() - (this.height - 8) / 2, 0xAA000000);
+
+        this.regex.setPosition(this.getX() + 4, this.getY() + (this.height - 8) / 2);
+        this.display.setPosition(this.getX() + this.regex.getWidth() + 25 + 4, this.getY() + (this.height - 8) / 2);
+        this.remove.setPosition(this.getX() + this.regex.getWidth() + this.display.getWidth() + 25 + 4 + 25, this.getY());
+
+        context.fill(this.regex.getX(), this.regex.getY(), this.regex.getX() + this.regex.getWidth(), this.regex.getY() + this.regex.getHeight(), 0xAAFF0000);
 
         this.regex.render(context, mouseX, mouseY, delta);
         this.display.render(context, mouseX, mouseY, delta);
