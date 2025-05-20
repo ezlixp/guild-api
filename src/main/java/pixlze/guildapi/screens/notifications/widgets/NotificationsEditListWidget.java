@@ -14,9 +14,9 @@ import pixlze.guildapi.screens.notifications.NotificationsEditScreen;
 import java.util.List;
 import java.util.Objects;
 
-public class NotificationsEditWidget extends ElementListWidget<NotificationsEditWidget.Entry> {
-    public NotificationsEditWidget(MinecraftClient client, int width, NotificationsEditScreen notificationsScreen) {
-        super(client, width, notificationsScreen.layout.getContentHeight(), notificationsScreen.layout.getHeaderHeight(), 25);
+public class NotificationsEditListWidget extends ElementListWidget<NotificationsEditListWidget.Entry> {
+    public NotificationsEditListWidget(MinecraftClient client, int width, NotificationsEditScreen notificationsScreen) {
+        super(client, width, notificationsScreen.layout.getContentHeight(), notificationsScreen.layout.getHeaderHeight(), 29);
     }
 
     public void addNotification() {
@@ -51,16 +51,16 @@ public class NotificationsEditWidget extends ElementListWidget<NotificationsEdit
         return this.getRight() - 6;
     }
 
-    public static class Entry extends ElementListWidget.Entry<NotificationsEditWidget.Entry> implements ParentElement {
-        private final NotificationsEditWidget parent;
+    public static class Entry extends ElementListWidget.Entry<NotificationsEditListWidget.Entry> implements ParentElement {
+        private final NotificationsEditListWidget parent;
         private final NotificationWidget widget;
 
-        public Entry(NotificationsEditWidget parent) {
+        public Entry(NotificationsEditListWidget parent) {
             this.parent = parent;
             widget = NotificationWidget.of(parent);
         }
 
-        public Entry(NotificationsEditWidget parent, Notification<Trigger.CHAT> notif) {
+        public Entry(NotificationsEditListWidget parent, Notification<Trigger.CHAT> notif) {
             this.parent = parent;
             widget = NotificationWidget.of(parent, notif);
         }

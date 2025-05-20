@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Manager;
 import pixlze.guildapi.core.components.Managers;
-import pixlze.guildapi.screens.notifications.widgets.NotificationsEditWidget;
+import pixlze.guildapi.screens.notifications.widgets.NotificationsEditListWidget;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -43,10 +43,10 @@ public class NotificationManager extends Manager {
         return (List<Notification<T>>) temp;
     }
 
-    public void saveNotifications(List<NotificationsEditWidget.Entry> entries) {
+    public void saveNotifications(List<NotificationsEditListWidget.Entry> entries) {
         List<Notification<Trigger.CHAT>> notifs = getNotifications(Trigger.CHAT.class);
         notifs.clear();
-        for (NotificationsEditWidget.Entry entry : entries) {
+        for (NotificationsEditListWidget.Entry entry : entries) {
             Notification<Trigger.CHAT> notif = entry.getNotification();
             if (notif != null)
                 notifs.add(notif);

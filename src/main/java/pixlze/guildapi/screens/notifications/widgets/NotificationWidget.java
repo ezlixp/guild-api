@@ -22,9 +22,9 @@ public class NotificationWidget extends ClickableWidget implements ParentElement
     private final AllowSectionSignTextField regex;
     private final AllowSectionSignTextField display;
     private final ButtonWidget remove;
-    private final NotificationsEditWidget widget;
+    private final NotificationsEditListWidget widget;
 
-    private NotificationWidget(NotificationsEditWidget widget, String regex, String display, int width, int height, Text text) {
+    private NotificationWidget(NotificationsEditListWidget widget, String regex, String display, int width, int height, Text text) {
         super(0, 0, width, height, text);
         this.widget = widget;
 
@@ -45,19 +45,19 @@ public class NotificationWidget extends ClickableWidget implements ParentElement
         this.display.setDrawsBackground(false);
     }
 
-    private NotificationWidget(NotificationsEditWidget widget) {
+    private NotificationWidget(NotificationsEditListWidget widget) {
         this(widget, "", "");
     }
 
-    private NotificationWidget(NotificationsEditWidget widget, String regex, String display) {
+    private NotificationWidget(NotificationsEditListWidget widget, String regex, String display) {
         this(widget, regex, display, 400, 21, Text.literal("Notification"));
     }
 
-    public static NotificationWidget of(NotificationsEditWidget widget) {
+    public static NotificationWidget of(NotificationsEditListWidget widget) {
         return new NotificationWidget(widget);
     }
 
-    public static NotificationWidget of(NotificationsEditWidget widget, Notification<Trigger.CHAT> notification) {
+    public static NotificationWidget of(NotificationsEditListWidget widget, Notification<Trigger.CHAT> notification) {
         return new NotificationWidget(widget, notification.trigger.toString(), notification.displayText);
     }
 
@@ -107,14 +107,12 @@ public class NotificationWidget extends ClickableWidget implements ParentElement
 
     @Override
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-        context.fill(this.regex.getX() - 4, this.regex.getY() - (this.height - 8) / 2, this.regex.getX() + this.regex.getWidth(), this.regex.getY() + this.regex.getHeight() - (this.height - 8) / 2, 0xAA000000);
-        context.fill(this.display.getX() - 4, this.display.getY() - (this.height - 8) / 2, this.display.getX() + this.display.getWidth(), this.display.getY() + this.display.getHeight() - (this.height - 8) / 2, 0xAA000000);
+        context.fill(this.regex.getX() - 4, this.remove.getY() - 2, this.remove.getRight() + 4, this.remove.getY() + this.remove.getHeight() + 2, 0xAA000000);
 
-        this.regex.setPosition(this.getX() + 4, this.getY() + (this.height - 8) / 2);
-        this.display.setPosition(this.getX() + this.regex.getWidth() + 25 + 4, this.getY() + (this.height - 8) / 2);
-        this.remove.setPosition(this.getX() + this.regex.getWidth() + this.display.getWidth() + 25 + 4 + 25, this.getY());
+        this.regex.setPosition(this.getX() + 4, this.getY() + (this.height - 10) / 2);
+        this.remove.setPosition(this.getRight() - this.remove.getWidth() - 4, this.getY());
+        this.display.setPosition((this.regex.getX() + this.remove.getX()) / 2, this.getY() + (this.height - 10) / 2);
 
-        context.fill(this.regex.getX(), this.regex.getY(), this.regex.getX() + this.regex.getWidth(), this.regex.getY() + this.regex.getHeight(), 0xAAFF0000);
 
         this.regex.render(context, mouseX, mouseY, delta);
         this.display.render(context, mouseX, mouseY, delta);

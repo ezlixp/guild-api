@@ -9,13 +9,13 @@ import net.minecraft.text.Text;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.notifications.Notification;
 import pixlze.guildapi.core.notifications.Trigger;
-import pixlze.guildapi.screens.notifications.widgets.NotificationsEditWidget;
+import pixlze.guildapi.screens.notifications.widgets.NotificationsEditListWidget;
 import pixlze.guildapi.utils.McUtils;
 
 public class NotificationsEditScreen extends Screen {
     private final Screen parent;
     public final ThreePartsLayoutWidget layout = new ThreePartsLayoutWidget(this);
-    public NotificationsEditWidget body;
+    public NotificationsEditListWidget body;
 
     public NotificationsEditScreen(Screen parent) {
         super(Text.of("Notifications"));
@@ -54,7 +54,7 @@ public class NotificationsEditScreen extends Screen {
     }
 
     protected void initBody() {
-        this.body = this.layout.addBody(new NotificationsEditWidget(McUtils.mc(), this.width, this));
+        this.body = this.layout.addBody(new NotificationsEditListWidget(McUtils.mc(), this.width, this));
     }
 
     protected void initFooter() {
