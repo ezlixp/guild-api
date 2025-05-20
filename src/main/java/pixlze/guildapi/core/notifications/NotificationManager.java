@@ -78,12 +78,16 @@ public class NotificationManager extends Manager {
                     String display = asObject.get("display").getAsString();
                     if (type.equals("CHAT")) {
                         Notification<Trigger.CHAT> notification = Notification.ofChat(trigger, display);
-                        if (notifications.containsKey(Trigger.CHAT.class))
-                            notifications.get(Trigger.CHAT.class).add(notification);
-                        else {
-                            List<Notification<Trigger.CHAT>> temp = new ArrayList<>();
-                            temp.add(notification);
-                            notifications.put(Trigger.CHAT.class, (List<Notification<? extends Trigger>>) (List<?>) temp);
+                        if (notification != null) {
+                            if (notifications.containsKey(Trigger.CHAT.class))
+                                notifications.get(Trigger.CHAT.class).add(notification);
+                            else {
+                                List<Notification<Trigger.CHAT>> temp = new ArrayList<>();
+                                temp.add(notification);
+                                notifications.put(Trigger.CHAT.class, (List<Notification<? extends Trigger>>) (List<?>) temp);
+                            }
+                        } else {
+                            GuildApi.LOGGER.warn("illegal notification: {}", asObject);
                         }
                     } else
                         GuildApi.LOGGER.warn("illegal notification trigger type: {}", type);

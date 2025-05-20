@@ -4,6 +4,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.text.Text;
@@ -14,6 +15,8 @@ import pixlze.guildapi.screens.widgets.AllowSectionSignTextField;
 import pixlze.guildapi.utils.McUtils;
 
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class NotificationWidget extends ClickableWidget implements ParentElement {
     private Element focused;
@@ -108,6 +111,13 @@ public class NotificationWidget extends ClickableWidget implements ParentElement
         this.regex.setPosition(this.getX() + 4, this.getY() + (this.height - 10) / 2);
         this.remove.setPosition(this.getRight() - this.remove.getWidth() - 4, this.getY());
         this.display.setPosition((this.regex.getX() + this.remove.getX()) / 2, this.getY() + (this.height - 10) / 2);
+
+        try {
+            Pattern.compile(this.regex.getText());
+            this.regex.setTooltip(null);
+        } catch (PatternSyntaxException e) {
+            this.regex.setTooltip(Tooltip.of(Text.literal("§cInvalid Regex. This notification won't be saved.")));
+        }
 
 
         this.regex.render(context, mouseX, mouseY, delta);
