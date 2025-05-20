@@ -552,9 +552,6 @@ public class AllowSectionSignTextField extends ClickableWidget {
                     ++this.firstCharacterIndex;
             int selectionStartIdx = this.selectionStart - this.firstCharacterIndex;
             String visibleText = trimToWidth(this.text.substring(this.firstCharacterIndex), this.getInnerWidth());
-            if (selectionStartIdx > 0 && selectionStartIdx < visibleText.length() && visibleText.charAt(selectionStartIdx - 1) == '§' && Formatting.byCode(visibleText.charAt(selectionStartIdx)) != null) {
-                visibleText = visibleText.substring(0, visibleText.length() - 2);
-            }
             boolean pointerVisible = selectionStartIdx >= 0 && selectionStartIdx <= visibleText.length();
             boolean blinkingPointer = this.isFocused() && (Util.getMeasuringTimeMs() - this.lastSwitchFocusTime) / 300L % 2L == 0L && pointerVisible;
             int textStartX = this.drawsBackground ? this.getX() + 4:this.getX();
@@ -607,21 +604,21 @@ public class AllowSectionSignTextField extends ClickableWidget {
                 }
             }
 
-            if (selectionEndIdx != selectionStartIdx) {
-                int selectionEndX = textStartX + getWidth(visibleText.substring(0, selectionEndIdx));
-                if (selectionStartIdx > 0 && selectionStartIdx < visibleText.length() && visibleText.charAt(selectionStartIdx - 1) == '§') {
-                    if (Formatting.byCode(visibleText.charAt(selectionStartIdx)) != null) {
-                        if (selectionStartIdx < selectionEndIdx)
-                            selectionEndX += 2 * getWidth("&");
-                    }
-                }
-                if (selectionEndIdx > 0 && selectionEndIdx < visibleText.length() && visibleText.charAt(selectionEndIdx - 1) == '§') {
-                    if (Formatting.byCode(visibleText.charAt(selectionEndIdx)) != null) {
-                        selectionEndX -= getWidth("&");
-                    }
-                }
-                this.drawSelectionHighlight(context, pointerX, textStartY - 1, selectionEndX - 1, textStartY + 1 + 9);
-            }
+//            if (selectionEndIdx != selectionStartIdx) {
+//                int selectionEndX = textStartX + getWidth(visibleText.substring(0, selectionEndIdx));
+//                if (selectionStartIdx > 0 && selectionStartIdx < visibleText.length() && visibleText.charAt(selectionStartIdx - 1) == '§') {
+//                    if (Formatting.byCode(visibleText.charAt(selectionStartIdx)) != null) {
+//                        if (selectionStartIdx < selectionEndIdx)
+//                            selectionEndX += 2 * getWidth("&");
+//                    }
+//                }
+//                if (selectionEndIdx > 0 && selectionEndIdx < visibleText.length() && visibleText.charAt(selectionEndIdx - 1) == '§') {
+//                    if (Formatting.byCode(visibleText.charAt(selectionEndIdx)) != null) {
+//                        selectionEndX -= getWidth("&");
+//                    }
+//                }
+//                this.drawSelectionHighlight(context, pointerX, textStartY - 1, selectionEndX - 1, textStartY + 1 + 9);
+//            }
         }
     }
 
