@@ -35,12 +35,12 @@ public class NotificationWidget extends ClickableWidget implements ParentElement
             GuildApi.LOGGER.info("hi");
         }).size(100, height).build();
 
+        this.regex.setMaxLength(256);
+        this.display.setMaxLength(100);
         this.regex.write(regex);
         this.display.write(display);
         this.regex.setPlaceholder(Text.literal("§7Regex"));
         this.display.setPlaceholder(Text.literal("§7Display"));
-        this.regex.setMaxLength(256);
-        this.display.setMaxLength(100);
 
     }
 
