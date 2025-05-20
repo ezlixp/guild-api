@@ -39,6 +39,8 @@ public class NotificationWidget extends ClickableWidget implements ParentElement
         this.display.write(display);
         this.regex.setPlaceholder(Text.literal("§7Regex"));
         this.display.setPlaceholder(Text.literal("§7Display"));
+        this.regex.setMaxLength(256);
+        this.display.setMaxLength(100);
 
     }
 

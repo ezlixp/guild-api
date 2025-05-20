@@ -10,11 +10,12 @@ import net.minecraft.client.gui.screen.narration.NarrationPart;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.sound.SoundManager;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.*;
 import net.minecraft.util.*;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RotationAxis;
 import org.jetbrains.annotations.Nullable;
-import pixlze.guildapi.GuildApi;
 
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -78,13 +79,23 @@ public class AllowSectionSignTextField extends ClickableWidget {
                         return false;
                     }
                 } else {
-                    if (c == '§' && j + 1 < i) {
-                        Formatting fmt = Formatting.byCode(visible.charAt(j + 1));
-                        if (fmt == null) {
-                            if (!visitRegularCharacter(curstyle, visitor, j, c)) return false;
+                    if (c == '§') {
+                        if (j + 1 < i) {
+                            Formatting fmt = Formatting.byCode(visible.charAt(j + 1));
+                            if (fmt == null) {
+                                if (!visitRegularCharacter(curstyle, visitor, j, c)) return false;
+                            } else {
+                                curstyle = curstyle.withFormatting(fmt);
+                                ++j;
+                            }
                         } else {
-                            curstyle = curstyle.withFormatting(fmt);
-                            ++j;
+                            if (j + offset + 1 < this.text.length()) {
+                                Formatting fmt = Formatting.byCode(this.text.charAt(j + offset + 1));
+                                if (fmt != null)
+                                    curstyle = curstyle.withFormatting(fmt);
+                                if (!visitRegularCharacter(curstyle, visitor, j, c)) return false;
+                            } else if (!visitRegularCharacter(curstyle, visitor, j, c)) return false;
+
                         }
                     } else if (!visitRegularCharacter(curstyle, visitor, j, c)) return false;
                 }
@@ -108,11 +119,11 @@ public class AllowSectionSignTextField extends ClickableWidget {
     }
 
 
-    private static boolean visitRegularCharacter(Style style, CharacterVisitor visitor, int index, char c) {
+    private boolean visitRegularCharacter(Style style, CharacterVisitor visitor, int index, char c) {
         return Character.isSurrogate(c) ? visitor.accept(index, style, 65533):visitor.accept(index, style, c);
     }
 
-    private static Style computeInheritedStyle(String fullText, int offset) {
+    private Style computeInheritedStyle(String fullText, int offset) {
         Style style = Style.EMPTY;
         for (int i = 0; i + 1 <= Math.min(offset, fullText.length() - 1); i++) {
             if (fullText.charAt(i) == '§') {
@@ -125,6 +136,103 @@ public class AllowSectionSignTextField extends ClickableWidget {
             }
         }
         return style;
+    }
+
+    private String getRenderedText(String text) {
+        StringBuilder out = new StringBuilder();
+        for (int j = 0; j < text.length(); ++j) {
+            char c = text.charAt(j);
+            if (Character.isHighSurrogate(c)) {
+                if (j + 1 >= text.length()) {
+                    out.append(Character.toString(65533));
+                    break;
+                }
+
+                char d = text.charAt(j + 1);
+                if (Character.isLowSurrogate(d)) {
+                    out.append(Character.toString(Character.toCodePoint(c, d)));
+                    ++j;
+                } else {
+                    out.append(Character.toString(65533));
+                    break;
+                }
+            } else {
+                if (c == '§') {
+                    if (j + 1 < text.length()) {
+                        Formatting fmt = Formatting.byCode(text.charAt(j + 1));
+                        if (fmt == null) {
+                            out.append("&");
+                        } else {
+                            ++j;
+                        }
+                    } else out.append("&");
+                } else {
+                    out.append(c);
+                }
+            }
+        }
+        return out.toString();
+    }
+
+    private String trimToWidth(String text, int maxWidth) {
+        StringBuilder out = new StringBuilder();
+        int curWidth = 0;
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (curWidth > maxWidth) break;
+            if (c == '§') {
+                if (i + 1 < text.length()) {
+                    if (Formatting.byCode(text.charAt(i + 1)) != null) {
+                        out.append(c);
+                        out.append(text.charAt(i + 1));
+                        ++i;
+                    } else {
+                        curWidth += textRenderer.getWidth("&");
+                        if (curWidth <= maxWidth) out.append(c);
+                    }
+                } else {
+                    curWidth += textRenderer.getWidth("&");
+                    if (curWidth <= maxWidth) out.append(c);
+                }
+            } else {
+                curWidth += textRenderer.getWidth(String.valueOf(c));
+                if (curWidth <= maxWidth) out.append(c);
+            }
+        }
+        return out.toString();
+    }
+
+    private String trimToWidth(String text, int maxWidth, boolean backwards) {
+        if (!backwards) return trimToWidth(text, maxWidth);
+        StringBuilder out = new StringBuilder();
+        int curWidth = 0;
+        for (int i = text.length() - 1; i >= 0; i--) {
+            char c = text.charAt(i);
+            if (curWidth > maxWidth) break;
+            if (c == '§') {
+                if (i - 1 >= 0) {
+                    if (Formatting.byCode(text.charAt(i - 1)) != null) {
+                        out.append(c);
+                        out.append(text.charAt(i - 1));
+                        --i;
+                    } else {
+                        curWidth += textRenderer.getWidth("&");
+                        if (curWidth <= maxWidth) out.append(c);
+                    }
+                } else {
+                    curWidth += textRenderer.getWidth("&");
+                    if (curWidth <= maxWidth) out.append(c);
+                }
+            } else {
+                curWidth += textRenderer.getWidth(String.valueOf(c));
+                if (curWidth <= maxWidth) out.append(c);
+            }
+        }
+        return out.toString();
+    }
+
+    private int getWidth(String text) {
+        return textRenderer.getWidth(getRenderedText(text));
     }
 
     public void setChangedListener(Consumer<String> changedListener) {
@@ -422,12 +530,8 @@ public class AllowSectionSignTextField extends ClickableWidget {
             i -= 4;
         }
 
-        // TODO section sign should be width 0 if is used as style, check here
-        // for these ty pes of things, have a utility function that converts the text to what is actually visible for easier actual width calcs
-        // maybe replace section code with & for that utility function so 100% width counted if its visible.
-        String string = this.textRenderer.trimToWidth(this.text.substring(this.firstCharacterIndex), this.getInnerWidth());
-        GuildApi.LOGGER.info("{}", this.textRenderer.getWidth("§"));
-        this.setCursor(this.textRenderer.trimToWidth(string, i).length() + this.firstCharacterIndex, Screen.hasShiftDown());
+        String string = trimToWidth(this.text.substring(this.firstCharacterIndex), this.getInnerWidth());
+        this.setCursor(trimToWidth(string, i).length() + this.firstCharacterIndex, Screen.hasShiftDown());
     }
 
     @Override
@@ -442,52 +546,81 @@ public class AllowSectionSignTextField extends ClickableWidget {
                 context.drawGuiTexture(RenderLayer::getGuiTextured, identifier, this.getX(), this.getY(), this.getWidth(), this.getHeight());
             }
 
-            int i = this.editable ? this.editableColor:this.uneditableColor;
-            int j = this.selectionStart - this.firstCharacterIndex;
-            String string = this.textRenderer.trimToWidth(this.text.substring(this.firstCharacterIndex), this.getInnerWidth());
-            boolean bl = j >= 0 && j <= string.length();
-            boolean bl2 = this.isFocused() && (Util.getMeasuringTimeMs() - this.lastSwitchFocusTime) / 300L % 2L == 0L && bl;
-            int k = this.drawsBackground ? this.getX() + 4:this.getX();
-            int l = this.drawsBackground ? this.getY() + (this.height - 8) / 2:this.getY();
-            int m = k;
-            int n = MathHelper.clamp(this.selectionEnd - this.firstCharacterIndex, 0, string.length());
-            if (!string.isEmpty()) {
-                String string2 = bl ? string.substring(0, j):string;
-                m = context.drawTextWithShadow(this.textRenderer, (OrderedText) this.renderTextProvider.apply(string2, this.firstCharacterIndex), k, l, i);
+            int colour = this.editable ? this.editableColor:this.uneditableColor;
+            if (this.firstCharacterIndex > 0)
+                if (this.text.charAt(this.firstCharacterIndex - 1) == '§' && Formatting.byCode(this.text.charAt(this.firstCharacterIndex)) != null)
+                    ++this.firstCharacterIndex;
+            int selectionStartIdx = this.selectionStart - this.firstCharacterIndex;
+            String visibleText = trimToWidth(this.text.substring(this.firstCharacterIndex), this.getInnerWidth());
+            if (selectionStartIdx > 0 && selectionStartIdx < visibleText.length() && visibleText.charAt(selectionStartIdx - 1) == '§' && Formatting.byCode(visibleText.charAt(selectionStartIdx)) != null) {
+                visibleText = visibleText.substring(0, visibleText.length() - 2);
+            }
+            boolean pointerVisible = selectionStartIdx >= 0 && selectionStartIdx <= visibleText.length();
+            boolean blinkingPointer = this.isFocused() && (Util.getMeasuringTimeMs() - this.lastSwitchFocusTime) / 300L % 2L == 0L && pointerVisible;
+            int textStartX = this.drawsBackground ? this.getX() + 4:this.getX();
+            int textStartY = this.drawsBackground ? this.getY() + (this.height - 8) / 2:this.getY();
+            int curTextStart = textStartX;
+            int selectionEndIdx = MathHelper.clamp(this.selectionEnd - this.firstCharacterIndex, 0, visibleText.length());
+            if (!visibleText.isEmpty()) {
+                String beforePointer = pointerVisible ? visibleText.substring(0, selectionStartIdx):visibleText;
+                curTextStart = context.drawTextWithShadow(this.textRenderer, this.renderTextProvider.apply(beforePointer, this.firstCharacterIndex), textStartX, textStartY, colour);
             }
 
-            boolean bl3 = this.selectionStart < this.text.length() || this.text.length() >= this.getMaxLength();
-            int o = m;
-            if (!bl) {
-                o = j > 0 ? k + this.width:k;
-            } else if (bl3) {
-                o = m - 1;
-                m--;
+            boolean renderPointerAsLine = this.selectionStart < this.text.length() || this.text.length() >= this.getMaxLength();
+            int pointerX = curTextStart;
+            if (!pointerVisible) {
+                // pointer is outside of visisble range
+                pointerX = selectionStartIdx > 0 ? textStartX + this.width:textStartX;
+            } else if (renderPointerAsLine) {
+                pointerX = curTextStart - 1;
+                curTextStart--;
             }
 
-            if (!string.isEmpty() && bl && j < string.length()) {
-                context.drawTextWithShadow(this.textRenderer, this.renderTextProvider.apply(string.substring(j), this.selectionStart), m, l, i);
+            if (!visibleText.isEmpty() && pointerVisible && selectionStartIdx < visibleText.length()) {
+                // this renders the second half of the text, after the pointer
+                context.drawTextWithShadow(this.textRenderer, this.renderTextProvider.apply(visibleText.substring(selectionStartIdx), this.selectionStart), curTextStart, textStartY, colour);
             }
 
-            if (this.placeholder != null && string.isEmpty() && !this.isFocused()) {
-                context.drawTextWithShadow(this.textRenderer, this.placeholder, m, l, i);
+            // placeholder text drawn
+            if (this.placeholder != null && visibleText.isEmpty() && !this.isFocused()) {
+                context.drawTextWithShadow(this.textRenderer, this.placeholder, curTextStart, textStartY, colour);
             }
 
-            if (!bl3 && this.suggestion != null) {
-                context.drawTextWithShadow(this.textRenderer, this.suggestion, o - 1, l, Colors.GRAY);
+            if (!renderPointerAsLine && this.suggestion != null) {
+                context.drawTextWithShadow(this.textRenderer, this.suggestion, pointerX - 1, textStartY, Colors.GRAY);
             }
 
-            if (bl2) {
-                if (bl3) {
-                    context.fill(RenderLayer.getGuiOverlay(), o, l - 1, o + 1, l + 1 + 9, -3092272);
+            if (blinkingPointer) {
+                if (renderPointerAsLine) {
+                    Style beforeStyle = computeInheritedStyle(this.text, this.selectionStart);
+                    MatrixStack stack = context.getMatrices();
+                    stack.push();
+                    if (beforeStyle.isItalic()) {
+                        stack.translate(pointerX, textStartY + 4.5, 0);
+                        stack.multiply(RotationAxis.POSITIVE_Z.rotation(0.245f));
+                        stack.translate(-pointerX, -textStartY - 4.5, 0);
+                    }
+                    context.fill(RenderLayer.getGuiOverlay(), pointerX, textStartY - 1, pointerX + 1, textStartY + 1 + 9, beforeStyle.getColor() != null ? beforeStyle.getColor().getRgb() + 0xFF000000:-3092272);
+                    stack.pop();
                 } else {
-                    context.drawTextWithShadow(this.textRenderer, Text.literal("_").fillStyle(computeInheritedStyle(this.text, this.selectionStart)), o, l, i);
+                    context.drawTextWithShadow(this.textRenderer, Text.literal("_").fillStyle(computeInheritedStyle(this.text, this.selectionStart).withObfuscated(false).withStrikethrough(false).withUnderline(false)), pointerX, textStartY, colour);
                 }
             }
 
-            if (n != j) {
-                int p = k + this.textRenderer.getWidth(string.substring(0, n));
-                this.drawSelectionHighlight(context, o, l - 1, p - 1, l + 1 + 9);
+            if (selectionEndIdx != selectionStartIdx) {
+                int selectionEndX = textStartX + getWidth(visibleText.substring(0, selectionEndIdx));
+                if (selectionStartIdx > 0 && selectionStartIdx < visibleText.length() && visibleText.charAt(selectionStartIdx - 1) == '§') {
+                    if (Formatting.byCode(visibleText.charAt(selectionStartIdx)) != null) {
+                        if (selectionStartIdx < selectionEndIdx)
+                            selectionEndX += 2 * getWidth("&");
+                    }
+                }
+                if (selectionEndIdx > 0 && selectionEndIdx < visibleText.length() && visibleText.charAt(selectionEndIdx - 1) == '§') {
+                    if (Formatting.byCode(visibleText.charAt(selectionEndIdx)) != null) {
+                        selectionEndX -= getWidth("&");
+                    }
+                }
+                this.drawSelectionHighlight(context, pointerX, textStartY - 1, selectionEndX - 1, textStartY + 1 + 9);
             }
         }
     }
@@ -576,19 +709,25 @@ public class AllowSectionSignTextField extends ClickableWidget {
     }
 
     private void updateFirstCharacterIndex(int cursor) {
+        // 1026
         if (this.textRenderer != null) {
             this.firstCharacterIndex = Math.min(this.firstCharacterIndex, this.text.length());
+            while (this.firstCharacterIndex < this.text.length() - 1 && this.text.charAt(this.firstCharacterIndex) == '§' && Formatting.byCode(this.text.charAt(this.firstCharacterIndex + 1)) != null)
+                ++this.firstCharacterIndex;
             int i = this.getInnerWidth();
-            String string = this.textRenderer.trimToWidth(this.text.substring(this.firstCharacterIndex), i);
-            int j = string.length() + this.firstCharacterIndex;
+            String visibleText = trimToWidth(this.text.substring(this.firstCharacterIndex), i);
+            int endingAbsolutePos = visibleText.length() + this.firstCharacterIndex;
             if (cursor == this.firstCharacterIndex) {
-                this.firstCharacterIndex = this.firstCharacterIndex - this.textRenderer.trimToWidth(this.text, i, true).length();
+                // if the cursor is at the first character, move one width to the right
+                this.firstCharacterIndex = this.firstCharacterIndex - trimToWidth(this.text.substring(0, this.firstCharacterIndex + visibleText.length()), i, true).length();
             }
 
-            if (cursor > j) {
-                this.firstCharacterIndex += cursor - j;
+            if (cursor > endingAbsolutePos) {
+                // if cursor is beyond the end of the current visible text, set the cursor to be the rightmost visible thing
+                this.firstCharacterIndex += cursor - endingAbsolutePos;
             } else if (cursor <= this.firstCharacterIndex) {
-                this.firstCharacterIndex = this.firstCharacterIndex - (this.firstCharacterIndex - cursor);
+                // if the cursor is before the visible text, set the cursor to be the first visible thing
+                this.firstCharacterIndex = cursor;
             }
 
             this.firstCharacterIndex = MathHelper.clamp(this.firstCharacterIndex, 0, this.text.length());
@@ -612,7 +751,7 @@ public class AllowSectionSignTextField extends ClickableWidget {
     }
 
     public int getCharacterX(int index) {
-        return index > this.text.length() ? this.getX():this.getX() + this.textRenderer.getWidth(this.text.substring(0, index));
+        return index > this.text.length() ? this.getX():this.getX() + getWidth(this.text.substring(0, index));
     }
 
     @Override
