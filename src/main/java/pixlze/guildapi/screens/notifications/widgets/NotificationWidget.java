@@ -8,7 +8,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
-import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.notifications.Notification;
 import pixlze.guildapi.core.notifications.Trigger;
 import pixlze.guildapi.screens.widgets.AllowSectionSignTextField;
@@ -30,10 +29,7 @@ public class NotificationWidget extends ClickableWidget implements ParentElement
 
         this.regex = new AllowSectionSignTextField(McUtils.mc().textRenderer, 125, height, Text.literal("Notification Regex"));
         this.display = new AllowSectionSignTextField(McUtils.mc().textRenderer, 125, height, Text.literal("Notification Display"));
-        this.remove = ButtonWidget.builder(Text.literal("Remove"), button -> {
-            this.widget.removeNotification(button.getX() + (double) button.getWidth() / 2, button.getY() + (double) button.getHeight() / 2);
-            GuildApi.LOGGER.info("hi");
-        }).size(100, height).build();
+        this.remove = ButtonWidget.builder(Text.literal("Remove"), button -> this.widget.removeNotification(button.getX() + (double) button.getWidth() / 2, button.getY() + (double) button.getHeight() / 2)).size(100, height).build();
 
         this.regex.setMaxLength(256);
         this.display.setMaxLength(100);
