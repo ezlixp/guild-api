@@ -80,6 +80,11 @@ public class TextUtils {
         return out;
     }
 
+    public static boolean isFormatting(String text, int index) {
+        if (index + 1 >= text.length()) return false;
+        return text.charAt(index) == '§' && Formatting.byCode(text.charAt(index + 1)) != null;
+    }
+
     public static Text toBlockMessage(Text text, Style prependStyle) {
         MinecraftClient client = MinecraftClient.getInstance();
         ChatHud chatHud = client.inGameHud.getChatHud();
