@@ -49,6 +49,6 @@ public class McUtils {
 
     public static void sendTitleMessage(Text message) {
         mc().inGameHud.setTitle(message);
-        mc().inGameHud.setTitleTicks(20, 500, 20);
+        mc().inGameHud.setTitleTicks(5, 20, 10);
     }
 }
