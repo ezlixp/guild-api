@@ -4,7 +4,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ParentElement;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.text.Text;
@@ -114,9 +113,8 @@ public class NotificationWidget extends ClickableWidget implements ParentElement
 
         try {
             Pattern.compile(this.regex.getText());
-            this.regex.setTooltip(null);
         } catch (PatternSyntaxException e) {
-            this.regex.setTooltip(Tooltip.of(Text.literal("§cInvalid Regex. This notification won't be saved.")));
+            context.drawTooltip(McUtils.mc().textRenderer, Text.literal("§cInvalid Regex."), this.regex.getX() + this.regex.getWidth() / 2 - 4, this.regex.getY() + this.regex.getHeight() + 4);
         }
 
 
