@@ -92,10 +92,10 @@ public class AllowSectionSignTextField extends ClickableWidget {
                         } else {
                             if (j + offset + 1 < this.text.length()) {
                                 Formatting fmt = Formatting.byCode(this.text.charAt(j + offset + 1));
-                                if (fmt != null)
+                                if (fmt != null && this.text.charAt(j + offset + 1) != 'k')
                                     curstyle = curstyle.withFormatting(fmt);
-                                if (!visitRegularCharacter(curstyle, visitor, j, c)) return false;
-                            } else if (!visitRegularCharacter(curstyle, visitor, j, c)) return false;
+                            }
+                            if (!visitRegularCharacter(curstyle, visitor, j, c)) return false;
 
                         }
                     } else if (!visitRegularCharacter(curstyle, visitor, j, c)) return false;
