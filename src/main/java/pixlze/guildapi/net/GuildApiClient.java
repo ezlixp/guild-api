@@ -95,11 +95,8 @@ public class GuildApiClient extends Api {
     private void onWynnMessage(Text message) {
         if (GUILD_JOIN_PATTERN.matcher(TextUtils.parseStyled(message, TextParseOptions.DEFAULT)).find()) {
             GuildApi.LOGGER.info("joining guild");
-//            reloadWynnInfo();
-            // need to reset socket too
-            // disable everything and have something wait until wynn api reloads
-            // just have the user  on lock for 2 minutes using a special kind of disable
-            // §3You have joined §bIdiot Co§3!
+            // disable this and discord socket, and lock this api for 2-3 minutes while waiting for wynn api to update, then reload wynn api after, which automatically unlocks ts
+            // create special function in wynnapi that requires the wynn api's guild to be the guild gotten from guildjoinpattertn.matcher.group(guild), and poll wynn api every 30 seconds if first try fails with user feedback
         }
     }
 
@@ -158,6 +155,10 @@ public class GuildApiClient extends Api {
     }
 
     public void login() {
+        if (missingDeps > 0) {
+            McUtils.sendLocalMessage(Text.literal("§eCould not log in at this time. Please wait a few minutes for the Wynncraft API to update and try again."), Prepend.GUILD.getWithStyle(ColourUtils.YELLOW), true);
+            return;
+        }
         if (server != null) server.stop(0);
         if (fetchGuildServerToken()) return;
         CompletableFuture<Pair<String, String>> tokenRequest = new CompletableFuture<>();
