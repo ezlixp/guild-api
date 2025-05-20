@@ -1,6 +1,7 @@
 package pixlze.guildapi.screens.notifications;
 
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.DirectionalLayoutWidget;
 import net.minecraft.client.gui.widget.ThreePartsLayoutWidget;
@@ -14,12 +15,16 @@ import pixlze.guildapi.utils.McUtils;
 
 public class NotificationsEditScreen extends Screen {
     private final Screen parent;
+    private final ButtonWidget helpButton;
     public final ThreePartsLayoutWidget layout = new ThreePartsLayoutWidget(this);
-    public NotificationsEditListWidget body;
+    private NotificationsEditListWidget body;
 
     public NotificationsEditScreen(Screen parent) {
         super(Text.of("Notifications"));
         this.parent = parent;
+        helpButton = ButtonWidget.builder(Text.literal("?"), (button) -> {
+            McUtils.mc().keyboard.setClipboard("§");
+        }).size(20, 20).tooltip(Tooltip.of(Text.literal("The left box accepts regex, or regular expressions. Visit https://regexr.com/ to learn more. \nFor reference, the exact text of chat messages can be copied by alt-clicking on them. \n\nClick here to copy the formatting code."))).build();
     }
 
     @Override
@@ -28,6 +33,7 @@ public class NotificationsEditScreen extends Screen {
         this.initBody();
         this.initFooter();
         this.layout.forEachChild(this::addDrawableChild);
+        this.addDrawableChild(helpButton);
         this.refreshWidgetPositions();
         this.addNotifications();
     }
@@ -66,6 +72,7 @@ public class NotificationsEditScreen extends Screen {
     @Override
     protected void refreshWidgetPositions() {
         this.layout.refreshPositions();
+        this.helpButton.setPosition(this.width - 20 - 6, 6);
         if (this.body != null)
             this.body.position(this.width, this.layout);
     }
