@@ -81,7 +81,7 @@ public class TextUtils {
     }
 
     public static boolean isFormatting(String text, int index) {
-        if (index + 1 >= text.length()) return false;
+        if (index + 1 >= text.length() || index < 0) return false;
         return text.charAt(index) == '§' && Formatting.byCode(text.charAt(index + 1)) != null;
     }
 
