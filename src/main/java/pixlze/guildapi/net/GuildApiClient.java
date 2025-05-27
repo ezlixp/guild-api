@@ -17,8 +17,6 @@ import pixlze.guildapi.utils.ColourUtils;
 import pixlze.guildapi.utils.ExceptionUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.NetUtils;
-import pixlze.guildapi.utils.text.TextUtils;
-import pixlze.guildapi.utils.text.type.TextParseOptions;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.awt.*;
@@ -37,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Pattern;
 
 import static pixlze.guildapi.GuildApi.MOD_VERSION;
 
@@ -48,7 +45,6 @@ public class GuildApiClient extends Api {
     private static final String REDIRECT_URI = "http://localhost:" + PORT + CALLBACK_PATH;
     private static final String CLIENT_ID = "1252463028025426031";
     private static final String UNLINKED_ERROR = "Could not validate account linking.";
-    private static final Pattern GUILD_JOIN_PATTERN = Pattern.compile("^§.You have joined §.(?<guild>.+)§.!$");
     private static final Text LOGIN_MESSAGE_NEW = Text.literal("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands.\n§aType /link in your guild's discord bridging channel, then, click ")
             .append(Text.literal("here").setStyle(
                     Style.EMPTY.withUnderline(true).withColor(ColourUtils.GREEN.getColor())
@@ -91,14 +87,6 @@ public class GuildApiClient extends Api {
 
     }
 
-
-    private void onWynnMessage(Text message) {
-        if (GUILD_JOIN_PATTERN.matcher(TextUtils.parseStyled(message, TextParseOptions.DEFAULT)).find()) {
-            GuildApi.LOGGER.info("joining guild");
-            // disable this and discord socket, and lock this api for 2-3 minutes while waiting for wynn api to update, then reload wynn api after, which automatically unlocks ts
-            // create special function in wynnapi that requires the wynn api's guild to be the guild gotten from guildjoinpattertn.matcher.group(guild), and poll wynn api every 30 seconds if first try fails with user feedback
-        }
-    }
 
     @Override
     public void init() {

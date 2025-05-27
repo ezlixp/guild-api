@@ -10,8 +10,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Managers;
+import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
+import pixlze.guildapi.utils.text.TextUtils;
+import pixlze.guildapi.utils.text.type.TextParseOptions;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.net.URI;
@@ -19,16 +22,21 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class WynnApiClient extends Api {
+    private static final Pattern GUILD_JOIN_PATTERN = Pattern.compile("^§.You have joined §.(?<guild>.+)§.!$");
     private static WynnApiClient instance;
     public JsonObject wynnPlayerInfo;
     private boolean reloading = false;
+    private String expectedGuild;
 
 
     protected WynnApiClient() {
         super("wynn", List.of());
         instance = this;
+        WynnChatMessage.EVENT.register(this::onWynnMessage);
     }
 
     public static WynnApiClient getInstance() {
@@ -71,8 +79,14 @@ public class WynnApiClient extends Api {
             }
 
             // asserts that the necessary fields for guildapiclient exist
-            wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
             wynnPlayerInfo.get("guild").getAsJsonObject().get("uuid").getAsString();
+            String name = wynnPlayerInfo.get("guild").getAsJsonObject().get("name").getAsString();
+            wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
+
+            if (expectedGuild != null && !expectedGuild.equals(name)) {
+                tryNewGuild();
+                return;
+            }
 
             GuildApi.LOGGER.info("successfully loaded wynn player info");
             if (GuildApi.isDevelopment() || GuildApi.isTesting())
@@ -108,6 +122,31 @@ public class WynnApiClient extends Api {
             reloadWynnInfo();
         } else {
             GuildApi.LOGGER.warn("wynn player already initialized");
+        }
+    }
+
+    private void tryNewGuild() {
+        Managers.Net.apiCrash(Text.literal("§ePlease wait ~2 minutes to connect to the chat server while the Wynncraft API updates."), this);
+        Thread t = new Thread(() -> {
+            try {
+                Thread.sleep(125000);
+            } catch (InterruptedException e) {
+                GuildApi.LOGGER.warn("wynnapi lock error: {} {}", e, e.getMessage());
+            }
+            reloadWynnInfo();
+        }, "Wynn Player Info Lock Thread");
+    }
+
+    private void onWynnMessage(Text message) {
+        Matcher m = GUILD_JOIN_PATTERN.matcher(TextUtils.parseStyled(message, TextParseOptions.DEFAULT));
+        if (m.find()) {
+            String newGuild = m.group("guild");
+            GuildApi.LOGGER.info("joining guild: {}", newGuild);
+
+            Managers.DiscordSocket.disable();
+
+            this.expectedGuild = newGuild;
+            tryNewGuild();
         }
     }
 }
