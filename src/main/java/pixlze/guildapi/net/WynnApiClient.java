@@ -10,7 +10,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Managers;
-import pixlze.guildapi.mc.event.WynnChatMessage;
+import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.net.type.Api;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.TextUtils;
@@ -36,7 +36,7 @@ public class WynnApiClient extends Api {
     protected WynnApiClient() {
         super("wynn", List.of());
         instance = this;
-        WynnChatMessage.EVENT.register(this::onWynnMessage);
+        ChatMessageReceived.EVENT.register(this::onWynnMessage);
     }
 
     public static WynnApiClient getInstance() {
