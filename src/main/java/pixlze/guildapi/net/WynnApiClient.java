@@ -32,6 +32,8 @@ public class WynnApiClient extends Api {
     private boolean reloading = false;
     private String expectedGuild;
 
+    private Thread lockThread;
+
 
     protected WynnApiClient() {
         super("wynn", List.of());
@@ -126,16 +128,28 @@ public class WynnApiClient extends Api {
     }
 
     private void tryNewGuild() {
-        Managers.Net.apiCrash(Text.literal("§ePlease wait ~2 minutes to connect to the chat server while the Wynncraft API updates."), this);
-        Thread t = new Thread(() -> {
+        // stops any current running lock threads
+        if (lockThread != null)
+            lockThread.interrupt();
+
+        this.disable();
+        Managers.Tick.scheduleNextTick(() -> McUtils.sendLocalMessage(Text.literal("§ePlease wait ~2 minutes to connect to the chat server while the Wynncraft API updates."), Prepend.DEFAULT.get(), false));
+
+        lockThread = new Thread(() -> {
+            reloading = true;
+
             try {
                 Thread.sleep(125000);
             } catch (InterruptedException e) {
                 GuildApi.LOGGER.warn("wynnapi lock error: {} {}", e, e.getMessage());
+                return;
             }
+
             reloadWynnInfo();
+
+            reloading = false;
         }, "Wynn Player Info Lock Thread");
-        t.start();
+        lockThread.start();
     }
 
     private void onWynnMessage(Text message) {

@@ -45,7 +45,7 @@ public class GuildApiClient extends Api {
     private static final String REDIRECT_URI = "http://localhost:" + PORT + CALLBACK_PATH;
     private static final String CLIENT_ID = "1252463028025426031";
     private static final String UNLINKED_ERROR = "Could not validate account linking.";
-    private static final Text LOGIN_MESSAGE_NEW = Text.literal("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands.\n§aType /link in your guild's discord bridging channel, then, click ")
+    private static final Text LOGIN_MESSAGE_NEW = Text.literal("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands.\n\n§aType /link in your guild's discord bridging channel, then, click ")
             .append(Text.literal("here").setStyle(
                     Style.EMPTY.withUnderline(true).withColor(ColourUtils.GREEN.getColor())
                             .withClickEvent(
@@ -106,7 +106,8 @@ public class GuildApiClient extends Api {
         guildId = wynnPlayerInfo.get("guild").getAsJsonObject().get("uuid").getAsString();
         try {
             refreshToken = refreshTokenObject.get("do not share").getAsString();
-            if (!fetchGuildServerToken())
+            if (refreshToken.equals("new guild")) promptLink();
+            else if (!fetchGuildServerToken())
                 promptLogin();
             else this.enable();
         } catch (NullPointerException exception) {
@@ -123,7 +124,10 @@ public class GuildApiClient extends Api {
         guildId = null;
         token = null;
         refreshToken = null;
-        refreshTokenObject = null;
+        if (Managers.Net.wynn.isDisabled()) {
+            refreshTokenObject = new JsonObject();
+            refreshTokenObject.addProperty("do not share", "new guild");
+        }
         wynnPlayerInfo = null;
         if (server != null) server.stop(0);
         super.unready();
