@@ -135,6 +135,7 @@ public class WynnApiClient extends Api {
             }
             reloadWynnInfo();
         }, "Wynn Player Info Lock Thread");
+        t.start();
     }
 
     private void onWynnMessage(Text message) {
