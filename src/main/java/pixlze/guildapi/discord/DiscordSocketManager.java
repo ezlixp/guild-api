@@ -63,12 +63,20 @@ public class DiscordSocketManager extends AbstractSocketManager {
 
     private void worldStateChanged(WorldState state) {
         if (state == WorldState.WORLD) {
-            if (Managers.DiscordSocket.isDisabled())
+            if (Managers.DiscordSocket.isDisabled()) {
+                GuildApi.LOGGER.info("on world");
                 onWorld = true;
-            else
-                Managers.DiscordSocket.emit("sync", (Ack) args -> onWorld = true);
-        } else
+            } else {
+                GuildApi.LOGGER.info("syncing with chat server");
+                Managers.DiscordSocket.emit("sync", (Ack) args -> {
+                    GuildApi.LOGGER.info("synced. on world");
+                    onWorld = true;
+                });
+            }
+        } else {
+            GuildApi.LOGGER.info("off world");
             onWorld = false;
+        }
     }
 
     public void initSocket() {
