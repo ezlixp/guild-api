@@ -69,6 +69,7 @@ public class GuildApiClient extends Api {
     private static final Text SUCCESS_MESSAGE = Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN));
     private static final String API_BASE_PATH = "api/v3/";
     private static GuildApiClient instance;
+
     public String guildPrefix = "";
     public String guildId = "none";
     private String token;
@@ -118,10 +119,13 @@ public class GuildApiClient extends Api {
     }
 
     protected void unready() {
-        wynnPlayerInfo = null;
+        guildPrefix = null;
         guildId = null;
         token = null;
         refreshToken = null;
+        refreshTokenObject = null;
+        wynnPlayerInfo = null;
+        if (server != null) server.stop(0);
         super.unready();
     }
 
