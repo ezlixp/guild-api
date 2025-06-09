@@ -55,7 +55,7 @@ public class WorldStateModel {
     }
 
     private void onTabListFooter(Text footer) {
-//        if (footer.equals(currentTabListFooter)) return;
+        if (footer.equals(currentTabListFooter)) return;
         currentTabListFooter = footer;
         if (footer.getLiteralString() != null) {
             if (HUB_NAME.matcher(Objects.requireNonNull(footer.getLiteralString())).find()) {
@@ -65,7 +65,8 @@ public class WorldStateModel {
     }
 
     private void onPlayerTeleport(Vec3d newpos) {
-        if (Math.abs(newpos.x - CLASS_SELECT_POSITION.x) < 0.01 && Math.abs(newpos.y - CLASS_SELECT_POSITION.y) < 0.01 && Math.abs(newpos.z - CLASS_SELECT_POSITION.z) < 0.01) {
+        // this is for the /class area
+        if (Math.abs(newpos.x - CLASS_SELECT_POSITION.x) < 0.01 && Math.abs(newpos.y - CLASS_SELECT_POSITION.y) < 5 && Math.abs(newpos.z - CLASS_SELECT_POSITION.z) < 0.01) {
             setState(WorldState.WORLD);
         }
     }
