@@ -10,6 +10,7 @@ public class ColourUtils {
     public static Style GOLD = getColourStyle(Formatting.GOLD);
     public static Style AQUA = getColourStyle(Formatting.AQUA);
     public static Style LIGHT_PURPLE = getColourStyle(Formatting.LIGHT_PURPLE);
+    public static Style DARK_PURPLE = getColourStyle(Formatting.DARK_PURPLE);
 
     public static Style getColourStyle(Formatting formatting) {
         return Style.EMPTY.withColor(formatting);

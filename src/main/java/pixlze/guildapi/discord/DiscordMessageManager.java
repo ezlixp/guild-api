@@ -1,8 +1,11 @@
 package pixlze.guildapi.discord;
 
+import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import pixlze.guildapi.core.components.Manager;
 import pixlze.guildapi.screens.discord.widgets.DiscordChatWidget;
+import pixlze.guildapi.utils.ColourUtils;
+import pixlze.guildapi.utils.text.FontUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +30,12 @@ public class DiscordMessageManager extends Manager {
         if (curDiscordChat != null) {
             if (confirmed && !unconfirmedIndex.isEmpty() && author.equals(messages.get(unconfirmedIndex.getFirst())
                     .getLeft()) && content.equals(messages.get(unconfirmedIndex.getFirst()).getRight())) {
+                // confirming message
                 if (curDiscordChat.getEntryCount() > unconfirmedIndex.getFirst())
                     curDiscordChat.getEntry(unconfirmedIndex.getFirst()).confirm();
                 unconfirmedIndex.removeFirst();
             } else {
+                // new message, potentially unconfirmed
                 messages.add(new Pair<>(author, content));
                 addDiscordMessage(curDiscordChat, author, content, confirmed);
             }
@@ -66,6 +71,16 @@ public class DiscordMessageManager extends Manager {
 
     public String stripIllegal(String input) {
         return input.replaceAll("[\u200C\uE087\uE013\u2064\uE071\uE012\uE000\uE089\uE088\uE07F\uE08B\uE07E\uE080ÁÀ֎]", "");
+    }
+
+    /** still needs prepend and highlighting **/
+    public Text toDiscordMessage(String author, String content) {
+        return Text.empty().append(FontUtils.BannerPillFont.parseStringWithFill("discord")
+                        .fillStyle(ColourUtils.LIGHT_PURPLE)).append(" ")
+                .append(Text.literal(author)
+                        .fillStyle(ColourUtils.LIGHT_PURPLE).append(": "))
+                .append(Text.literal(content)
+                        .setStyle(ColourUtils.LIGHT_PURPLE));
     }
 
     @Override

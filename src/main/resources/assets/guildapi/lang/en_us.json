@@ -4,5 +4,5 @@
   "feature.guildapi.discordBridge.useGui.name": "Use Toasts",
   "feature.guildapi.discordBridge.useGui.description": "Should discord bridging messages be shown through a toast instead of in chat?",
   "feature.guildapi.discordBridge.highlight.name": "Highlighted Phrases",
-  "feature.guildapi.discordBridge.highlight.description": "Enter phrases separated by \",\" (no spaces) to highlight in the discord bridge."
+  "feature.guildapi.discordBridge.highlight.description": "Enter phrases separated by \",\" (no spaces) to highlight in the discord bridge. These will only be highlighted in purple discord messages."
 }

@@ -5,11 +5,11 @@ import net.minecraft.client.toast.SystemToast;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.json.JSONObject;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Feature;
+import pixlze.guildapi.core.components.Handlers;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.config.Config;
 import pixlze.guildapi.core.config.Configurable;
@@ -18,8 +18,8 @@ import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.core.handlers.discord.event.S2CSocketEvents;
 import pixlze.guildapi.discord.DiscordMessageManager;
 import pixlze.guildapi.mc.mixin.accessors.SystemToastInvoker;
+import pixlze.guildapi.utils.ColourUtils;
 import pixlze.guildapi.utils.McUtils;
-import pixlze.guildapi.utils.text.FontUtils;
 import pixlze.guildapi.utils.text.TextUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
 import pixlze.guildapi.utils.type.Prepend;
@@ -145,28 +145,23 @@ public class DiscordBridgeFeature extends Feature {
             try {
                 String author = message.get("Author").toString();
                 String content = message.get("Content").toString();
-                McUtils.sendLocalMessage(Text.empty().append(FontUtils.BannerPillFont.parseStringWithFill("discord")
-                                .fillStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE))).append(" ")
-                        .append(Text.literal(highlightMessage(author))
-                                .fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE)).append(": "))
-                        .append(Text.literal(highlightMessage(content))
-                                .setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), true);
+                McUtils.sendLocalMessage(Managers.Discord.toDiscordMessage(highlightMessage(author), highlightMessage(content)), Prepend.GUILD.getWithStyle(ColourUtils.DARK_PURPLE), true);
                 Managers.Discord.newMessage(message.get("Author").toString(), message.get("Content").toString(), true, DiscordMessageManager.DISCORD_MESSAGE);
             } catch (Exception e) {
                 GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
             }
         } else {
             try {
-                Text description = Text.literal(message.get("Content").toString());
+                String author = message.get("Author").toString();
+                String content = message.get("Content").toString();
                 TextRenderer textRenderer = McUtils.mc().textRenderer;
-                List<OrderedText> lines = textRenderer.wrapLines(description, (int) (McUtils.mc().getWindow()
+                List<OrderedText> lines = textRenderer.wrapLines(Text.literal(highlightMessage(content)), (int) (McUtils.mc().getWindow()
                         .getScaledWidth() * 0.25));
                 Objects.requireNonNull(textRenderer);
                 int width = Math.max(50, lines.stream().mapToInt(textRenderer::getWidth).max()
                         .orElse((int) (McUtils.mc().getWindow().getScaledWidth() * 0.25)));
                 McUtils.mc().getToastManager()
-                        .add(SystemToastInvoker.create(SystemToast.Type.PERIODIC_NOTIFICATION, Text.literal(message.get("Author")
-                                .toString()), lines, width + 30));
+                        .add(SystemToastInvoker.create(SystemToast.Type.PERIODIC_NOTIFICATION, Text.literal(highlightMessage(author)), lines, width + 30));
                 Managers.Discord.newMessage(message.get("Author").toString(), message.get("Content").toString(), true, DiscordMessageManager.DISCORD_MESSAGE);
             } catch (Exception e) {
                 GuildApi.LOGGER.info("discord message toast error: {} {}", e, e.getMessage());
@@ -184,12 +179,15 @@ public class DiscordBridgeFeature extends Feature {
             if (matcher.find()) {
                 String pill = matcher.group("pill");
                 String leftover = message.substring(pill.length());
-                McUtils.sendLocalMessage(Text.empty()
+                Text mirrored = Text.empty()
                         .append(Text.literal(pill).setStyle(Style.EMPTY.withFont(Identifier.of("banner/pill"))))
-                        .append(Text.literal(leftover).setStyle(Style.EMPTY)), Prepend.GUILD.get(), true);
+                        .append(Text.literal(leftover).setStyle(Style.EMPTY));
+                McUtils.sendLocalMessage(mirrored, Prepend.GUILD.get(), true);
+                Handlers.Chat.postChatLine(mirrored);
                 Managers.Discord.newMessage(matcher.group("header"), matcher.group("content"), true, DiscordMessageManager.GUILD_MESSAGE);
             } else {
                 McUtils.sendLocalMessage(Text.literal(message), Prepend.GUILD.get(), true);
+                Handlers.Chat.postChatLine(Text.literal(message));
                 Managers.Discord.newMessage("⚠ Info", message, true, DiscordMessageManager.GUILD_MESSAGE);
             }
         }
