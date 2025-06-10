@@ -7,6 +7,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.mc.mixin.accessors.ChatHudAccessorInvoker;
 import pixlze.guildapi.utils.text.TextUtils;
 import pixlze.guildapi.utils.type.Prepend;
@@ -44,6 +45,11 @@ public class McUtils {
         if (wynncraftStyle) withPrepend = TextUtils.toBlockMessage(withPrepend, prepend.getStyle());
         Prepend.linesSinceBadge += ChatMessages.breakRenderedChatMessageLines(withPrepend, chatHudAccessorInvoker.invokeGetWidth(), MinecraftClient.getInstance().textRenderer)
                 .size();
+        if (player() == null) {
+            Text finalWithPrepend = withPrepend.copy();
+            Managers.Net.join.addTask(() -> player().sendMessage(finalWithPrepend, false));
+            return;
+        }
         player().sendMessage(withPrepend, false);
     }
 

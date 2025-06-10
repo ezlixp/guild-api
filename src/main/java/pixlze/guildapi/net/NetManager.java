@@ -15,7 +15,7 @@ import java.util.Map;
 public class NetManager extends Manager {
     public static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
     private final Map<String, Api> apis = new HashMap<>();
-    private final WynnJoinApi join = new WynnJoinApi();
+    public final WynnJoinApi join = new WynnJoinApi();
     public final WynnApiClient wynn = new WynnApiClient();
     public final GuildApiClient guild = new GuildApiClient();
 
