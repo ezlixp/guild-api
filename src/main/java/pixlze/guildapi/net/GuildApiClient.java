@@ -212,7 +212,7 @@ public class GuildApiClient extends Api {
                 promptLogin();
             }
             try {
-                String html = "You can now close this window and return to the minecraft";
+                String html = "You may now close this window and return to Minecraft";
                 byte[] bytes = html.getBytes(StandardCharsets.UTF_8);
                 exchange.getResponseHeaders().add("Content-Type", "text/plain; charset=UTF-8");
                 exchange.sendResponseHeaders(200, bytes.length);
