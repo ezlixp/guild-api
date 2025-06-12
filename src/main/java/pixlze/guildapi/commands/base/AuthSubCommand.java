@@ -17,8 +17,7 @@ public class AuthSubCommand extends ClientCommand {
     @Override
     protected LiteralArgumentBuilder<FabricClientCommandSource> getCommand(LiteralArgumentBuilder<FabricClientCommandSource> base) {
         return base.executes((context) -> {
-            if (Managers.Net.guild.isDisabled()) {
-                Managers.Net.guild.login();
+            if (Managers.Net.guild.isDisabled() && Managers.Net.guild.login() != 1) {
                 return Command.SINGLE_SUCCESS;
             }
             McUtils.sendLocalMessage(Text.literal("§aYou are already logged in!"), Prepend.DEFAULT.get(), false);

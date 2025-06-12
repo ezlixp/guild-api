@@ -150,13 +150,16 @@ public class GuildApiClient extends Api {
         McUtils.sendLocalMessage(LINK_MESSAGE, Prepend.DEFAULT.get(), false);
     }
 
-    public void login() {
+    public int login() {
         if (missingDeps > 0) {
             McUtils.sendLocalMessage(Text.literal("§eCould not log in at this time. Please wait a few minutes for the Wynncraft API to update and try again."), Prepend.GUILD.getWithStyle(ColourUtils.YELLOW), true);
-            return;
+            return -1;
         }
         if (server != null) server.stop(0);
-        if (fetchGuildServerToken()) return;
+        if (fetchGuildServerToken()) {
+            super.enable();
+            return 1;
+        }
         CompletableFuture<Pair<String, String>> tokenRequest = new CompletableFuture<>();
         try {
             startLocalServer(tokenRequest);
@@ -176,6 +179,7 @@ public class GuildApiClient extends Api {
             successMessage();
             super.enable();
         });
+        return 0;
     }
 
     private void handleHttpCallback(HttpExchange exchange, CompletableFuture<Pair<String, String>> tokenRequest) {
