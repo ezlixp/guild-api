@@ -157,6 +157,10 @@ public class GuildApiClient extends Api {
             return -1;
         }
         if (server != null) server.stop(0);
+        if (!checkGuildExists()) {
+            McUtils.sendLocalMessage(Text.literal("§eGuild api has not been set up for your guild. Check the modrinth for further instructions."), Prepend.GUILD.get(), false);
+            return -1;
+        }
         if (fetchGuildServerToken()) {
             super.enable();
             return 1;
@@ -330,6 +334,17 @@ public class GuildApiClient extends Api {
             return;
         }
         callback.complete(response);
+    }
+
+    private boolean checkGuildExists() {
+        try {
+            HttpResponse<String> res = get("guilds/tomes/" + guildId, true).get();
+            if (res.statusCode() / 100 == 2)
+                return true;
+        } catch (Exception e) {
+            GuildApi.LOGGER.error("check guild exists error: {} {}", e, e.getMessage());
+        }
+        return false;
     }
 
     public CompletableFuture<HttpResponse<String>> get(String path, boolean skipDisableCheck) {

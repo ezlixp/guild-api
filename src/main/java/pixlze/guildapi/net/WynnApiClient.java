@@ -86,7 +86,7 @@ public class WynnApiClient extends Api {
             wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
 
             if (expectedGuild != null && !expectedGuild.equals(name)) {
-                tryNewGuild();
+                tryNewGuild(10000);
                 return;
             }
 
@@ -127,7 +127,7 @@ public class WynnApiClient extends Api {
         }
     }
 
-    private void tryNewGuild() {
+    private void tryNewGuild(int sleepTime) {
         // stops any current running lock threads
         if (lockThread != null)
             lockThread.interrupt();
@@ -139,7 +139,7 @@ public class WynnApiClient extends Api {
             reloading = true;
 
             try {
-                Thread.sleep(125000);
+                Thread.sleep(sleepTime);
             } catch (InterruptedException e) {
                 GuildApi.LOGGER.warn("wynnapi lock error: {} {}", e, e.getMessage());
                 return;
@@ -161,7 +161,7 @@ public class WynnApiClient extends Api {
             Managers.DiscordSocket.disable();
 
             this.expectedGuild = newGuild;
-            tryNewGuild();
+            tryNewGuild(125000);
         }
     }
 }
