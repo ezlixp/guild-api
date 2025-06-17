@@ -346,7 +346,7 @@ public class GuildApiClient extends Api {
         CompletableFuture<HttpResponse<String>> response = tryToken(builder);
         response.whenCompleteAsync((res, exception) -> {
                     if (GuildApi.isTesting())
-                        GuildApi.LOGGER.info("api GET completed: res {} exception {}", res.body(), exception);
+                        GuildApi.LOGGER.info("api GET completed: res {} exception {}", res, exception);
                     applyCallback(out, res, exception);
                 }
         );
@@ -371,7 +371,7 @@ public class GuildApiClient extends Api {
         CompletableFuture<HttpResponse<String>> response = tryToken(builder);
         response.whenCompleteAsync((res, exception) -> {
             if (GuildApi.isTesting())
-                GuildApi.LOGGER.info("api POST completed: res {} exception {}", res.body(), exception);
+                GuildApi.LOGGER.info("api POST completed: res {} exception {}", res, exception);
             applyCallback(out, res, exception);
         });
         return out;
@@ -393,7 +393,7 @@ public class GuildApiClient extends Api {
         CompletableFuture<HttpResponse<String>> response = tryToken(builder);
         response.whenCompleteAsync((res, exception) -> {
             if (GuildApi.isTesting())
-                GuildApi.LOGGER.info("api DELETE completed: res {} exception {}", res.body(), exception);
+                GuildApi.LOGGER.info("api DELETE completed: res {} exception {}", res, exception);
             applyCallback(out, res, exception);
         });
         return out;
