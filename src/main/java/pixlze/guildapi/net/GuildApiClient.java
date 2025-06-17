@@ -300,8 +300,8 @@ public class GuildApiClient extends Api {
     private boolean fetchGuildServerToken() {
         try {
             JsonObject requestBody = new JsonObject();
-            requestBody.add("grant_type", Managers.Json.toJsonElement("refresh_token"));
-            requestBody.add("refreshToken", Managers.Json.toJsonElement(refreshToken));
+            requestBody.addProperty("grant_type", "refresh_token");
+            requestBody.addProperty("refreshToken", refreshToken);
             HttpRequest.Builder builder = HttpRequest.newBuilder()
                     .uri(URI.create(baseURL + API_BASE_PATH + "auth/get-token"))
                     .header("Content-Type", "application/json")
