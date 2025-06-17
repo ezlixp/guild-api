@@ -106,7 +106,8 @@ public class GuildApiClient extends Api {
         guildId = wynnPlayerInfo.get("guild").getAsJsonObject().get("uuid").getAsString();
         try {
             refreshToken = refreshTokenObject.get("do not share").getAsString();
-            if (refreshToken.equals("new guild")) promptLink();
+            if (refreshToken.equals("new guild"))
+                McUtils.sendLocalMessage(LOGIN_MESSAGE_NEW, Prepend.DEFAULT.get(), false);
             else if (!fetchGuildServerToken())
                 promptLogin();
             else this.enable();
