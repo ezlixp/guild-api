@@ -36,8 +36,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import static pixlze.guildapi.GuildApi.MOD_VERSION;
-
 public class GuildApiClient extends Api {
     private static final File CACHE_DIR = GuildApi.getModStorageDir("apicache");
     private static final int PORT = 24242;
@@ -45,26 +43,25 @@ public class GuildApiClient extends Api {
     private static final String REDIRECT_URI = "http://localhost:" + PORT + CALLBACK_PATH;
     private static final String CLIENT_ID = "1252463028025426031";
     private static final String UNLINKED_ERROR = "Could not validate account linking.";
-    private static final Text LOGIN_MESSAGE_NEW = Text.literal("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands.\n\n§aType /link in your guild's discord bridging channel, then, click ")
-            .append(Text.literal("here").setStyle(
-                    Style.EMPTY.withUnderline(true).withColor(ColourUtils.GREEN.getColor())
-                            .withClickEvent(
-                                    new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                            "/gapi login")))).
+    private static final Text CLICKABLE_HERE_GREEN = Text.literal("here").setStyle(Style.EMPTY.withUnderline(true).withColor(ColourUtils.GREEN.getColor())
+            .withClickEvent(
+                    new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                            "/gapi login")));
+    private static final Text CLICKABLE_HERE_RED = Text.literal("here").setStyle(Style.EMPTY.withUnderline(true).withColor(ColourUtils.RED.getColor())
+            .withClickEvent(
+                    new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                            "/gapi login")));
+    private static final Text GUILD_NOT_SET_UP = Text.literal("§eGuild api has not been set up for your guild. Please check the modrinth for further instructions.");
+    private static final Text LOGIN_MESSAGE_NEW = GuildApi.BASE_INFO.copy()
+            .append(Text.literal("§a\n\nType /link in your guild's discord bridging channel, then click"))
+            .append(CLICKABLE_HERE_GREEN).
             append(Text.literal("§a to authenticate and enable most features."));
+    private static final Text GUILD_NOT_SET_UP_NEW = GuildApi.BASE_INFO.copy().append("\n\n").append(GUILD_NOT_SET_UP);
     private static final Text LOGIN_MESSAGE = Text.literal("§cCould not connect to guild server. Click ")
-            .append(Text.literal("here").setStyle(
-                    Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
-                            .withClickEvent(
-                                    new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                            "/gapi login")))).
+            .append(CLICKABLE_HERE_RED).
             append(Text.literal("§c to re-authenticate."));
     private static final Text LINK_MESSAGE = Text.literal("§cYou have not linked a discord account. Type /link in your guild's discord bridging channel, then click ")
-            .append(Text.literal("here").setStyle(
-                    Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
-                            .withClickEvent(
-                                    new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                            "/gapi login")))).
+            .append(CLICKABLE_HERE_RED).
             append(Text.literal("§c to re-authenticate."));
     private static final Text SUCCESS_MESSAGE = Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN));
     private static final String API_BASE_PATH = "api/v3/";
@@ -106,14 +103,14 @@ public class GuildApiClient extends Api {
         guildId = wynnPlayerInfo.get("guild").getAsJsonObject().get("uuid").getAsString();
         try {
             refreshToken = refreshTokenObject.get("do not share").getAsString();
-            if (refreshToken.equals("new guild"))
-                McUtils.sendLocalMessage(LOGIN_MESSAGE_NEW, Prepend.DEFAULT.get(), false);
-            else if (!fetchGuildServerToken())
+            if (refreshToken != null && refreshToken.equals("new guild")) {
+                promptNew();
+            } else if (!fetchGuildServerToken())
                 promptLogin();
             else this.enable();
         } catch (NullPointerException exception) {
             GuildApi.LOGGER.warn("expected nullpointer: {} {}", exception, exception.getMessage());
-            McUtils.sendLocalMessage(LOGIN_MESSAGE_NEW, Prepend.DEFAULT.get(), false);
+            promptNew();
         } catch (Exception e) {
             ExceptionUtils.defaultException("login", e);
             promptLogin();
@@ -143,6 +140,14 @@ public class GuildApiClient extends Api {
         return token;
     }
 
+    public void promptNew() {
+        if (checkGuildExists())
+            McUtils.sendLocalMessage(LOGIN_MESSAGE_NEW, Prepend.DEFAULT.get(), false);
+        else {
+            McUtils.sendLocalMessage(GUILD_NOT_SET_UP_NEW, Prepend.DEFAULT.get(), false);
+        }
+    }
+
     public void promptLogin() {
         McUtils.sendLocalMessage(LOGIN_MESSAGE, Prepend.DEFAULT.get(), false);
     }
@@ -158,7 +163,7 @@ public class GuildApiClient extends Api {
         }
         if (server != null) server.stop(0);
         if (!checkGuildExists()) {
-            McUtils.sendLocalMessage(Text.literal("§eGuild api has not been set up for your guild. Check the modrinth for further instructions."), Prepend.GUILD.get(), false);
+            McUtils.sendLocalMessage(GUILD_NOT_SET_UP, Prepend.DEFAULT.get(), false);
             return -1;
         }
         if (fetchGuildServerToken()) {

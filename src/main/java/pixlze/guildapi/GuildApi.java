@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pixlze.guildapi.core.components.Handlers;
@@ -20,6 +21,7 @@ public class GuildApi implements ClientModInitializer {
     public static final String MOD_ID = "guildapi";
     public static final String MOD_STORAGE_ROOT = "guildapi";
     public static final Logger LOGGER = LoggerFactory.getLogger("guildapi");
+    public static final Text BASE_INFO = Text.literal("§a§lGuild API §r§av\" + MOD_VERSION + \" by §lpixlze§r§a.\\n§fType /guildapi help for a list of commands.\"");
     public static ModContainer MOD_CONTAINER;
     public static String MOD_VERSION;
     public static JsonObject secrets;
