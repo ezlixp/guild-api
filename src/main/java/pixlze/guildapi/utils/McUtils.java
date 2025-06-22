@@ -34,7 +34,7 @@ public class McUtils {
         return MinecraftClient.getInstance();
     }
 
-    public static void sendLocalMessage(Text message, MutableText prepend, boolean wynncraftStyle) {
+    public static synchronized void sendLocalMessage(Text message, MutableText prepend, boolean wynncraftStyle) {
         ChatHud chatHud = MinecraftClient.getInstance().inGameHud.getChatHud();
         ChatHudAccessorInvoker chatHudAccessorInvoker = (ChatHudAccessorInvoker) chatHud;
         Text withPrepend = Text.empty().append(prepend).append(message);

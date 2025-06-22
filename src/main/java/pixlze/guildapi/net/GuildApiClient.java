@@ -51,19 +51,23 @@ public class GuildApiClient extends Api {
             .withClickEvent(
                     new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                             "/gapi login")));
+
     private static final Text GUILD_NOT_SET_UP = Text.literal("§eGuild api has not been set up for your guild. Please check the modrinth for further instructions.");
+    private static final Text GUILD_NOT_SET_UP_NEW = GuildApi.BASE_INFO.copy().append("\n\n").append(GUILD_NOT_SET_UP);
+
+    private static final Text LOGIN_MESSAGE = Text.literal("§cCould not connect to guild server. Click ")
+            .append(CLICKABLE_HERE_RED).
+            append(Text.literal("§c to re-authenticate."));
     private static final Text LOGIN_MESSAGE_NEW = GuildApi.BASE_INFO.copy()
             .append(Text.literal("§a\n\nType /link in your guild's discord bridging channel, then click"))
             .append(CLICKABLE_HERE_GREEN).
             append(Text.literal("§a to authenticate and enable most features."));
-    private static final Text GUILD_NOT_SET_UP_NEW = GuildApi.BASE_INFO.copy().append("\n\n").append(GUILD_NOT_SET_UP);
-    private static final Text LOGIN_MESSAGE = Text.literal("§cCould not connect to guild server. Click ")
-            .append(CLICKABLE_HERE_RED).
-            append(Text.literal("§c to re-authenticate."));
+
     private static final Text LINK_MESSAGE = Text.literal("§cYou have not linked a discord account. Type /link in your guild's discord bridging channel, then click ")
             .append(CLICKABLE_HERE_RED).
             append(Text.literal("§c to re-authenticate."));
     private static final Text SUCCESS_MESSAGE = Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN));
+
     private static final String API_BASE_PATH = "api/v3/";
     private static GuildApiClient instance;
 

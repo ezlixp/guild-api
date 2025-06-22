@@ -21,7 +21,7 @@ public class GuildApi implements ClientModInitializer {
     public static final String MOD_ID = "guildapi";
     public static final String MOD_STORAGE_ROOT = "guildapi";
     public static final Logger LOGGER = LoggerFactory.getLogger("guildapi");
-    public static final Text BASE_INFO = Text.literal("§a§lGuild API §r§av\" + MOD_VERSION + \" by §lpixlze§r§a.\\n§fType /guildapi help for a list of commands.\"");
+    public static Text BASE_INFO;
     public static ModContainer MOD_CONTAINER;
     public static String MOD_VERSION;
     public static JsonObject secrets;
@@ -46,6 +46,7 @@ public class GuildApi implements ClientModInitializer {
         if (FabricLoader.getInstance().getModContainer(MOD_ID).isPresent()) {
             MOD_CONTAINER = FabricLoader.getInstance().getModContainer(MOD_ID).get();
             MOD_VERSION = MOD_CONTAINER.getMetadata().getVersion().getFriendlyString();
+            BASE_INFO = Text.literal("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands.");
         }
 
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("secrets.json");
