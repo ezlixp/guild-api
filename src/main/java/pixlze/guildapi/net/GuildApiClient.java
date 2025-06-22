@@ -338,7 +338,7 @@ public class GuildApiClient extends Api {
 
     private boolean checkGuildExists() {
         try {
-            HttpResponse<String> res = get("guilds/tomes/" + guildId, true).get();
+            HttpResponse<String> res = get("guilds/" + guildId, true).get();
             if (res.statusCode() / 100 == 2)
                 return true;
         } catch (Exception e) {
