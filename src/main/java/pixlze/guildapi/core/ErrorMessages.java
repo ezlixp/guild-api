@@ -8,6 +8,7 @@ public class ErrorMessages {
     public static final String NO_TOKEN = "No token provided.";
     public static final String NO_REFRESH = "No refresh token provided.";
     public static final String UNPRIVILEGED_TOKEN = "Token does not have access to selected resource.";
+    public static final String BANNED = "You are banned.";
 
     // blocked list
     public static final String FULL_BLOCKED_LIST = "The blocked user list is currently full.";

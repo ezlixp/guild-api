@@ -108,6 +108,10 @@ public abstract class AbstractSocketManager extends Manager {
                     String message = error.getString("message");
                     if (message.equals(ErrorMessages.INVALID_TOKEN) || message.equals(ErrorMessages.NO_TOKEN))
                         options.extraHeaders.put("Authorization", Collections.singletonList("bearer " + getToken()));
+                    else if (message.equals(ErrorMessages.BANNED)) {
+                        McUtils.sendLocalMessage(Text.literal("§cYou are banned from connecting to the chat server."), Prepend.GUILD.getWithStyle(ColourUtils.RED), true);
+                        return;
+                    }
                 } catch (Exception e) {
                     GuildApi.LOGGER.error("connect error: {} {}", e, e.getMessage());
                 }
