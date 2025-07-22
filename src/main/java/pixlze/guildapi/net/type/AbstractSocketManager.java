@@ -131,8 +131,13 @@ public abstract class AbstractSocketManager extends Manager {
 
         registerListener(Socket.EVENT_CONNECT, (args) -> {
             McUtils.sendLocalMessage(Text.literal("§aSuccessfully connected to chat server."),
-                    Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)), true);
+                    Prepend.GUILD.getWithStyle(ColourUtils.GREEN), true);
             firstConnect = false;
+        });
+
+        registerListener("error", (err) -> {
+            McUtils.sendLocalMessage(Text.literal("§e" + err[0]), Prepend.GUILD.getWithStyle(ColourUtils.RED), true);
+            GuildApi.LOGGER.info("{} this an error", err);
         });
     }
 

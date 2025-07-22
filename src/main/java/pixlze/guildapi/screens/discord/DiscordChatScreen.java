@@ -11,8 +11,6 @@ import pixlze.guildapi.discord.DiscordMessageManager;
 import pixlze.guildapi.screens.discord.widgets.DiscordChatWidget;
 import pixlze.guildapi.utils.McUtils;
 
-import java.util.Map;
-
 public class DiscordChatScreen extends Screen {
     private final Screen parent;
     public final ThreePartsLayoutWidget layout = new ThreePartsLayoutWidget(this);
@@ -93,7 +91,6 @@ public class DiscordChatScreen extends Screen {
             String content = Managers.Discord.stripIllegal(discordInput.getText());
             if (content.isBlank()) return true;
             Managers.DiscordSocket.emit("discordOnlyWynnMessage", author + ": " + content);
-            Managers.DiscordSocket.emit("discordMessage", Map.of("Author", author, "Content", content, "WynnGuildId", Managers.Net.guild.guildId));
             Managers.Discord.newMessage(author, content, false, DiscordMessageManager.DISCORD_MESSAGE);
             discordInput.setText("");
             this.body.setScrollY(this.body.getMaxScrollY());

@@ -202,10 +202,10 @@ public class GuildApiClient extends Api {
         String code = params.get("code");
 
         JsonObject requestBody = new JsonObject();
-        requestBody.add("grant_type", Managers.Json.toJsonElement("authorization_code"));
+        requestBody.add("grantType", Managers.Json.toJsonElement("authorization_code"));
         requestBody.add("code", Managers.Json.toJsonElement(code));
         requestBody.add("mcUsername", Managers.Json.toJsonElement(McUtils.playerName()));
-        post("auth/get-token", requestBody, true).whenCompleteAsync((res, exception) -> {
+        post("auth/token", requestBody, true).whenCompleteAsync((res, exception) -> {
             try {
                 NetUtils.applyDefaultCallback(res, exception, (resOK) -> {
                             JsonObject resBody = resOK.getAsJsonObject();
@@ -309,10 +309,10 @@ public class GuildApiClient extends Api {
     private boolean fetchGuildServerToken() {
         try {
             JsonObject requestBody = new JsonObject();
-            requestBody.addProperty("grant_type", "refresh_token");
+            requestBody.addProperty("grantType", "refresh_token");
             requestBody.addProperty("refreshToken", refreshToken);
             HttpRequest.Builder builder = HttpRequest.newBuilder()
-                    .uri(URI.create(baseURL + API_BASE_PATH + "auth/get-token"))
+                    .uri(URI.create(baseURL + API_BASE_PATH + "auth/token"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()));
             if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);

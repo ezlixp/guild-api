@@ -17,7 +17,6 @@ import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.util.List;
-import java.util.Map;
 
 public class DiscordBridgeCommand extends ClientCommand {
     public DiscordBridgeCommand() {
@@ -48,7 +47,6 @@ public class DiscordBridgeCommand extends ClientCommand {
                                 return 0;
                             }
                             Managers.DiscordSocket.emit("discordOnlyWynnMessage", McUtils.playerName() + ": " + message);
-                            Managers.DiscordSocket.emit("discordMessage", Map.of("Author", McUtils.playerName(), "Content", message, "WynnGuildId", Managers.Net.guild.guildId));
                             return Command.SINGLE_SUCCESS;
                         }))
                 .executes(context -> {
