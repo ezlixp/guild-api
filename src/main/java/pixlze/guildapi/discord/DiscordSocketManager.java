@@ -51,7 +51,7 @@ public class DiscordSocketManager extends AbstractSocketManager {
 
     @Override
     protected String getToken() {
-        return Managers.Net.guild.getToken(false);
+        return Managers.Net.guild.getToken(true);
     }
 
     @Override
