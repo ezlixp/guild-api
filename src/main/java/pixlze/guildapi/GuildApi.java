@@ -24,7 +24,6 @@ public class GuildApi implements ClientModInitializer {
     public static Text BASE_INFO;
     public static ModContainer MOD_CONTAINER;
     public static String MOD_VERSION;
-    public static JsonObject secrets;
     private static boolean development;
 
     public static File getModStorageDir(String dirName) {
@@ -48,14 +47,6 @@ public class GuildApi implements ClientModInitializer {
             MOD_VERSION = MOD_CONTAINER.getMetadata().getVersion().getFriendlyString();
             BASE_INFO = Text.literal("§a§lGuild API §r§av" + MOD_VERSION + " by §lpixlze§r§a.\n§fType /guildapi help for a list of commands.");
         }
-
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("secrets.json");
-        if (inputStream == null) {
-            GuildApi.LOGGER.error("secret variables could not be loaded");
-        } else {
-            secrets = JsonParser.parseReader(new InputStreamReader(inputStream)).getAsJsonObject();
-        }
-
 
         Handlers.init();
         Managers.init();
