@@ -19,7 +19,7 @@ public class SocketEventHandler extends Handler {
         if (args[0] instanceof JSONObject data) {
             try {
                 GuildApi.LOGGER.info("received discord {}", data.get("Content").toString());
-                if (data.get("Content").toString().isBlank() || Models.DiscordMessage.isBlocked(data.get("Author")
+                if (data.get("Content").toString().isBlank() || Models.DiscordMessage.isBlocked(data.get("DiscordUsername")
                         .toString().split(" ")[0])) return;
                 S2CSocketEvents.DISCORD_MESSAGE.invoker().interact(data);
             } catch (Exception e) {

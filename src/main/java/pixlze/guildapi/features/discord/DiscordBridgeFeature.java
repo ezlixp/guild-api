@@ -141,9 +141,10 @@ public class DiscordBridgeFeature extends Feature {
             GuildApi.LOGGER.warn("received discord message with disabled feature.");
             return;
         }
-        String username, content, discord;
+        String username = null, content, discord;
         try {
-             username = message.get("McUsername").toString();
+             if (message.get("McUsername") != null)
+                 username = message.get("McUsername").toString();
              content = message.get("Content").toString();
              discord = message.get("DiscordUsername").toString();
              if (discord.equals("@none")) discord = "";
@@ -152,7 +153,7 @@ public class DiscordBridgeFeature extends Feature {
             return;
         }
 
-        String combined = Managers.Discord.addDiscord(username, discord);
+        String combined = Managers.Discord.addDiscord(username != null ? username : discord, discord);
         if (!useGui.getValue()) {
                 McUtils.sendLocalMessage(Managers.Discord.toDiscordMessage(highlightMessage(Managers.Discord.parse(combined)),  highlightMessage(content)), Prepend.GUILD.getWithStyle(ColourUtils.DARK_PURPLE), true);
         } else {
