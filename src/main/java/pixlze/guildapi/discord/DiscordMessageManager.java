@@ -2,6 +2,7 @@ package pixlze.guildapi.discord;
 
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
+import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Manager;
 import pixlze.guildapi.screens.discord.widgets.DiscordChatWidget;
 import pixlze.guildapi.utils.ColourUtils;
@@ -22,14 +23,17 @@ public class DiscordMessageManager extends Manager {
         super(List.of());
     }
 
-    // TODO: add timestamps, and add unconfirmed messages (greyed out)
+    // TODO: add timestamps, probably use enum for type
+    public synchronized void newMessage(String author, String discord, String content, boolean confirmed, String type) {
+        newMessage(addDiscord(author, discord), content, confirmed, type);
+    }
     public synchronized void newMessage(String author, String content, boolean confirmed, String type) {
         content = stripIllegal(content);
         if (!confirmed) unconfirmedIndex.add(messages.size());
         author = type + author;
         if (curDiscordChat != null) {
-            if (confirmed && !unconfirmedIndex.isEmpty() && author.equals(messages.get(unconfirmedIndex.getFirst())
-                    .getLeft()) && content.equals(messages.get(unconfirmedIndex.getFirst()).getRight())) {
+            if (confirmed && !unconfirmedIndex.isEmpty() && author.split("/")[0].equals(messages.get(unconfirmedIndex.getFirst())
+                    .getLeft().split("/")[0]) && content.equals(messages.get(unconfirmedIndex.getFirst()).getRight())) {
                 // confirming message
                 if (curDiscordChat.getEntryCount() > unconfirmedIndex.getFirst())
                     curDiscordChat.getEntry(unconfirmedIndex.getFirst()).confirm();
@@ -49,10 +53,10 @@ public class DiscordMessageManager extends Manager {
         for (int i = 0; i < messages.size(); i++) {
             Pair<String, String> message = messages.get(i);
             if (unconfirmedI < unconfirmedIndex.size() && i == unconfirmedIndex.get(unconfirmedI)) {
-                addDiscordMessage(body, message.getLeft(), message.getRight(), false);
+                addDiscordMessage(body, parse(message.getLeft()), message.getRight(), false);
                 ++unconfirmedI;
             } else
-                addDiscordMessage(body, message.getLeft(), message.getRight(), true);
+                addDiscordMessage(body, parse(message.getLeft()), message.getRight(), true);
         }
     }
 
@@ -62,7 +66,7 @@ public class DiscordMessageManager extends Manager {
     }
 
     private synchronized void addDiscordMessage(DiscordChatWidget body, String author, String content, boolean confirmed) {
-        body.addMessage(author.substring(2), content, confirmed, author.startsWith(GUILD_MESSAGE));
+        body.addMessage(parse(author.substring(2)), content, confirmed, author.startsWith(GUILD_MESSAGE));
     }
 
     public void setDiscordChat(DiscordChatWidget to) {
@@ -81,6 +85,24 @@ public class DiscordMessageManager extends Manager {
                         .fillStyle(ColourUtils.LIGHT_PURPLE).append(": "))
                 .append(Text.literal(content)
                         .setStyle(ColourUtils.LIGHT_PURPLE));
+    }
+
+    public String addDiscord(String str, String discord) {
+        if (discord.isBlank() || discord.equals("@none")) return str + "/";
+        return str + "/" + discord;
+    }
+
+    public String parse(String author) {
+        // TODO implement config for how discord should be displayed here
+        String[] parts = author.split("/");
+        if (parts.length > 2) {
+            GuildApi.LOGGER.warn("malformed author: {}", author);
+            return author;
+        }
+        String username = parts[0];
+        String discord = parts.length == 2 ? parts[1] : "";
+        if (discord.equals("@me")) discord = "";
+        return username + (discord.isBlank() ? "" : "/§o" + discord);
     }
 
     @Override

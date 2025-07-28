@@ -91,7 +91,7 @@ public class DiscordChatScreen extends Screen {
             String content = Managers.Discord.stripIllegal(discordInput.getText());
             if (content.isBlank()) return true;
             Managers.DiscordSocket.emit("discordOnlyWynnMessage", author + ": " + content);
-            Managers.Discord.newMessage(author, content, false, DiscordMessageManager.DISCORD_MESSAGE);
+            Managers.Discord.newMessage(author, "@me", content, false, DiscordMessageManager.DISCORD_MESSAGE);
             discordInput.setText("");
             this.body.setScrollY(this.body.getMaxScrollY());
             return true;

@@ -141,19 +141,21 @@ public class DiscordBridgeFeature extends Feature {
             GuildApi.LOGGER.warn("received discord message with disabled feature.");
             return;
         }
+        String username, content, discord;
+        try {
+             username = message.get("McUsername").toString();
+             content = message.get("Content").toString();
+             discord = message.get("DiscordUsername").toString();
+             if (discord.equals("@none")) discord = "";
+        } catch (Exception e) {
+            GuildApi.LOGGER.info("discord message extract: {} {}", e, e.getMessage());
+            return;
+        }
+
+        String combined = Managers.Discord.addDiscord(username, discord);
         if (!useGui.getValue()) {
-            try {
-                String author = message.get("Author").toString();
-                String content = message.get("Content").toString();
-                McUtils.sendLocalMessage(Managers.Discord.toDiscordMessage(highlightMessage(author), highlightMessage(content)), Prepend.GUILD.getWithStyle(ColourUtils.DARK_PURPLE), true);
-                Managers.Discord.newMessage(message.get("Author").toString(), message.get("Content").toString(), true, DiscordMessageManager.DISCORD_MESSAGE);
-            } catch (Exception e) {
-                GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
-            }
+                McUtils.sendLocalMessage(Managers.Discord.toDiscordMessage(highlightMessage(Managers.Discord.parse(combined)),  highlightMessage(content)), Prepend.GUILD.getWithStyle(ColourUtils.DARK_PURPLE), true);
         } else {
-            try {
-                String author = message.get("Author").toString();
-                String content = message.get("Content").toString();
                 TextRenderer textRenderer = McUtils.mc().textRenderer;
                 List<OrderedText> lines = textRenderer.wrapLines(Text.literal(highlightMessage(content)), (int) (McUtils.mc().getWindow()
                         .getScaledWidth() * 0.25));
@@ -161,12 +163,10 @@ public class DiscordBridgeFeature extends Feature {
                 int width = Math.max(50, lines.stream().mapToInt(textRenderer::getWidth).max()
                         .orElse((int) (McUtils.mc().getWindow().getScaledWidth() * 0.25)));
                 McUtils.mc().getToastManager()
-                        .add(SystemToastInvoker.create(SystemToast.Type.PERIODIC_NOTIFICATION, Text.literal(highlightMessage(author)), lines, width + 30));
-                Managers.Discord.newMessage(message.get("Author").toString(), message.get("Content").toString(), true, DiscordMessageManager.DISCORD_MESSAGE);
-            } catch (Exception e) {
-                GuildApi.LOGGER.info("discord message toast error: {} {}", e, e.getMessage());
-            }
+                        .add(SystemToastInvoker.create(SystemToast.Type.PERIODIC_NOTIFICATION, Text.literal(highlightMessage(Managers.Discord.parse(combined))), lines, width + 30));
         }
+
+        Managers.Discord.newMessage(username, discord, content, true, DiscordMessageManager.DISCORD_MESSAGE);
     }
 
     private void onWynnMirror(String message) {
@@ -188,7 +188,7 @@ public class DiscordBridgeFeature extends Feature {
             } else {
                 McUtils.sendLocalMessage(Text.literal(message), Prepend.GUILD.get(), true);
                 Handlers.Chat.postChatLine(Text.literal(message));
-                Managers.Discord.newMessage("⚠ Info", message, true, DiscordMessageManager.GUILD_MESSAGE);
+                Managers.Discord.newMessage("⚠ Info",  message, true, DiscordMessageManager.GUILD_MESSAGE);
             }
         }
     }
