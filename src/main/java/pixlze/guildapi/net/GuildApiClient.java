@@ -59,7 +59,7 @@ public class GuildApiClient extends Api {
             .append(CLICKABLE_HERE_RED).
             append(Text.literal("§c to re-authenticate."));
     private static final Text LOGIN_MESSAGE_NEW = GuildApi.BASE_INFO.copy()
-            .append(Text.literal("§a\n\nType /link in your guild's discord bridging channel, then click"))
+            .append(Text.literal("§a\n\nType /link in your guild's discord bridging channel, then click "))
             .append(CLICKABLE_HERE_GREEN).
             append(Text.literal("§a to authenticate and enable most features."));
 
