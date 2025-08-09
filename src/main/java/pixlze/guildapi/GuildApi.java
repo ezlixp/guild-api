@@ -35,7 +35,7 @@ public class GuildApi implements ClientModInitializer {
     }
 
     public static boolean isTesting() {
-        return true;
+        return false;
     }
 
     @Override
