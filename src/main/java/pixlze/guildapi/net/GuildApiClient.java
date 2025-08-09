@@ -437,6 +437,7 @@ public class GuildApiClient extends Api {
         Managers.Json.saveJsonAsFile(refreshTokenFile, refreshTokenObject);
     }
 
+
     /** only used for test command */
     public void resetToken() {
         this.token = null;
