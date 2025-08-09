@@ -1,49 +1,137 @@
 package pixlze.guildapi.net;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Pair;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.components.Managers;
+import pixlze.guildapi.core.ErrorMessages;
+import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.net.type.Api;
-import pixlze.guildapi.utils.JsonUtils;
+import pixlze.guildapi.utils.ColourUtils;
+import pixlze.guildapi.utils.ExceptionUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.NetUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
+import java.awt.*;
+import java.io.File;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class GuildApiClient extends Api {
+    private static final File CACHE_DIR = GuildApi.getModStorageDir("apicache");
+    private static final int PORT = 24242;
+    private static final String CALLBACK_PATH = "/callback/";
+    private static final String REDIRECT_URI = "http://localhost:" + PORT + CALLBACK_PATH;
+    private static final String CLIENT_ID = "1252463028025426031";
+    private static final String UNLINKED_ERROR = "Could not validate account linking.";
+    private static final Text CLICKABLE_HERE_GREEN = Text.literal("here").setStyle(Style.EMPTY.withUnderline(true).withColor(ColourUtils.GREEN.getColor())
+            .withClickEvent(
+                    new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                            "/gapi login")));
+    private static final Text CLICKABLE_HERE_RED = Text.literal("here").setStyle(Style.EMPTY.withUnderline(true).withColor(ColourUtils.RED.getColor())
+            .withClickEvent(
+                    new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                            "/gapi login")));
+
+    private static final Text GUILD_NOT_SET_UP = Text.literal("§eGuild api has not been set up for your guild. Please check the modrinth for further instructions.");
+    private static final Text GUILD_NOT_SET_UP_NEW = GuildApi.BASE_INFO.copy().append("\n\n").append(GUILD_NOT_SET_UP);
+
+    private static final Text LOGIN_MESSAGE = Text.literal("§cCould not connect to guild server. Click ")
+            .append(CLICKABLE_HERE_RED).
+            append(Text.literal("§c to re-authenticate."));
+    private static final Text LOGIN_MESSAGE_NEW = GuildApi.BASE_INFO.copy()
+            .append(Text.literal("§a\n\nType /link in your guild's discord bridging channel, then click "))
+            .append(CLICKABLE_HERE_GREEN).
+            append(Text.literal("§a to authenticate and enable most features."));
+
+    private static final Text LINK_MESSAGE = Text.literal("§cYou have not linked a discord account. Type /link in your guild's discord bridging channel, then click ")
+            .append(CLICKABLE_HERE_RED).
+            append(Text.literal("§c to re-authenticate."));
+    private static final Text SUCCESS_MESSAGE = Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN));
+
+    private static final String API_BASE_PATH = "api/v3/";
     private static GuildApiClient instance;
-    private final Text retryMessage = Text.literal("Could not connect to guild server. Click ")
-            .setStyle(Style.EMPTY.withColor(Formatting.RED))
-            .append(Text.literal("here").setStyle(
-                    Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
-                            .withClickEvent(
-                                    new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                            "/retryLastFailed")))).
-            append(Text.literal(" to retry.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.RED)));
-    private final Text successMessage = Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN));
-    private final String apiBasePath = "api/v2/";
+
     public String guildPrefix = "";
     public String guildId = "none";
     private String token;
-    private JsonElement validationKey;
+    private String refreshToken;
+    private JsonObject refreshTokenObject;
+    private final File refreshTokenFile;
     private JsonObject wynnPlayerInfo;
+    private HttpServer server;
 
     public GuildApiClient() {
-        super("guild", List.of(WynnApiClient.class));
+        super("guild", List.of(WynnApiClient.class, WynnJoinApi.class));
         instance = this;
+        baseURL = "https://ico-server.onrender.com/";
+        refreshTokenFile = new File(CACHE_DIR, "webapi.json");
+
+    }
+
+
+    @Override
+    public void init() {
+        try {
+            refreshTokenObject = Managers.Json.loadJsonFromFile(refreshTokenFile).getAsJsonObject();
+        } catch (Exception e) {
+            GuildApi.LOGGER.warn("refresh token load error: {} {}", e, e.getMessage());
+            refreshTokenObject = new JsonObject();
+        }
+    }
+
+    @Override
+    protected void ready() {
+        wynnPlayerInfo = Managers.Net.wynn.wynnPlayerInfo;
+        guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
+        guildId = wynnPlayerInfo.get("guild").getAsJsonObject().get("uuid").getAsString();
+        try {
+            refreshToken = refreshTokenObject.get("do not share").getAsString();
+            if (refreshToken != null && refreshToken.equals("new guild")) {
+                promptNew();
+            } else if (!fetchGuildServerToken())
+                promptLogin();
+            else this.enable();
+        } catch (NullPointerException exception) {
+            GuildApi.LOGGER.warn("expected nullpointer: {} {}", exception, exception.getMessage());
+            promptNew();
+        } catch (Exception e) {
+            ExceptionUtils.defaultException("login", e);
+            promptLogin();
+        }
+    }
+
+    protected void unready() {
+        guildPrefix = null;
+        guildId = null;
+        token = null;
+        refreshToken = null;
+        if (Managers.Net.wynn.isDisabled()) {
+            refreshTokenObject = new JsonObject();
+            refreshTokenObject.addProperty("do not share", "new guild");
+        }
+        wynnPlayerInfo = null;
+        if (server != null) server.stop(0);
+        super.unready();
     }
 
     public static GuildApiClient getInstance() {
@@ -51,125 +139,142 @@ public class GuildApiClient extends Api {
     }
 
     public String getToken(boolean refresh) {
-        if (token == null || refresh) getGuildServerToken();
+        if (token == null || refresh) fetchGuildServerToken();
         return token;
     }
 
-    private boolean getGuildServerToken() {
-        if (wynnPlayerInfo != null) {
-            try {
-                JsonObject requestBody = new JsonObject();
-                requestBody.add("validationKey", validationKey);
-                requestBody.add("username", JsonUtils.toJsonElement(McUtils.playerName()));
-                HttpRequest.Builder builder = HttpRequest.newBuilder()
-                        .uri(URI.create(baseURL + apiBasePath + "guilds/auth/get-token/" + guildId))
-                        .header("Content-Type", "application/json")
-                        .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()));
-                if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
-                HttpResponse<String> response = NetManager.HTTP_CLIENT.send(builder.build(),
-                        HttpResponse.BodyHandlers.ofString());
-                if (response.statusCode() / 100 == 2) {
-                    GuildApi.LOGGER.info("Api token refresh call successful: {}", response.statusCode());
-                    JsonObject responseObject = JsonUtils.toJsonObject(response.body());
-                    token = responseObject.get("token").getAsString();
-                    return true;
-                }
-                GuildApi.LOGGER.error("get token error: status {} {}", response.statusCode(), response.body());
-            } catch (JsonSyntaxException e) {
-                GuildApi.LOGGER.error("Json syntax exception: {}", (Object) e.getStackTrace());
-            } catch (Exception e) {
-                GuildApi.LOGGER.error("get token error: {}", e.getMessage());
+    public void promptNew() {
+        if (checkGuildExists())
+            McUtils.sendLocalMessage(LOGIN_MESSAGE_NEW, Prepend.DEFAULT.get(), false);
+        else {
+            McUtils.sendLocalMessage(GUILD_NOT_SET_UP_NEW, Prepend.DEFAULT.get(), false);
+        }
+    }
+
+    public void promptLogin() {
+        McUtils.sendLocalMessage(LOGIN_MESSAGE, Prepend.DEFAULT.get(), false);
+    }
+
+    public void promptLink() {
+        McUtils.sendLocalMessage(LINK_MESSAGE, Prepend.DEFAULT.get(), false);
+    }
+
+    public int login() {
+        if (missingDeps > 0) {
+            McUtils.sendLocalMessage(Text.literal("§eCould not log in at this time. Please wait a few minutes for the Wynncraft API to update and try again."), Prepend.GUILD.getWithStyle(ColourUtils.YELLOW), true);
+            return -1;
+        }
+        if (server != null) server.stop(0);
+        if (!checkGuildExists()) {
+            McUtils.sendLocalMessage(GUILD_NOT_SET_UP, Prepend.DEFAULT.get(), false);
+            return -1;
+        }
+        if (fetchGuildServerToken()) {
+            super.enable();
+            return 1;
+        }
+        CompletableFuture<Pair<String, String>> tokenRequest = new CompletableFuture<>();
+        try {
+            startLocalServer(tokenRequest);
+            openInBrowser();
+        } catch (Exception e) {
+            GuildApi.LOGGER.error("its cooked: {} {}", e, e.getMessage());
+            tokenRequest.completeExceptionally(e);
+        }
+        tokenRequest.whenCompleteAsync((res, exception) -> {
+            if (exception != null) {
+                GuildApi.LOGGER.error("login error: {} {}", exception, exception.getMessage());
+                return;
             }
-        } else {
-            GuildApi.LOGGER.warn("wynn player not initialized, can't refresh token");
-        }
-        return false;
+            this.token = res.getLeft();
+            this.refreshToken = res.getRight();
+            this.saveRefreshToken();
+            successMessage();
+            super.enable();
+        });
+        return 0;
     }
 
-    private void applyCallback(CompletableFuture<HttpResponse<String>> callback, HttpResponse<String> response, Throwable exception) {
-        if (exception != null) {
-            assert Formatting.RED.getColorValue() != null;
-//            McUtils.sendLocalMessage(Text.literal("Fatal API error: " + exception + " " + exception.getMessage())
-//                    .withColor(Formatting.RED.getColorValue()), Prepend.DEFAULT.get(), false);
-            callback.completeExceptionally(exception);
-            return;
-        }
-        callback.complete(response);
-    }
+    private void handleHttpCallback(HttpExchange exchange, CompletableFuture<Pair<String, String>> tokenRequest) {
+        String query = exchange.getRequestURI().getQuery();
+        Map<String, String> params = parseQuery(query);
+        String code = params.get("code");
 
-    public CompletableFuture<HttpResponse<String>> get(String path) {
-        path = apiBasePath + path;
-        CompletableFuture<HttpResponse<String>> out = new CompletableFuture<>();
-        if (isDisabled()) {
-            GuildApi.LOGGER.warn("skipped api get because api service were crashed");
-            McUtils.sendLocalMessage(Text.literal("A request was skipped.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
-            return out;
-        }
-        HttpRequest.Builder builder = HttpRequest.newBuilder().uri(URI.create(baseURL + path))
-                .header("Authorization", "bearer " + token).GET();
-        if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
-        CompletableFuture<HttpResponse<String>> response = tryToken(builder);
-        response.whenCompleteAsync((res, exception) -> {
-                    GuildApi.LOGGER.info("api GET completed: res {} exception {}", res, exception);
-                    applyCallback(out, res, exception);
-                    // else {
-//                        if (res.statusCode() / 100 == 2)
-//                            out.complete(JsonUtils.toJsonElement(res.body()));
-//                        else {
-//                            if (handleError)
-//                                checkError(res, builder, false);
-//                            else out.complete(JsonUtils.toJsonElement(res.body()));
-//                        }
-//                    }
+        JsonObject requestBody = new JsonObject();
+        requestBody.add("grantType", Managers.Json.toJsonElement("authorization_code"));
+        requestBody.add("code", Managers.Json.toJsonElement(code));
+        requestBody.add("mcUsername", Managers.Json.toJsonElement(McUtils.playerName()));
+        post("auth/token", requestBody, true).whenCompleteAsync((res, exception) -> {
+            try {
+                NetUtils.applyDefaultCallback(res, exception, (resOK) -> {
+                            JsonObject resBody = resOK.getAsJsonObject();
+                            tokenRequest.complete(new Pair<>(resBody.get("token").getAsString(), resBody.get("refreshToken").getAsString()));
+                        },
+                        (error) -> {
+                            if (error.equals(UNLINKED_ERROR)) {
+                                promptLink();
+                            } else {
+                                McUtils.sendLocalMessage(
+                                        Text.literal("§cSomething went wrong authenticating. Click ").append(
+                                                Text.literal("here").setStyle(
+                                                        Style.EMPTY.withUnderline(true).withColor(Formatting.RED).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/gapi login")))
+                                        ).append(Text.literal("§c to try again.")),
+                                        Prepend.DEFAULT.get(), false
+                                );
+                            }
+                        }
+                );
+            } catch (Exception e) {
+                GuildApi.LOGGER.error("handle login callback failed: {} {}", e, e.getMessage());
+                promptLogin();
+            }
+            try {
+                String html = "You may now close this window and return to Minecraft";
+                byte[] bytes = html.getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().add("Content-Type", "text/plain; charset=UTF-8");
+                exchange.sendResponseHeaders(200, bytes.length);
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(bytes);
                 }
-        );
-        return out;
+            } catch (Exception e) {
+                ExceptionUtils.defaultException("send success", e);
+            }
+            exchange.getHttpContext().getServer().stop(0);
+        });
     }
 
-    public CompletableFuture<HttpResponse<String>> post(String path, JsonObject body) {
-        CompletableFuture<HttpResponse<String>> out = new CompletableFuture<>();
-        path = apiBasePath + path;
-        if (isDisabled()) {
-            GuildApi.LOGGER.warn("skipped api post because api service were crashed");
-            McUtils.sendLocalMessage(Text.literal("A request was skipped.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
-            return out;
+    private Map<String, String> parseQuery(String q) {
+        Map<String, String> m = new HashMap<>();
+        if (q == null) return m;
+        try {
+            for (String pair : q.split("&")) {
+                String[] kv = pair.split("=", 2);
+                m.put(URLDecoder.decode(kv[0], StandardCharsets.UTF_8),
+                        kv.length > 1 ? URLDecoder.decode(kv[1], StandardCharsets.UTF_8):"");
+            }
+        } catch (Exception e) {
+            GuildApi.LOGGER.error("parse query error: {} {}", e, e.getMessage());
         }
-        HttpRequest.Builder builder = HttpRequest.newBuilder()
-                .uri(URI.create(baseURL + path))
-                .headers("Content-Type", "application/json", "Authorization",
-                        "bearer " + token)
-                .POST(HttpRequest.BodyPublishers.ofString(body.toString()));
-        if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
-        CompletableFuture<HttpResponse<String>> response = tryToken(builder);
-        response.whenCompleteAsync((res, exception) -> {
-            GuildApi.LOGGER.info("api POST completed: res {} exception {}", res, exception);
-            applyCallback(out, res, exception);
-        });
-        return out;
+        return m;
     }
 
-    public CompletableFuture<HttpResponse<String>> delete(String path) {
-        CompletableFuture<HttpResponse<String>> out = new CompletableFuture<>();
-        path = apiBasePath + path;
-        if (isDisabled()) {
-            GuildApi.LOGGER.warn("Skipped api delete because api services weren't enabled");
-            McUtils.sendLocalMessage(Text.literal("A request was skipped.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
-            return out;
-        }
-        HttpRequest.Builder builder = HttpRequest.newBuilder()
-                .uri(URI.create(baseURL + path))
-                .header("Authorization", "bearer " + token)
-                .DELETE();
-        if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
-        CompletableFuture<HttpResponse<String>> response = tryToken(builder);
-        response.whenCompleteAsync((res, exception) -> {
-            GuildApi.LOGGER.info("api DELETE completed: res {} exception {}", res, exception);
-            applyCallback(out, res, exception);
-        });
-        return out;
+    private void openInBrowser() throws Exception {
+        String state = UUID.randomUUID().toString();
+        String authUrl = "https://discord.com/api/v10/oauth2/authorize"
+                + "?response_type=code"
+                + "&client_id=" + URLEncoder.encode(CLIENT_ID, StandardCharsets.UTF_8)
+                + "&redirect_uri=" + URLEncoder.encode(REDIRECT_URI, StandardCharsets.UTF_8)
+                + "&scope=" + URLEncoder.encode("identify", StandardCharsets.UTF_8)
+                + "&state=" + URLEncoder.encode(state, StandardCharsets.UTF_8);
+
+        Desktop.getDesktop().browse(new URI(authUrl));
+    }
+
+    private void startLocalServer(CompletableFuture<Pair<String, String>> tokenRequest) throws Exception {
+        server = HttpServer.create(new InetSocketAddress(PORT), 0);
+        server.createContext(CALLBACK_PATH, exchange -> handleHttpCallback(exchange, tokenRequest));
+        server.setExecutor(null);
+        server.start();
     }
 
     private CompletableFuture<HttpResponse<String>> tryToken(HttpRequest.Builder builder) {
@@ -179,9 +284,9 @@ public class GuildApiClient extends Api {
             if (exception != null) {
                 out.completeExceptionally(exception);
             } else {
-                if (res.statusCode() == 401) {
+                if (res.statusCode() == 400) {
                     GuildApi.LOGGER.info("Refreshing api token");
-                    if (!getGuildServerToken()) {
+                    if (!fetchGuildServerToken()) {
                         out.complete(res);
                         return;
                     }
@@ -200,83 +305,147 @@ public class GuildApiClient extends Api {
         return out;
     }
 
-    private void successMessage() {
-        McUtils.sendLocalMessage(successMessage, Prepend.DEFAULT.get(), false);
+    private boolean fetchGuildServerToken() {
+        try {
+            JsonObject requestBody = new JsonObject();
+            requestBody.addProperty("grantType", "refresh_token");
+            requestBody.addProperty("refreshToken", refreshToken);
+            HttpRequest.Builder builder = HttpRequest.newBuilder()
+                    .uri(URI.create(baseURL + API_BASE_PATH + "auth/token"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()));
+            if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
+            HttpResponse<String> response = NetManager.HTTP_CLIENT.send(builder.build(),
+                    HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() / 100 == 2) {
+                GuildApi.LOGGER.info("Api token refresh call successful: {}", response.statusCode());
+                JsonObject responseObject = Managers.Json.toJsonObject(response.body());
+                token = responseObject.get("token").getAsString();
+                refreshToken = responseObject.get("refreshToken").getAsString();
+                saveRefreshToken();
+                return true;
+            }
+            GuildApi.LOGGER.error("get token error: status {} {}", response.statusCode(), response.body());
+        } catch (JsonSyntaxException e) {
+            GuildApi.LOGGER.error("Json syntax exception: {}", (Object) e.getStackTrace());
+        } catch (Exception e) {
+            GuildApi.LOGGER.error("get token error: {}", e.getMessage());
+        }
+        if (!this.isDisabled())
+            Managers.Net.apiCrash(LOGIN_MESSAGE, this);
+        return false;
     }
 
+    private void applyCallback(CompletableFuture<HttpResponse<String>> callback, HttpResponse<String> response, Throwable exception) {
+        if (exception != null) {
+            callback.completeExceptionally(exception);
+            return;
+        }
+        callback.complete(response);
+    }
+
+    private boolean checkGuildExists() {
+        try {
+            HttpResponse<String> res = get("guilds/" + guildId, true).get();
+            if (res.statusCode() / 100 == 2)
+                return true;
+        } catch (Exception e) {
+            GuildApi.LOGGER.error("check guild exists error: {} {}", e, e.getMessage());
+        }
+        return false;
+    }
+
+    public CompletableFuture<HttpResponse<String>> get(String path, boolean skipDisableCheck) {
+        path = API_BASE_PATH + path;
+        CompletableFuture<HttpResponse<String>> out = new CompletableFuture<>();
+        if (isDisabled() && !skipDisableCheck) {
+            GuildApi.LOGGER.warn("skipped api call because not logged in");
+            promptLogin();
+            out.completeExceptionally(new Exception(ErrorMessages.API_DISABLED_ERROR));
+            return out;
+        }
+        HttpRequest.Builder builder = HttpRequest.newBuilder().uri(URI.create(baseURL + path))
+                .header("Authorization", "bearer " + token).GET();
+        if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
+        CompletableFuture<HttpResponse<String>> response = tryToken(builder);
+        response.whenCompleteAsync((res, exception) -> {
+                    if (GuildApi.isTesting())
+                        GuildApi.LOGGER.info("api GET completed: res {} exception {}", res, exception);
+                    applyCallback(out, res, exception);
+                }
+        );
+        return out;
+    }
+
+    public CompletableFuture<HttpResponse<String>> post(String path, JsonObject body, boolean skipDisableCheck) {
+        CompletableFuture<HttpResponse<String>> out = new CompletableFuture<>();
+        path = API_BASE_PATH + path;
+        if (isDisabled() && !skipDisableCheck) {
+            GuildApi.LOGGER.warn("skipped api post because api service were crashed");
+            promptLogin();
+            out.completeExceptionally(new Exception(ErrorMessages.API_DISABLED_ERROR));
+            return out;
+        }
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create(baseURL + path))
+                .headers("Content-Type", "application/json", "Authorization",
+                        "bearer " + token)
+                .POST(HttpRequest.BodyPublishers.ofString(body.toString()));
+        if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
+        CompletableFuture<HttpResponse<String>> response = tryToken(builder);
+        response.whenCompleteAsync((res, exception) -> {
+            if (GuildApi.isTesting())
+                GuildApi.LOGGER.info("api POST completed: res {} exception {}", res, exception);
+            applyCallback(out, res, exception);
+        });
+        return out;
+    }
+
+    public CompletableFuture<HttpResponse<String>> delete(String path) {
+        CompletableFuture<HttpResponse<String>> out = new CompletableFuture<>();
+        path = API_BASE_PATH + path;
+        if (isDisabled()) {
+            GuildApi.LOGGER.warn("Skipped api delete because api services weren't enabled");
+            promptLogin();
+            return out;
+        }
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create(baseURL + path))
+                .header("Authorization", "bearer " + token)
+                .DELETE();
+        if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
+        CompletableFuture<HttpResponse<String>> response = tryToken(builder);
+        response.whenCompleteAsync((res, exception) -> {
+            if (GuildApi.isTesting())
+                GuildApi.LOGGER.info("api DELETE completed: res {} exception {}", res, exception);
+            applyCallback(out, res, exception);
+        });
+        return out;
+    }
+
+
+    private void successMessage() {
+        McUtils.sendLocalMessage(SUCCESS_MESSAGE, Prepend.DEFAULT.get(), false);
+    }
 
     public String getBaseURL() {
         return baseURL;
     }
 
-    @Override
-    public void init() {
+    private void saveRefreshToken() {
+        this.refreshTokenObject.addProperty("do not share", refreshToken);
+        Managers.Json.saveJsonAsFile(refreshTokenFile, refreshTokenObject);
     }
 
-    @Override
-    protected void ready() {
-        wynnPlayerInfo = Managers.Net.wynn.wynnPlayerInfo;
-        try {
-            guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
-            guildId = wynnPlayerInfo.get("guild").getAsJsonObject().get("uuid").getAsString();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(GuildApi.secrets.get("url").getAsString() + "guild/id/" + guildId))
-                    .header("Authorization", "bearer " + GuildApi.secrets.get("password").getAsString())
-                    .GET()
-                    .build();
-            NetManager.HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                    .whenCompleteAsync((response, error) -> {
-                        try {
-                            NetUtils.applyDefaultCallback(response, error, (resOK) -> {
-                                JsonObject res = JsonUtils.toJsonObject(response.body());
-                                baseURL = GuildApi.isDevelopment() ? "http://localhost:3000/":"https://ico-server.onrender.com/";
-                                validationKey = res.get("validationKey");
-                                GuildApi.LOGGER.info("successfully loaded base url");
-                                super.enable();
-                            }, (e) -> {
-                                String guildString = null;
-                                if (wynnPlayerInfo.get("guild").isJsonObject()) {
-                                    guildString = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix")
-                                            .getAsString();
-                                }
-                                Managers.Net.apiCrash(Text.literal(
-                                                "Couldn't fetch base url for server of guild \"" + guildString + "\". " +
-                                                        "Talk to a chief about setting one up for your guild. If you believe this is a mistake, check logs for more details.")
-                                        .setStyle(Style.EMPTY.withColor(Formatting.RED)), this);
-                                GuildApi.LOGGER.error("Fetch guild api exception: {}", e);
-                            });
-                        } catch (Exception e) {
-                            String guildString = null;
-                            if (wynnPlayerInfo.get("guild").isJsonObject()) {
-                                guildString = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
-                            }
-                            Managers.Net.apiCrash(Text.literal(
-                                            "Couldn't fetch base url for server of guild \"" + guildString + "\". " +
-                                                    "Talk to a chief about setting one up for your guild. If you believe this is a mistake, check logs for more details.")
-                                    .setStyle(Style.EMPTY.withColor(Formatting.RED)), this);
-                            GuildApi.LOGGER.error("Fetch guild exception: {} {}", e, e.getMessage());
 
-                        }
-                    });
-        } catch (Exception e) {
-            String guildString = null;
-            if (wynnPlayerInfo.get("guild").isJsonObject()) {
-                guildString = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
-            }
-            Managers.Net.apiCrash(Text.literal(
-                            "Couldn't fetch base url for server of guild \"" + guildString + "\". " +
-                                    "Talk to a chief about setting one up for your guild.")
-                    .setStyle(Style.EMPTY.withColor(Formatting.RED)), this);
-        }
+    /** only used for test command */
+    public void resetToken() {
+        this.token = null;
     }
 
-    protected void unready() {
-        validationKey = null;
-        wynnPlayerInfo = null;
-        guildId = null;
-        baseURL = null;
-        token = null;
-        super.unready();
+    /** only used for test command */
+    public void resetRefreshToken() {
+        this.token = null;
+        this.refreshToken = null;
     }
-
 }

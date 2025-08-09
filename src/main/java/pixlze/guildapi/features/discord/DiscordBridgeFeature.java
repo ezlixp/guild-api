@@ -1,29 +1,31 @@
 package pixlze.guildapi.features.discord;
 
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import io.socket.client.Ack;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.minecraft.text.MutableText;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.toast.SystemToast;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import org.json.JSONArray;
+import net.minecraft.util.Identifier;
 import org.json.JSONObject;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.components.Feature;
-import pixlze.guildapi.components.Managers;
-import pixlze.guildapi.handlers.chat.event.ChatMessageReceived;
-import pixlze.guildapi.handlers.discord.event.S2CDiscordEvents;
-import pixlze.guildapi.net.SocketIOClient;
+import pixlze.guildapi.core.components.Feature;
+import pixlze.guildapi.core.components.Handlers;
+import pixlze.guildapi.core.components.Managers;
+import pixlze.guildapi.core.config.Config;
+import pixlze.guildapi.core.config.Configurable;
+import pixlze.guildapi.core.features.FeatureState;
+import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
+import pixlze.guildapi.core.handlers.discord.event.S2CSocketEvents;
+import pixlze.guildapi.discord.DiscordMessageManager;
+import pixlze.guildapi.mc.mixin.accessors.SystemToastInvoker;
+import pixlze.guildapi.utils.ColourUtils;
 import pixlze.guildapi.utils.McUtils;
-import pixlze.guildapi.utils.text.FontUtils;
 import pixlze.guildapi.utils.text.TextUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
 import pixlze.guildapi.utils.type.Prepend;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -32,7 +34,7 @@ public class DiscordBridgeFeature extends Feature {
     private final Pattern GUILD_PATTERN = Pattern.compile("^§[b8c]((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§[b8c] (?<content>.*)$");
     private final Pattern[] GUILD_WHITELIST_PATTERNS = Stream.of(
             // Basic guild chat message
-            "^.*§[38](?<header>.+?)(§[38])?:§[b8] (?<content>.*)$",
+            "^(?<pill>.*)§[38](?<header>.+?)(§[38])?:§[b8] (?<content>.*)$",
             // Guild raid finished
             "^§[e8](?<player1>.*?)§[b8], §[e8](?<player2>.*?)§[b8], §[e8](?<player3>.*?)§[b8], and §[e8](?<player4>.*?)§[b8] finished §[38](?<raid>.*?)§[b8].*$",
             // Giving out resources
@@ -86,88 +88,109 @@ public class DiscordBridgeFeature extends Feature {
             "^(?<guild1>.+?) formed an alliance with (?<guild2>.?)$",
             "^(?<username>.+?) revoked the alliance with (?<guild>.*?)$"
     ).map(Pattern::compile).toArray(Pattern[]::new);
-    private SocketIOClient socketIOClient;
+
+    public DiscordBridgeFeature() {
+        super("Discord Bridging");
+    }
+
+    @Configurable
+    public final Config<Boolean> useGui = new Config<>(false);
+
+    @Configurable
+    public final Config<String> highlight = new Config<>("");
 
     @Override
     public void init() {
-        socketIOClient = Managers.Net.socket;
-
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            dispatcher.register(ClientCommandManager.literal("discord")
-                    .then(ClientCommandManager.argument("message", StringArgumentType.greedyString())
-                            .executes((context) -> {
-                                String message = StringArgumentType.getString(context, "message");
-                                message = message.replaceAll("[\u200C\uE087\uE013\u2064\uE071\uE012\uE000\uE089\uE088\uE07F\uE08B\uE07E\uE080ÁÀ֎]", "");
-                                if (message.isBlank()) return 0;
-                                if (socketIOClient == null || socketIOClient.discordSocket == null) {
-                                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...")
-                                            .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
-                                    return 0;
-                                }
-                                if (!socketIOClient.discordSocket.connected()) {
-                                    McUtils.sendLocalMessage(Text.literal("Chat server not connected. Type /reconnect to try to connect.")
-                                            .setStyle(Style.EMPTY.withColor(Formatting.RED)), Prepend.DEFAULT.get(), false);
-                                    return 0;
-
-                                }
-                                socketIOClient.emit(socketIOClient.discordSocket, "discordOnlyWynnMessage", McUtils.playerName() + ": " + message);
-                                socketIOClient.emit(socketIOClient.discordSocket, "discordMessage", Map.of("Author", McUtils.playerName(), "Content", message, "WynnGuildId", Managers.Net.guild.guildId));
-                                return Command.SINGLE_SUCCESS;
-                            })));
-            dispatcher.register(ClientCommandManager.literal("dc").redirect(dispatcher.getRoot().getChild("discord")));
-
-            dispatcher.register(ClientCommandManager.literal("online").executes((context) -> {
-                if (socketIOClient == null || socketIOClient.discordSocket == null) {
-                    McUtils.sendLocalMessage(Text.literal("Still connecting to chat server...")
-                            .setStyle(Style.EMPTY.withColor(Formatting.YELLOW)), Prepend.DEFAULT.get(), false);
-                    return 0;
-                }
-                socketIOClient.emit(socketIOClient.discordSocket, "listOnline", (Ack) args -> {
-                    if (args[0] instanceof JSONArray data) {
-                        try {
-                            MutableText message = Text.literal("Online mod users: ");
-                            for (int i = 0; i < data.length(); i++) {
-                                message.append(data.getString(i));
-                                if (i != data.length() - 1) message.append(", ");
-                            }
-                            message.setStyle(Style.EMPTY.withColor(Formatting.GREEN));
-                            McUtils.sendLocalMessage(message, Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.GREEN)), true);
-                        } catch (Exception e) {
-                            GuildApi.LOGGER.error("error parsing online users: {} {}", e, e.getMessage());
-                        }
-                    }
-                });
-                return Command.SINGLE_SUCCESS;
-            }));
-        });
-
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
-        S2CDiscordEvents.MESSAGE.register(this::onDiscordMessage);
+        S2CSocketEvents.DISCORD_MESSAGE.register(this::onDiscordMessage);
+        S2CSocketEvents.WYNN_MIRROR.register(this::onWynnMirror);
+    }
+
+    @Override
+    public void onConfigUpdate(Config<?> config) {
+
+    }
+
+    @Override
+    public void onEnabled() {
+        Managers.DiscordSocket.initSocket();
+    }
+
+    @Override
+    public void onDisabled() {
+        Managers.DiscordSocket.disable();
+        Managers.Discord.clearMessages();
     }
 
     private void onWynnMessage(Text message) {
+        if (Managers.Feature.getFeatureState(this) == FeatureState.DISABLED) return;
         String m = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));
         if (GuildApi.isDevelopment()) m = m.replaceAll("&", "§");
         GuildApi.LOGGER.info("received: {}", m);
         Matcher guildMatcher = GUILD_PATTERN.matcher(m);
-        if (!m.contains("\uE003") && guildMatcher.find()) {
+        if (Managers.DiscordSocket.onWorld && !m.contains("\uE003") && guildMatcher.find()) {
             if (isGuildMessage(guildMatcher.group("content")))
-                socketIOClient.emit(socketIOClient.discordSocket, "wynnMessage", guildMatcher.group("content"));
+                Managers.DiscordSocket.emit("wynnMessage", guildMatcher.group("content"));
             else if (isHRMessage(guildMatcher.group("content")))
-                socketIOClient.emit(socketIOClient.discordSocket, "hrMessage", guildMatcher.group("content"));
+                Managers.DiscordSocket.emit("hrMessage", guildMatcher.group("content"));
         }
     }
 
     private void onDiscordMessage(JSONObject message) {
+        if (Managers.Feature.getFeatureState(this) == FeatureState.DISABLED) {
+            GuildApi.LOGGER.warn("received discord message with disabled feature.");
+            return;
+        }
+        String username = null, content, discord;
         try {
-            McUtils.sendLocalMessage(Text.empty().append(FontUtils.BannerPillFont.parseStringWithFill("discord")
-                            .fillStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE))).append(" ")
-                    .append(Text.literal(message.get("Author").toString())
-                            .fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE)).append(": "))
-                    .append(Text.literal(TextUtils.highlightUser(message.get("Content").toString()))
-                            .setStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE))), Prepend.GUILD.getWithStyle(Style.EMPTY.withColor(Formatting.DARK_PURPLE)), true);
+             if (message.get("McUsername") != null)
+                 username = message.get("McUsername").toString();
+             content = message.get("Content").toString();
+             discord = message.get("DiscordUsername").toString();
+             if (discord.equals("@none")) discord = "";
         } catch (Exception e) {
-            GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
+            GuildApi.LOGGER.info("discord message extract: {} {}", e, e.getMessage());
+            return;
+        }
+
+        String combined = Managers.Discord.addDiscord(username != null ? username : discord, discord);
+        if (!useGui.getValue()) {
+                McUtils.sendLocalMessage(Managers.Discord.toDiscordMessage(highlightMessage(Managers.Discord.parse(combined)),  highlightMessage(content)), Prepend.GUILD.getWithStyle(ColourUtils.DARK_PURPLE), true);
+        } else {
+                TextRenderer textRenderer = McUtils.mc().textRenderer;
+                List<OrderedText> lines = textRenderer.wrapLines(Text.literal(highlightMessage(content)), (int) (McUtils.mc().getWindow()
+                        .getScaledWidth() * 0.25));
+                Objects.requireNonNull(textRenderer);
+                int width = Math.max(50, lines.stream().mapToInt(textRenderer::getWidth).max()
+                        .orElse((int) (McUtils.mc().getWindow().getScaledWidth() * 0.25)));
+                McUtils.mc().getToastManager()
+                        .add(SystemToastInvoker.create(SystemToast.Type.PERIODIC_NOTIFICATION, Text.literal(highlightMessage(Managers.Discord.parse(combined))), lines, width + 30));
+        }
+
+        Managers.Discord.newMessage(username, discord, content, true, DiscordMessageManager.DISCORD_MESSAGE);
+    }
+
+    private void onWynnMirror(String message) {
+        if (Managers.Feature.getFeatureState(this) == FeatureState.DISABLED) {
+            GuildApi.LOGGER.warn("received wynn mirror with disabled feature.");
+            return;
+        }
+        if (!Managers.DiscordSocket.onWorld || GuildApi.isTesting()) {
+            Matcher matcher = GUILD_WHITELIST_PATTERNS[0].matcher(message);
+            if (matcher.find()) {
+                String pill = matcher.group("pill");
+                String leftover = message.substring(pill.length());
+                Text mirrored = Text.empty()
+                        .append(Text.literal(pill).setStyle(Style.EMPTY.withFont(Identifier.of("banner/pill"))))
+                        .append(Text.literal(leftover).setStyle(Style.EMPTY));
+                McUtils.sendLocalMessage(mirrored, Prepend.GUILD.get(), true);
+                Handlers.Chat.postChatLine(mirrored);
+                Managers.Discord.newMessage(matcher.group("header"), matcher.group("content"), true, DiscordMessageManager.GUILD_MESSAGE);
+            } else {
+                McUtils.sendLocalMessage(Text.literal(message), Prepend.GUILD.get(), true);
+                Handlers.Chat.postChatLine(Text.literal(message));
+                Managers.Discord.newMessage("⚠ Info",  message, true, DiscordMessageManager.GUILD_MESSAGE);
+            }
         }
     }
 
@@ -183,5 +206,35 @@ public class DiscordBridgeFeature extends Feature {
             if (hrMessagePatter.matcher(message).find()) return true;
         }
         return false;
+    }
+
+    public String highlightMessage(String message) {
+        String[] phrases = highlight.getValue().split(",");
+        int[] diff = new int[message.length() + 1];
+        for (String phrase : phrases) {
+            if (phrase.isBlank()) continue;
+            int index = 0;
+            while ((index = message.indexOf(phrase, index)) != -1) {
+                diff[index]++;
+                diff[index + phrase.length()]--;
+                index += phrase.length();
+            }
+        }
+
+        StringBuilder out = new StringBuilder();
+        boolean sectioned = false;
+        int sum = 0;
+        for (int i = 0; i < message.length(); i++) {
+            sum += diff[i];
+            if (sum > 0 && !sectioned) {
+                sectioned = true;
+                out.append("§e");
+            } else if (sum <= 0 && sectioned) {
+                sectioned = false;
+                out.append("§r");
+            }
+            out.append(message.charAt(i));
+        }
+        return out.toString();
     }
 }

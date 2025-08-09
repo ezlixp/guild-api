@@ -10,7 +10,7 @@ public abstract class Api {
     private final List<Class<? extends Api>> dependencies;
     protected String baseURL;
     private boolean enabled = false;
-    private int missingDeps;
+    protected int missingDeps;
 
     // TODO move api get posts here
     // TODO improve dependencies system to show which dependencies specifically are unloaded to ensure no duplications
@@ -74,5 +74,7 @@ public abstract class Api {
         return !enabled;
     }
 
-    public abstract void init();
+    public void init() {
+        this.ready();
+    }
 }

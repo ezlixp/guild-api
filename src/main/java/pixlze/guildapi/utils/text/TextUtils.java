@@ -36,6 +36,26 @@ public class TextUtils {
         return splitted;
     }
 
+    public static String wrapText(String text, int maxWidth) {
+        MinecraftClient client = McUtils.mc();
+        if (client == null || client.textRenderer == null) return text;
+
+        StringBuilder wrapped = new StringBuilder();
+        String[] words = text.split(" ");
+        StringBuilder line = new StringBuilder();
+
+        for (String word : words) {
+            if (client.textRenderer.getWidth(line + word) > maxWidth) {
+                wrapped.append(line).append("\n");
+                line = new StringBuilder();
+            }
+            line.append(word).append(" ");
+        }
+        wrapped.append(line); // Add last line
+
+        return wrapped.toString();
+    }
+
 
     public static String parseStyled(StringVisitable text, TextParseOptions options) {
         TextVisitors.first = true;
@@ -60,6 +80,11 @@ public class TextUtils {
         return out;
     }
 
+    public static boolean isFormatting(String text, int index) {
+        if (index + 1 >= text.length() || index < 0) return false;
+        return text.charAt(index) == '§' && Formatting.byCode(text.charAt(index + 1)) != null;
+    }
+
     public static Text toBlockMessage(Text text, Style prependStyle) {
         MinecraftClient client = MinecraftClient.getInstance();
         ChatHud chatHud = client.inGameHud.getChatHud();
@@ -76,6 +101,7 @@ public class TextUtils {
         return out;
     }
 
+    @Deprecated
     public static String highlightUser(String message) {
         return message.replaceAll("(?i)(" + McUtils.playerName() + ")", "§e$1§d");
     }
