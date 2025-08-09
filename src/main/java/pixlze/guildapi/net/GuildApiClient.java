@@ -269,6 +269,7 @@ public class GuildApiClient extends Api {
                 + "&state=" + URLEncoder.encode(state, StandardCharsets.UTF_8);
 
         Util.getOperatingSystem().open(new URI(authUrl));
+        McUtils.sendLocalMessage(Text.literal("Please check your browser..."), Prepend.DEFAULT.get(), false);
     }
 
     private void startLocalServer(CompletableFuture<Pair<String, String>> tokenRequest) throws Exception {
