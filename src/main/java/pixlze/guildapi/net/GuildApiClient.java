@@ -222,6 +222,7 @@ public class GuildApiClient extends Api {
                                         ).append(Text.literal("§c to try again.")),
                                         Prepend.DEFAULT.get(), false
                                 );
+                                tokenRequest.completeExceptionally(new Error(error));
                             }
                         }
                 );
