@@ -12,8 +12,8 @@ public enum Prepend {
     DEFAULT(Text.literal("[Guild API] ").setStyle(Style.EMPTY.withColor(Formatting.GOLD))),
     EMPTY(Text.empty()),
     GUILD(Text.literal("󏿼󏿿󏿾")
-            .append(" ").setStyle(Style.EMPTY.withFont(Identifier.of("chat")).withColor(Formatting.AQUA)), Text.literal("\uDAFF\uDFFC\uE001\uDB00\uDC06")
-            .append(" ").setStyle(Style.EMPTY.withFont(Identifier.of("chat")).withColor(Formatting.AQUA)));
+            .append(" ").setStyle(Style.EMPTY.withFont(Identifier.of("chat/prefix")).withColor(Formatting.AQUA)), Text.literal("\uDAFF\uDFFC\uE001\uDB00\uDC06")
+            .append(" ").setStyle(Style.EMPTY.withFont(Identifier.of("chat/prefix")).withColor(Formatting.AQUA)));
 
     public static String lastBadge = "";
     public static int linesSinceBadge = 0;
