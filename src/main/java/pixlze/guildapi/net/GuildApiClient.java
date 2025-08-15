@@ -9,6 +9,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
+import net.minecraft.util.Util;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.ErrorMessages;
 import pixlze.guildapi.core.components.Managers;
@@ -221,6 +222,7 @@ public class GuildApiClient extends Api {
                                         ).append(Text.literal("§c to try again.")),
                                         Prepend.DEFAULT.get(), false
                                 );
+                                tokenRequest.completeExceptionally(new Error(error));
                             }
                         }
                 );
@@ -267,7 +269,8 @@ public class GuildApiClient extends Api {
                 + "&scope=" + URLEncoder.encode("identify", StandardCharsets.UTF_8)
                 + "&state=" + URLEncoder.encode(state, StandardCharsets.UTF_8);
 
-        Desktop.getDesktop().browse(new URI(authUrl));
+        Util.getOperatingSystem().open(new URI(authUrl));
+        McUtils.sendLocalMessage(Text.literal("Please check your browser..."), Prepend.DEFAULT.get(), false);
     }
 
     private void startLocalServer(CompletableFuture<Pair<String, String>> tokenRequest) throws Exception {
