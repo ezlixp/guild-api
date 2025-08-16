@@ -126,23 +126,22 @@ public class TextUtils {
 
         private static void handleStylesWithHover(Style style, String asString) {
             assert style.getHoverEvent() != null;
-            if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text) {
-                List<Text> onHover = ((Text) Objects.requireNonNull(
-                        style.getHoverEvent().getValue(style.getHoverEvent().getAction()))).getSiblings();
-                if (asString.indexOf('/') == -1) {
-                    if (onHover != null) {
-                        if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(
-                                onHover.get(1).getString()).contains("nickname is")) {
-                            handleStyles(style.withItalic(false), onHover.getFirst().getString());
-                        } else if (!onHover.isEmpty() && onHover.getFirst().getString() != null && onHover.getFirst()
-                                .getString().contains("real username is")) {
-                            if (onHover.size() > 1) {
-                                handleStyles(style.withItalic(false), onHover.get(1).getString());
-                            } else {
-                                handleStyles(style.withItalic(false), onHover.getFirst().getSiblings().getFirst()
-                                        .getString());
-                            }
+            if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text hoverText) {
+                List<Text> siblings = hoverText.getSiblings();
+                if (siblings != null) {
+                    if (siblings.size() > 2 && siblings.get(1).getString() != null && Objects.requireNonNull(
+                            siblings.get(1).getString()).contains("nickname is")) {
+                        handleStyles(style.withItalic(false), siblings.getFirst().getString());
+                    } else if (!siblings.isEmpty() && siblings.getFirst().getString() != null && siblings.getFirst()
+                            .getString().contains("real username is")) {
+                        if (siblings.size() > 1) {
+                            handleStyles(style.withItalic(false), siblings.get(1).getString());
+                        } else {
+                            handleStyles(style.withItalic(false), siblings.getFirst().getSiblings().getFirst()
+                                    .getString());
                         }
+                    } else if (siblings.isEmpty()) {
+                        handleStyles(style, asString);
                     }
                 }
             } else {
