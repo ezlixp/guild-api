@@ -1,20 +1,19 @@
 package pixlze.guildapi.discord;
 
-import net.minecraft.text.Text;
-import net.minecraft.util.Pair;
-import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Manager;
+import pixlze.guildapi.core.components.Managers;
+import pixlze.guildapi.discord.type.Message;
+import pixlze.guildapi.features.discord.DiscordBridgeFeature;
 import pixlze.guildapi.screens.discord.widgets.DiscordChatWidget;
-import pixlze.guildapi.utils.ColourUtils;
-import pixlze.guildapi.utils.text.FontUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public class DiscordMessageManager extends Manager {
     public static final String GUILD_MESSAGE = "\uD83C\uDD56";
     public static final String DISCORD_MESSAGE = "\uD83C\uDD53";
-    private final List<Pair<String, String>> messages = new ArrayList<>();
+    private final List<Message> messages = new ArrayList<>();
     // 🅖 first means guild 🅓 first means discord
     private final ArrayList<Integer> unconfirmedIndex = new ArrayList<>();
     private DiscordChatWidget curDiscordChat;
@@ -23,40 +22,40 @@ public class DiscordMessageManager extends Manager {
         super(List.of());
     }
 
-    // TODO: add timestamps, probably use enum for type
-    public synchronized void newMessage(String author, String discord, String content, boolean confirmed, String type) {
-        newMessage(addDiscord(author, discord), content, confirmed, type);
+    public void newMessage(String header, String content, boolean isGuild, boolean confirmed) {
+        newMessage(header, "", content, isGuild, confirmed);
     }
-    public synchronized void newMessage(String author, String content, boolean confirmed, String type) {
+
+    public synchronized void newMessage(String mcUsername, String discord, String content, boolean isGuild, boolean confirmed) {
         content = stripIllegal(content);
         if (!confirmed) unconfirmedIndex.add(messages.size());
-        author = type + author;
+        Function<String, String> highlight = ((DiscordBridgeFeature) Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class))::highlightMessage;
+        Message message = new Message(mcUsername, discord, content, isGuild, highlight);
         if (curDiscordChat != null) {
-            if (confirmed && !unconfirmedIndex.isEmpty() && author.split("/")[0].equals(messages.get(unconfirmedIndex.getFirst())
-                    .getLeft().split("/")[0]) && content.equals(messages.get(unconfirmedIndex.getFirst()).getRight())) {
+            if (confirmed && !unconfirmedIndex.isEmpty() && message.equals(messages.get(unconfirmedIndex.getFirst()))) {
                 // confirming message
                 if (curDiscordChat.getEntryCount() > unconfirmedIndex.getFirst())
                     curDiscordChat.getEntry(unconfirmedIndex.getFirst()).confirm();
                 unconfirmedIndex.removeFirst();
             } else {
                 // new message, potentially unconfirmed
-                messages.add(new Pair<>(author, content));
-                addDiscordMessage(curDiscordChat, author, content, confirmed);
+                messages.add(message);
+                addDiscordMessage(curDiscordChat, message, confirmed);
             }
         } else {
-            messages.add(new Pair<>(author, content));
+            messages.add(new Message(mcUsername, discord, content, isGuild, highlight));
         }
     }
 
     public void addAll(DiscordChatWidget body) {
         int unconfirmedI = 0;
         for (int i = 0; i < messages.size(); i++) {
-            Pair<String, String> message = messages.get(i);
+            Message message = messages.get(i);
             if (unconfirmedI < unconfirmedIndex.size() && i == unconfirmedIndex.get(unconfirmedI)) {
-                addDiscordMessage(body, parse(message.getLeft()), message.getRight(), false);
+                addDiscordMessage(body, message, false);
                 ++unconfirmedI;
             } else
-                addDiscordMessage(body, parse(message.getLeft()), message.getRight(), true);
+                addDiscordMessage(body, message, true);
         }
     }
 
@@ -65,8 +64,8 @@ public class DiscordMessageManager extends Manager {
         unconfirmedIndex.clear();
     }
 
-    private synchronized void addDiscordMessage(DiscordChatWidget body, String author, String content, boolean confirmed) {
-        body.addMessage(parse(author.substring(2)), content, confirmed, author.startsWith(GUILD_MESSAGE));
+    private synchronized void addDiscordMessage(DiscordChatWidget body, Message message, boolean confirmed) {
+        body.addMessage(message, confirmed, message.isGuild());
     }
 
     public void setDiscordChat(DiscordChatWidget to) {
@@ -75,34 +74,6 @@ public class DiscordMessageManager extends Manager {
 
     public String stripIllegal(String input) {
         return input.replaceAll("[\u200C\uE087\uE013\u2064\uE071\uE012\uE000\uE089\uE088\uE07F\uE08B\uE07E\uE080ÁÀ֎]", "");
-    }
-
-    /** still needs prepend and highlighting **/
-    public Text toDiscordMessage(String author, String content) {
-        return Text.empty().append(FontUtils.BannerPillFont.parseStringWithFill("discord")
-                        .fillStyle(ColourUtils.LIGHT_PURPLE)).append(" ")
-                .append(Text.literal(author)
-                        .fillStyle(ColourUtils.LIGHT_PURPLE).append(": "))
-                .append(Text.literal(content)
-                        .setStyle(ColourUtils.LIGHT_PURPLE));
-    }
-
-    public String addDiscord(String str, String discord) {
-        if (discord.isBlank() || discord.equals("@none")) return str + "/";
-        return str + "/" + discord;
-    }
-
-    public String parse(String author) {
-        // TODO implement config for how discord should be displayed here
-        String[] parts = author.split("/");
-        if (parts.length > 2) {
-            GuildApi.LOGGER.warn("malformed author: {}", author);
-            return author;
-        }
-        String username = parts[0];
-        String discord = parts.length == 2 ? parts[1] : "";
-        if (discord.equals("@me")) discord = "";
-        return username + (discord.isBlank() ? "" : "/§o" + discord);
     }
 
     @Override
