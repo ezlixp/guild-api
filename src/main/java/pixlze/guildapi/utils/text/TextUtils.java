@@ -23,16 +23,23 @@ public class TextUtils {
 
     public static List<Text> splitLines(Text message) {
         ArrayList<Text> splitted = new ArrayList<>();
+        // If all content isn't in siblings, we can just keep it as it is.
+        if (!message.getContent().toString().equals("empty")) {
+            splitted.add(message);
+            return splitted;
+        }
         MutableText currentPart = Text.empty();
-        for (Text part : message.getWithStyle(message.getStyle())) {
-            if (part.getString().equals("\n")) {
-                splitted.add(currentPart);
-                currentPart = Text.empty();
+        // Use getsiblings isntead of message.getwithstyle since message.getwithstyle flattens
+        // all nested siblings. Chat screens are defined by \n's in top level and after the wardrobe update
+        // \n's appear in nested siblings which is an issue when they are flattened
+        for (Text part : message.getSiblings()) {
+            if (part.getString().isEmpty() || part.getString().equals("\n")) {
+                if (splitted.size() < 2) splitted.add(currentPart);
             } else {
                 currentPart.append(part);
             }
         }
-        if (!currentPart.equals(Text.empty())) splitted.add(currentPart);
+        if (!currentPart.getString().isEmpty() || splitted.size() < 2) splitted.add(currentPart);
         return splitted;
     }
 
