@@ -31,7 +31,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class DiscordBridgeFeature extends Feature {
-    private final Pattern GUILD_PATTERN = Pattern.compile("^§[b8c]((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§[b8c] (?<content>.*)$");
+    private final Pattern GUILD_PATTERN = Pattern.compile(
+            "^§.((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§. (?<content>.*)$");
     private final Pattern[] GUILD_WHITELIST_PATTERNS = Stream.of(
             // Basic guild chat message
             "^(?<pill>.*)§[38](?<header>.+?)(§[38])?:§[b8] (?<content>.*)$",
