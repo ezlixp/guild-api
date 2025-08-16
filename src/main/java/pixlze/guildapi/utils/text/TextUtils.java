@@ -161,6 +161,16 @@ public class TextUtils {
                 afterBlockMarker = true;
                 return;
             }
+            // This block is before styles are added so style codes are not added that would be styling empty strings
+            if (afterBlockMarker)
+                asString = asString.substring(1);
+            String toAppend = asString.replaceAll("\\n", options.newline)
+                    .replaceAll("§", options.formatCode);
+            if (toAppend.isBlank()) {
+                afterBlockMarker = false;
+                return;
+            }
+
             if (!afterBlockMarker) {
                 if (style.getColor() != null) {
                     int colorIndex = 0;
@@ -191,10 +201,8 @@ public class TextUtils {
                 }
             } else {
                 afterBlockMarker = false;
-                asString = asString.substring(1);
             }
-            TextVisitors.currentVisit.append(asString.replaceAll("\\n", options.newline)
-                    .replaceAll("§", options.formatCode));
+            TextVisitors.currentVisit.append(toAppend);
             if (first) first = false;
         }
     }
