@@ -166,7 +166,7 @@ public class TextUtils {
                 asString = asString.substring(1);
             String toAppend = asString.replaceAll("\\n", options.newline)
                     .replaceAll("§", options.formatCode);
-            if (toAppend.isBlank()) {
+            if (toAppend.isEmpty()) {
                 afterBlockMarker = false;
                 return;
             }
