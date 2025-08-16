@@ -47,7 +47,7 @@ public class RaidRewardsListClientCommand extends ListClientCommand {
             if (b.getRight().equals(sortMember)) return 1;
             return 0;
         });
-        MutableText out = Text.literal(listItem.getAsJsonObject().get("username")
+        MutableText out = Text.literal(listItem.getAsJsonObject().get("mcUsername")
                 .getAsString()).append(": ");
         for (int i = 0; i < components.size() - 1; i++) {
             out.append(components.get(i).getLeft()).append(" | ");

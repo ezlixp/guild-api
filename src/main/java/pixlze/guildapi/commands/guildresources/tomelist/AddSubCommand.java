@@ -22,7 +22,7 @@ class AddSubCommand extends ClientCommand {
     @Override
     protected LiteralArgumentBuilder<FabricClientCommandSource> getCommand(LiteralArgumentBuilder<FabricClientCommandSource> base) {
         return base.executes((context) -> {
-            Managers.Net.guild.post(ENDPOINT + Managers.Net.guild.guildId, Managers.Json.toJsonObject("{\"username\":\"" + McUtils.playerName() + "\"}"), false).whenCompleteAsync((res, exception) -> {
+            Managers.Net.guild.post(ENDPOINT + Managers.Net.guild.guildId, Managers.Json.toJsonObject("{\"mcUsername\":\"" + McUtils.playerName() + "\"}"), false).whenCompleteAsync((res, exception) -> {
                 try {
                     NetUtils.applyDefaultCallback(res, exception, (response) -> McUtils.sendLocalMessage(Text.literal("§aSuccessfully added to the tome queue"), Prepend.DEFAULT.get(), false),
                             (error) -> {
