@@ -139,8 +139,8 @@ public class TextUtils {
                     if (siblings.size() > 2 && siblings.get(1).getString() != null && Objects.requireNonNull(
                             siblings.get(1).getString()).contains("nickname is")) {
                         handleStyles(style.withItalic(false), siblings.getFirst().getString());
-                    } else if (!siblings.isEmpty() && siblings.getFirst().getString() != null && siblings.getFirst()
-                            .getString().contains("real username is")) {
+                    } else if (!siblings.isEmpty() && siblings.getFirst().getString() != null && (siblings.getFirst()
+                            .getString().contains("real username is")) || siblings.getFirst().getString().contains("real name is")) {
                         if (siblings.size() > 1) {
                             handleStyles(style.withItalic(false), siblings.get(1).getString());
                         } else {
