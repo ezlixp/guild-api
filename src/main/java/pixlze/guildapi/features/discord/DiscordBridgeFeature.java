@@ -144,7 +144,7 @@ public class DiscordBridgeFeature extends Feature {
         }
         String username = null, content, discord;
         try {
-            if (message.get("McUsername") != null)
+            if (message.has("McUsername"))
                 username = message.get("McUsername").toString();
             content = message.get("Content").toString();
             discord = message.get("DiscordUsername").toString();
