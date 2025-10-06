@@ -20,7 +20,6 @@ import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.NetUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
-import java.awt.*;
 import java.io.File;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -82,11 +81,10 @@ public class GuildApiClient extends Api {
     private HttpServer server;
 
     public GuildApiClient() {
-        super("guild", List.of(WynnApiClient.class, WynnJoinApi.class));
+        super("guild", List.of(WynnApiClient.class));
         instance = this;
         baseURL = "https://ico-server.onrender.com/";
         refreshTokenFile = new File(CACHE_DIR, "webapi.json");
-
     }
 
 
