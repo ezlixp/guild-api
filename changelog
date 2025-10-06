@@ -1,2 +1,5 @@
+### New Features
+- Change online status (currently only online or appear offline)
+
 ### Bug Fixes
 - Fixed unverified messages being dropped
