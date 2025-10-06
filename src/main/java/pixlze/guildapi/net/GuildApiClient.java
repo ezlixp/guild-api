@@ -356,6 +356,11 @@ public class GuildApiClient extends Api {
         return false;
     }
 
+    /**
+     * @param path             baseUrl + api/v_ + path. Should not begin with /
+     * @param skipDisableCheck whether to skip check for feature disabled. used for simple calls that don't need specific verification.
+     * @return a promise that completes when the request completes
+     */
     public CompletableFuture<HttpResponse<String>> get(String path, boolean skipDisableCheck) {
         path = API_BASE_PATH + path;
         CompletableFuture<HttpResponse<String>> out = new CompletableFuture<>();
