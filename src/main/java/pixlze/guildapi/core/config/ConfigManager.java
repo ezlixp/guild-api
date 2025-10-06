@@ -7,6 +7,7 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Feature;
 import pixlze.guildapi.core.components.Manager;
 import pixlze.guildapi.core.components.Managers;
+import pixlze.guildapi.utils.McUtils;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -46,10 +47,15 @@ public class ConfigManager extends Manager {
             JsonObject curConfig = new JsonObject();
             for (Config<?> config : entry.getValue()) {
                 config.applyPending();
-                if (config.getValue().getClass() == String.class)
-                    curConfig.addProperty(config.getName(), config.getValue().toString());
-                else
-                    curConfig.add(config.getName(), Managers.Json.toJsonElement(config.getValue().toString()));
+                if (config.getSyncOnline()) {
+                    String syncUri = config.getSyncUri() + McUtils.playerUUID();
+                    Managers.Net.guild.post(syncUri, Managers.Json.toJsonObject("{" + config.getName() + ":" + config.getValue().toString() + "}"), false);
+                } else {
+                    if (config.getValue().getClass() == String.class)
+                        curConfig.addProperty(config.getName(), config.getValue().toString());
+                    else
+                        curConfig.add(config.getName(), Managers.Json.toJsonElement(config.getValue().toString()));
+                }
             }
             configObject.add(entry.getKey().getClass().getSimpleName(), curConfig);
         }
@@ -67,25 +73,53 @@ public class ConfigManager extends Manager {
             featureConfigObject = temp.getAsJsonObject();
 
         for (Field field : feature.getClass().getFields()) {
-            if (!field.isAnnotationPresent(Configurable.class)) continue;
+            if (!field.isAnnotationPresent(Configurable.class) && !field.isAnnotationPresent(SyncConfigurable.class))
+                continue;
             try {
                 Config<?> config = (Config<?>) field.get(feature);
                 config.setName(field.getName());
-                if (!field.getAnnotation(Configurable.class).i18nKey().isBlank())
-                    config.setTranslationKey(field.getAnnotation(Configurable.class).i18nKey());
-                else {
-                    config.setTranslationKey("feature." + GuildApi.MOD_ID + "." + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, feature.getClass().getSimpleName().replace("Feature", "")) + "." + field.getName());
-                }
                 config.setOwner(feature);
+                String simpleFeatureName = feature.getClass().getSimpleName().replace("Feature", "");
+                if (field.isAnnotationPresent(Configurable.class)) {
+                    if (!field.getAnnotation(Configurable.class).i18nKey().isBlank())
+                        config.setTranslationKey(field.getAnnotation(Configurable.class).i18nKey());
+                    else {
+                        config.setTranslationKey("feature." + GuildApi.MOD_ID + "." + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, simpleFeatureName) + "." + field.getName());
+                    }
 
-                if (featureConfigObject.get(config.getName()) != null) {
-                    Object toSet = Managers.Json.GSON.fromJson(featureConfigObject.get(config.getName()), config.getTypeToken());
-                    if (toSet.getClass() == config.getValue().getClass())
-                        config.setPending(Managers.Json.GSON.fromJson(featureConfigObject.get(config.getName()), config.getTypeToken()));
+                    if (featureConfigObject.get(config.getName()) != null) {
+                        Object toSet = Managers.Json.GSON.fromJson(featureConfigObject.get(config.getName()), config.getTypeToken());
+                        if (toSet.getClass() == config.getValue().getClass())
+                            config.setPending(Managers.Json.GSON.fromJson(featureConfigObject.get(config.getName()), config.getTypeToken()));
+                    }
+
+                    if (Objects.equals(config.getName(), "enabled")) featureConfigs.addFirst(config);
+                    else featureConfigs.add(config);
+                } else if (field.isAnnotationPresent(SyncConfigurable.class)) {
+                    config.setSyncOnline(true);
+                    config.setSyncUri(field.getAnnotation(SyncConfigurable.class).syncUri());
+                    if (!field.getAnnotation(SyncConfigurable.class).i18nKey().isBlank())
+                        config.setTranslationKey(field.getAnnotation(SyncConfigurable.class).i18nKey());
+                    else {
+                        config.setTranslationKey("feature." + GuildApi.MOD_ID + "." + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, simpleFeatureName) + "." + config.getName());
+                    }
+
+                    config.setCycleLength(field.getAnnotation(SyncConfigurable.class).cycleLength());
+
+                    String syncUri = config.getSyncUri() + McUtils.playerUUID();
+                    com.google.gson.JsonElement resBody = Managers.Json.toJsonElement(Managers.Net.guild.get(syncUri, false).get().body());
+                    Object toSet = Managers.Json.GSON.fromJson(resBody, config.getValue().getClass());
+                    if (toSet.getClass() == config.getValue().getClass()) {
+                        config.setPending(Managers.Json.GSON.fromJson(resBody, config.getTypeToken()));
+                    }
+
+                    // to prevent duplicates, only add to feature configs list if the current field isn't also annotated with configurable
+                    if (!field.isAnnotationPresent(Configurable.class)) {
+                        if (Objects.equals(config.getName(), "enabled")) featureConfigs.addFirst(config);
+                        else featureConfigs.add(config);
+                    }
+
                 }
-
-                if (Objects.equals(config.getName(), "enabled")) featureConfigs.addFirst(config);
-                else featureConfigs.add(config);
             } catch (Exception e) {
                 GuildApi.LOGGER.error("config register error: {} {}", e, e.getMessage());
             }

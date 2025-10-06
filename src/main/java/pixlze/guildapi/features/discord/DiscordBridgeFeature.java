@@ -13,6 +13,7 @@ import pixlze.guildapi.core.components.Handlers;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.config.Config;
 import pixlze.guildapi.core.config.Configurable;
+import pixlze.guildapi.core.config.SyncConfigurable;
 import pixlze.guildapi.core.features.FeatureState;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.core.handlers.discord.event.S2CSocketEvents;
@@ -99,6 +100,15 @@ public class DiscordBridgeFeature extends Feature {
 
     @Configurable
     public final Config<String> highlight = new Config<>("");
+
+    /**
+     * 0 - online
+     * 1 - busy (not implemented)
+     * 2 - dnd (not implemented)
+     * 3 - appear offline
+     */
+    @SyncConfigurable(syncUri = "user/onlineStatus/", cycleLength = 4)
+    public final Config<Integer> onlineStatus = new Config<>(0);
 
     @Override
     public void init() {

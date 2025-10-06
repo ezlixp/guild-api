@@ -21,6 +21,9 @@ public class Config<T> {
     private String name;
     private Feature owner;
     private String i18nKey;
+    private boolean syncOnline = false;
+    private String syncUri;
+    private int cycleLength;
 
     public Config(T value) {
         this.value = value;
@@ -48,6 +51,29 @@ public class Config<T> {
         this.pending = value;
     }
 
+    public boolean getSyncOnline() {
+        return syncOnline;
+    }
+
+    public void setSyncOnline(boolean value) {
+        this.syncOnline = value;
+    }
+
+    public String getSyncUri() {
+        return syncUri;
+    }
+
+    public void setSyncUri(String value) {
+        this.syncUri = value;
+    }
+
+    public int getCycleLength() {
+        return cycleLength;
+    }
+
+    public void setCycleLength(int value) {
+        this.cycleLength = value;
+    }
 
     public void applyPending() {
         if (pending != null && !pending.equals(value)) {
@@ -81,6 +107,16 @@ public class Config<T> {
                 this.setPending((T) (this.pending.equals(Boolean.TRUE) ? Boolean.FALSE:Boolean.TRUE));
                 button.setMessage(Text.of((boolean) this.pending ? "Yes":"No"));
             }).tooltip(Tooltip.of(Text.translatable(i18nKey + ".description"))).dimensions(0, 0, 100, 25 - 4).build();
+        } else if (Number.class.isAssignableFrom(getType()) && cycleLength > 0) {
+            if (this.value.getClass() == Double.class) {
+                this.value = (T) Integer.valueOf(((Double) this.value).intValue());
+            }
+            setPending(this.value);
+            return ButtonWidget.builder(Text.translatable(i18nKey + ".display." + this.pending), (button) -> {
+                this.setPending((T) Integer.valueOf((((int) this.pending + 1) % this.cycleLength)));
+                button.setMessage(Text.translatable(i18nKey + ".display." + this.pending));
+                button.setTooltip(Tooltip.of(Text.translatable(i18nKey + ".description." + this.pending)));
+            }).tooltip(Tooltip.of(Text.translatable(i18nKey + ".description." + this.pending))).dimensions(0, 0, 100, 25 - 4).build();
         } else {
             TextFieldWidget out = new TextFieldWidget(McUtils.mc().textRenderer, 100, 25 - 4, Text.of("enter here"));
             out.setEditable(true);

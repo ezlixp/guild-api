@@ -25,6 +25,7 @@ import java.util.Objects;
 public class DiscordSocketManager extends AbstractSocketManager {
     public String guildId;
     public boolean onWorld = false;
+    private static Text APPEARING_OFFLINE_MESSAGE = Text.literal("§aYou are appearing offline. To disable this, type /gapi config.");
 
     public DiscordSocketManager() {
         super(List.of());
@@ -44,6 +45,9 @@ public class DiscordSocketManager extends AbstractSocketManager {
         if (doConnect()) {
             socket.connect();
             GuildApi.LOGGER.info("discord socket connecting");
+            if (((DiscordBridgeFeature) Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)).onlineStatus.getValue().equals(3)) {
+                McUtils.sendLocalMessage(APPEARING_OFFLINE_MESSAGE, Prepend.GUILD.getWithStyle(ColourUtils.GREEN), true);
+            }
             return true;
         }
         return false;
