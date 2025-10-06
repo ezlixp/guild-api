@@ -9,7 +9,6 @@ import pixlze.guildapi.core.features.FeatureState;
 import pixlze.guildapi.features.discord.DiscordBridgeFeature;
 import pixlze.guildapi.models.worldState.event.WorldStateEvents;
 import pixlze.guildapi.models.worldState.type.WorldState;
-import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.net.WynnJoinApi;
 import pixlze.guildapi.net.event.NetEvents;
 import pixlze.guildapi.net.type.AbstractSocketManager;
@@ -37,7 +36,7 @@ public class DiscordSocketManager extends AbstractSocketManager {
     }
 
     private void onApiUnloaded(Api api) {
-        if (api.getClass().equals(GuildApiClient.class)) disable();
+        if (api.getClass().equals(WynnJoinApi.class)) disable();
     }
 
     @Override
