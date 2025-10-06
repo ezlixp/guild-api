@@ -4,5 +4,14 @@
   "feature.guildapi.discordBridge.useGui.name": "Use Toasts",
   "feature.guildapi.discordBridge.useGui.description": "Should discord bridging messages be shown through a toast instead of in chat?",
   "feature.guildapi.discordBridge.highlight.name": "Highlighted Phrases",
-  "feature.guildapi.discordBridge.highlight.description": "Enter phrases separated by \",\" (no spaces) to highlight in the discord bridge. These will only be highlighted in purple discord messages."
+  "feature.guildapi.discordBridge.highlight.description": "Enter phrases separated by \",\" (no spaces) to highlight in the discord bridge. These will only be highlighted in purple discord messages.",
+  "feature.guildapi.discordBridge.onlineStatus.name": "Online Status",
+  "feature.guildapi.discordBridge.onlineStatus.display.0": "Online §a\uD83D\uDFE2",
+  "feature.guildapi.discordBridge.onlineStatus.description.0": "Current online status: Online\n\nJoin messages will be logged in the bridging channel, and a star will appear next to your name in your messages.",
+  "feature.guildapi.discordBridge.onlineStatus.display.1": "Busy §e\uD83C\uDF19",
+  "feature.guildapi.discordBridge.onlineStatus.description.1": "Current online status: Busy\n\nnot implemented.",
+  "feature.guildapi.discordBridge.onlineStatus.display.2": "Do not disturb §c⛔",
+  "feature.guildapi.discordBridge.onlineStatus.description.2": "Current online status: Do not disturb\n\nnot implemented.",
+  "feature.guildapi.discordBridge.onlineStatus.display.3": "Appear offline §7⭕",
+  "feature.guildapi.discordBridge.onlineStatus.description.3": "Current online status: Appear offline\n\nJoin messages will not be logged in the bridging channel, and there will be no star next to your name in your merssages.\n\nMessages will still be bridged."
 }
