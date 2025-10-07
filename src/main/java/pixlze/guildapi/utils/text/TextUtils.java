@@ -78,15 +78,6 @@ public class TextUtils {
         return TextVisitors.currentVisit.toString();
     }
 
-    public static Text stringVisitableToText(StringVisitable visitable) {
-        MutableText out = Text.empty();
-        visitable.visit((style, asString) -> {
-            out.append(Text.literal(asString).setStyle(style));
-            return Optional.empty();
-        }, Style.EMPTY);
-        return out;
-    }
-
     public static boolean isFormatting(String text, int index) {
         if (index + 1 >= text.length() || index < 0) return false;
         return text.charAt(index) == '§' && Formatting.byCode(text.charAt(index + 1)) != null;
@@ -105,6 +96,15 @@ public class TextUtils {
             out.append(stringVisitableToText(lines.get(i)));
         }
 
+        return out;
+    }
+
+    public static Text stringVisitableToText(StringVisitable visitable) {
+        MutableText out = Text.empty();
+        visitable.visit((style, asString) -> {
+            out.append(Text.literal(asString).setStyle(style));
+            return Optional.empty();
+        }, Style.EMPTY);
         return out;
     }
 
@@ -140,7 +140,7 @@ public class TextUtils {
                             siblings.get(1).getString()).contains("nickname is")) {
                         handleStyles(style.withItalic(false), siblings.getFirst().getString());
                     } else if (!siblings.isEmpty() && siblings.getFirst().getString() != null && (siblings.getFirst()
-                            .getString().contains("real username is")) || siblings.getFirst().getString().contains("real name is")) {
+                            .getString().contains("real username is") || siblings.getFirst().getString().contains("real name is"))) {
                         if (siblings.size() > 1) {
                             handleStyles(style.withItalic(false), siblings.get(1).getString());
                         } else {
