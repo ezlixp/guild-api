@@ -40,8 +40,10 @@ public class NotificationManager extends Manager {
     @SuppressWarnings("unchecked")
     public <T extends Trigger> List<Notification<T>> getNotifications(Class<T> clazz) {
         List<?> temp = notifications.getOrDefault(clazz, new ArrayList<>());
+        notifications.putIfAbsent(clazz, (List<Notification<? extends Trigger>>) temp);
         return (List<Notification<T>>) temp;
     }
+
 
     public void saveNotifications(List<NotificationsEditListWidget.Entry> entries) {
         List<Notification<Trigger.CHAT>> notifs = getNotifications(Trigger.CHAT.class);
