@@ -39,9 +39,7 @@ public class NotificationManager extends Manager {
 
     @SuppressWarnings("unchecked")
     public <T extends Trigger> List<Notification<T>> getNotifications(Class<T> clazz) {
-        List<?> temp = notifications.getOrDefault(clazz, new ArrayList<>());
-        notifications.putIfAbsent(clazz, (List<Notification<? extends Trigger>>) temp);
-        return (List<Notification<T>>) temp;
+        return (List<Notification<T>>) ((List<?>) notifications.computeIfAbsent(clazz, (k) -> new ArrayList<>()));
     }
 
 
