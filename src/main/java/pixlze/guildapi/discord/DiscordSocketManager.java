@@ -45,7 +45,8 @@ public class DiscordSocketManager extends AbstractSocketManager {
         if (doConnect()) {
             socket.connect();
             GuildApi.LOGGER.info("discord socket connecting");
-            if (((DiscordBridgeFeature) Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)).onlineStatus.getValue().equals(3)) {
+            // .intvalue is necessary because of an unchecked cast resulting in value possibly being double.
+            if (((DiscordBridgeFeature) Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)).onlineStatus.getValue().intValue() == 3) {
                 McUtils.sendLocalMessage(APPEARING_OFFLINE_MESSAGE, Prepend.GUILD.getWithStyle(ColourUtils.GREEN), true);
             }
             return true;
