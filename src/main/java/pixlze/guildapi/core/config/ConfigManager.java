@@ -49,7 +49,8 @@ public class ConfigManager extends Manager {
                 config.applyPending();
                 if (config.getSyncOnline()) {
                     String syncUri = config.getSyncUri() + McUtils.playerUUID();
-                    Managers.Net.guild.post(syncUri, Managers.Json.toJsonObject("{" + config.getName() + ":" + config.getValue().toString() + "}"), false);
+                    if (!Managers.Net.guild.isDisabled())
+                        Managers.Net.guild.post(syncUri, Managers.Json.toJsonObject("{" + config.getName() + ":" + config.getValue().toString() + "}"), false);
                 } else {
                     if (config.getValue().getClass() == String.class)
                         curConfig.addProperty(config.getName(), config.getValue().toString());
