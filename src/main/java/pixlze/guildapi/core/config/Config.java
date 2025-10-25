@@ -36,7 +36,7 @@ public class Config<T> {
     }
 
     public T getValue() {
-        return value;
+        return (T) value;
     }
 
     public Type getTypeToken() {
