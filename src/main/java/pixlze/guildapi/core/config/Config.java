@@ -22,6 +22,7 @@ public class Config<T> {
     private Feature owner;
     private String i18nKey;
     private boolean syncOnline = false;
+    private boolean disabled = false;
     private String syncUri;
     private int cycleLength;
 
@@ -67,6 +68,14 @@ public class Config<T> {
         this.syncUri = value;
     }
 
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean dis) {
+        this.disabled = dis;
+    }
+
     public int getCycleLength() {
         return cycleLength;
     }
@@ -101,9 +110,10 @@ public class Config<T> {
 
     @SuppressWarnings("unchecked")
     public ClickableWidget getActionWidget() {
+        ClickableWidget out;
         if (getType().equals(Boolean.class)) {
             setPending(this.value);
-            return ButtonWidget.builder(Text.of((boolean) this.pending ? "Yes":"No"), (button) -> {
+            out = ButtonWidget.builder(Text.of((boolean) this.pending ? "Yes":"No"), (button) -> {
                 this.setPending((T) (this.pending.equals(Boolean.TRUE) ? Boolean.FALSE:Boolean.TRUE));
                 button.setMessage(Text.of((boolean) this.pending ? "Yes":"No"));
             }).tooltip(Tooltip.of(Text.translatable(i18nKey + ".description"))).dimensions(0, 0, 100, 25 - 4).build();
@@ -112,22 +122,28 @@ public class Config<T> {
                 this.value = (T) Integer.valueOf(((Double) this.value).intValue());
             }
             setPending(this.value);
-            return ButtonWidget.builder(Text.translatable(i18nKey + ".display." + this.pending), (button) -> {
+            out = ButtonWidget.builder(Text.translatable(i18nKey + ".display." + this.pending), (button) -> {
                 this.setPending((T) Integer.valueOf((((int) this.pending + 1) % this.cycleLength)));
                 button.setMessage(Text.translatable(i18nKey + ".display." + this.pending));
                 button.setTooltip(Tooltip.of(Text.translatable(i18nKey + ".description." + this.pending)));
             }).tooltip(Tooltip.of(Text.translatable(i18nKey + ".description." + this.pending))).dimensions(0, 0, 100, 25 - 4).build();
         } else {
-            TextFieldWidget out = new TextFieldWidget(McUtils.mc().textRenderer, 100, 25 - 4, Text.of("enter here"));
-            out.setEditable(true);
-            out.write(this.value.toString());
-            out.setTooltip(Tooltip.of(Text.translatable(i18nKey + ".description")));
-            out.setChangedListener((to) -> {
+            TextFieldWidget temp = new TextFieldWidget(McUtils.mc().textRenderer, 100, 25 - 4, Text.of("enter here"));
+            temp.setEditable(true);
+            temp.write(this.value.toString());
+            temp.setTooltip(Tooltip.of(Text.translatable(i18nKey + ".description")));
+            temp.setChangedListener((to) -> {
                 tryParseStringValue(to).ifPresent(this::setPending);
             });
-            out.setMaxLength(100);
-            return out;
+            temp.setMaxLength(100);
+            out = temp;
         }
+        if (isDisabled()) {
+            // active disables all interaction with it by stopping the mouse click event
+            out.active = false;
+            out.setTooltip(Tooltip.of(Text.literal("Please connect to the guild server to activate this option.")));
+        }
+        return out;
     }
 
     @SuppressWarnings("unchecked")

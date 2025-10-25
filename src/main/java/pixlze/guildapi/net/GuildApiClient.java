@@ -99,6 +99,18 @@ public class GuildApiClient extends Api {
     }
 
     @Override
+    public void enable() {
+        super.enable();
+        Managers.Config.enableSync();
+    }
+
+    @Override
+    public void disable() {
+        super.disable();
+        Managers.Config.disableSync();
+    }
+
+    @Override
     protected void ready() {
         wynnPlayerInfo = Managers.Net.wynn.wynnPlayerInfo;
         guildPrefix = wynnPlayerInfo.get("guild").getAsJsonObject().get("prefix").getAsString();
@@ -169,7 +181,7 @@ public class GuildApiClient extends Api {
             return -1;
         }
         if (fetchGuildServerToken()) {
-            super.enable();
+            this.enable();
             return 1;
         }
         CompletableFuture<Pair<String, String>> tokenRequest = new CompletableFuture<>();
@@ -189,7 +201,7 @@ public class GuildApiClient extends Api {
             this.refreshToken = res.getRight();
             this.saveRefreshToken();
             successMessage();
-            super.enable();
+            this.enable();
         });
         return 0;
     }

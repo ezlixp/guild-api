@@ -40,6 +40,35 @@ public class ConfigManager extends Manager {
         return configObject;
     }
 
+    public void enableSync() {
+        for (Map.Entry<Feature, List<Config<?>>> entry : configs.entrySet()) {
+            for (Config<?> config : entry.getValue()) {
+                if (config.getSyncOnline()) {
+                    config.setDisabled(false);
+                    try {
+                        String syncUri = config.getSyncUri() + McUtils.playerUUID();
+                        com.google.gson.JsonElement resBody = Managers.Json.toJsonElement(Managers.Net.guild.get(syncUri, false).get().body());
+                        Object toSet = Managers.Json.GSON.fromJson(resBody, config.getValue().getClass());
+                        if (toSet.getClass() == config.getValue().getClass()) {
+                            config.setPending(Managers.Json.GSON.fromJson(resBody, config.getTypeToken()));
+                        }
+                    } catch (Exception e) {
+                        GuildApi.LOGGER.error("unable to sync config {} {} reason {} {}", entry.getKey().getName(), config.getName(), e, e.getMessage());
+                    }
+                }
+            }
+        }
+        saveConfig();
+    }
+
+    public void disableSync() {
+        for (List<Config<?>> configList : configs.values()) {
+            for (Config<?> config : configList) {
+                if (config.getSyncOnline()) config.setDisabled(true);
+            }
+        }
+    }
+
     public synchronized void saveConfig() {
         configObject = new JsonObject();
 
@@ -114,9 +143,10 @@ public class ConfigManager extends Manager {
                         if (toSet.getClass() == config.getValue().getClass()) {
                             config.setPending(Managers.Json.GSON.fromJson(resBody, config.getTypeToken()));
                         }
+                    } else {
+                        config.setDisabled(true);
                     }
 
-                    // to prevent duplicates, only add to feature configs list if the current field isn't also annotated with configurable
                     if (!field.isAnnotationPresent(Configurable.class)) {
                         if (Objects.equals(config.getName(), "enabled")) featureConfigs.addFirst(config);
                         else featureConfigs.add(config);
