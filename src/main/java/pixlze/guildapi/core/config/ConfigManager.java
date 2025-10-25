@@ -106,11 +106,13 @@ public class ConfigManager extends Manager {
 
                     config.setCycleLength(field.getAnnotation(SyncConfigurable.class).cycleLength());
 
-                    String syncUri = config.getSyncUri() + McUtils.playerUUID();
-                    com.google.gson.JsonElement resBody = Managers.Json.toJsonElement(Managers.Net.guild.get(syncUri, false).get().body());
-                    Object toSet = Managers.Json.GSON.fromJson(resBody, config.getValue().getClass());
-                    if (toSet.getClass() == config.getValue().getClass()) {
-                        config.setPending(Managers.Json.GSON.fromJson(resBody, config.getTypeToken()));
+                    if (!Managers.Net.guild.isDisabled()) {
+                        String syncUri = config.getSyncUri() + McUtils.playerUUID();
+                        com.google.gson.JsonElement resBody = Managers.Json.toJsonElement(Managers.Net.guild.get(syncUri, false).get().body());
+                        Object toSet = Managers.Json.GSON.fromJson(resBody, config.getValue().getClass());
+                        if (toSet.getClass() == config.getValue().getClass()) {
+                            config.setPending(Managers.Json.GSON.fromJson(resBody, config.getTypeToken()));
+                        }
                     }
 
                     // to prevent duplicates, only add to feature configs list if the current field isn't also annotated with configurable
