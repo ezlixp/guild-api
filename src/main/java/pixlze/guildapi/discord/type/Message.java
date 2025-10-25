@@ -20,9 +20,9 @@ public class Message {
     // if just mcusername and empty discord, don't do any special formatting as that is the case used for headers that
     // aren't username (like triangl info)
     public Message(String mcUsername, String discord, String content, boolean isGuild, Function<String, String> highlight) {
-        this.mcUsername = mcUsername;
-        this.discord = discord;
-        this.content = content;
+        this.mcUsername = mcUsername == null ? "":mcUsername;
+        this.discord = discord == null ? "":discord;
+        this.content = content == null ? "":content;
         this.isGuild = isGuild;
         this.textRenderer = McUtils.mc().textRenderer;
         this.highlight = highlight;
