@@ -20,7 +20,6 @@ import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.NetUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
-import java.awt.*;
 import java.io.File;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -82,11 +81,10 @@ public class GuildApiClient extends Api {
     private HttpServer server;
 
     public GuildApiClient() {
-        super("guild", List.of(WynnApiClient.class, WynnJoinApi.class));
+        super("guild", List.of(WynnApiClient.class));
         instance = this;
         baseURL = "https://ico-server.onrender.com/";
         refreshTokenFile = new File(CACHE_DIR, "webapi.json");
-
     }
 
 
@@ -98,6 +96,18 @@ public class GuildApiClient extends Api {
             GuildApi.LOGGER.warn("refresh token load error: {} {}", e, e.getMessage());
             refreshTokenObject = new JsonObject();
         }
+    }
+
+    @Override
+    public void enable() {
+        super.enable();
+        Managers.Config.enableSync();
+    }
+
+    @Override
+    public void disable() {
+        super.disable();
+        Managers.Config.disableSync();
     }
 
     @Override
@@ -171,7 +181,7 @@ public class GuildApiClient extends Api {
             return -1;
         }
         if (fetchGuildServerToken()) {
-            super.enable();
+            this.enable();
             return 1;
         }
         CompletableFuture<Pair<String, String>> tokenRequest = new CompletableFuture<>();
@@ -191,7 +201,7 @@ public class GuildApiClient extends Api {
             this.refreshToken = res.getRight();
             this.saveRefreshToken();
             successMessage();
-            super.enable();
+            this.enable();
         });
         return 0;
     }
@@ -358,6 +368,11 @@ public class GuildApiClient extends Api {
         return false;
     }
 
+    /**
+     * @param path             baseUrl + api/v_ + path. Should not begin with /
+     * @param skipDisableCheck whether to skip check for feature disabled. used for simple calls that don't need specific verification.
+     * @return a promise that completes when the request completes
+     */
     public CompletableFuture<HttpResponse<String>> get(String path, boolean skipDisableCheck) {
         path = API_BASE_PATH + path;
         CompletableFuture<HttpResponse<String>> out = new CompletableFuture<>();

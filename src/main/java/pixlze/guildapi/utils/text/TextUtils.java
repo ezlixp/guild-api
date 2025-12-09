@@ -23,16 +23,23 @@ public class TextUtils {
 
     public static List<Text> splitLines(Text message) {
         ArrayList<Text> splitted = new ArrayList<>();
+        // If all content isn't in siblings, we can just keep it as it is.
+        if (!message.getContent().toString().equals("empty")) {
+            splitted.add(message);
+            return splitted;
+        }
         MutableText currentPart = Text.empty();
-        for (Text part : message.getWithStyle(message.getStyle())) {
-            if (part.getString().equals("\n")) {
-                splitted.add(currentPart);
-                currentPart = Text.empty();
+        // Use getsiblings isntead of message.getwithstyle since message.getwithstyle flattens
+        // all nested siblings. Chat screens are defined by \n's in top level and after the wardrobe update
+        // \n's appear in nested siblings which is an issue when they are flattened
+        for (Text part : message.getSiblings()) {
+            if (part.getString().isEmpty() || part.getString().equals("\n")) {
+                if (splitted.size() < 2) splitted.add(currentPart);
             } else {
                 currentPart.append(part);
             }
         }
-        if (!currentPart.equals(Text.empty())) splitted.add(currentPart);
+        if (!currentPart.getString().isEmpty() || splitted.size() < 2) splitted.add(currentPart);
         return splitted;
     }
 
@@ -71,15 +78,6 @@ public class TextUtils {
         return TextVisitors.currentVisit.toString();
     }
 
-    public static Text stringVisitableToText(StringVisitable visitable) {
-        MutableText out = Text.empty();
-        visitable.visit((style, asString) -> {
-            out.append(Text.literal(asString).setStyle(style));
-            return Optional.empty();
-        }, Style.EMPTY);
-        return out;
-    }
-
     public static boolean isFormatting(String text, int index) {
         if (index + 1 >= text.length() || index < 0) return false;
         return text.charAt(index) == '§' && Formatting.byCode(text.charAt(index + 1)) != null;
@@ -98,6 +96,15 @@ public class TextUtils {
             out.append(stringVisitableToText(lines.get(i)));
         }
 
+        return out;
+    }
+
+    public static Text stringVisitableToText(StringVisitable visitable) {
+        MutableText out = Text.empty();
+        visitable.visit((style, asString) -> {
+            out.append(Text.literal(asString).setStyle(style));
+            return Optional.empty();
+        }, Style.EMPTY);
         return out;
     }
 
@@ -126,23 +133,22 @@ public class TextUtils {
 
         private static void handleStylesWithHover(Style style, String asString) {
             assert style.getHoverEvent() != null;
-            if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text) {
-                List<Text> onHover = ((Text) Objects.requireNonNull(
-                        style.getHoverEvent().getValue(style.getHoverEvent().getAction()))).getSiblings();
-                if (asString.indexOf('/') == -1) {
-                    if (onHover != null) {
-                        if (onHover.size() > 2 && onHover.get(1).getString() != null && Objects.requireNonNull(
-                                onHover.get(1).getString()).contains("nickname is")) {
-                            handleStyles(style.withItalic(false), onHover.getFirst().getString());
-                        } else if (!onHover.isEmpty() && onHover.getFirst().getString() != null && onHover.getFirst()
-                                .getString().contains("real username is")) {
-                            if (onHover.size() > 1) {
-                                handleStyles(style.withItalic(false), onHover.get(1).getString());
-                            } else {
-                                handleStyles(style.withItalic(false), onHover.getFirst().getSiblings().getFirst()
-                                        .getString());
-                            }
+            if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text hoverText) {
+                List<Text> siblings = hoverText.getSiblings();
+                if (siblings != null) {
+                    if (siblings.size() > 2 && siblings.get(1).getString() != null && Objects.requireNonNull(
+                            siblings.get(1).getString()).contains("nickname is")) {
+                        handleStyles(style.withItalic(false), siblings.getFirst().getString());
+                    } else if (!siblings.isEmpty() && siblings.getFirst().getString() != null && (siblings.getFirst()
+                            .getString().contains("real username is") || siblings.getFirst().getString().contains("real name is"))) {
+                        if (siblings.size() > 1) {
+                            handleStyles(style.withItalic(false), siblings.get(1).getString());
+                        } else {
+                            handleStyles(style.withItalic(false), siblings.getFirst().getSiblings().getFirst()
+                                    .getString());
                         }
+                    } else if (siblings.isEmpty()) {
+                        handleStyles(style, asString);
                     }
                 }
             } else {
@@ -155,6 +161,16 @@ public class TextUtils {
                 afterBlockMarker = true;
                 return;
             }
+            // This block is before styles are added so style codes are not added that would be styling empty strings
+            if (afterBlockMarker)
+                asString = asString.substring(1);
+            String toAppend = asString.replaceAll("\\n", options.newline)
+                    .replaceAll("§", options.formatCode);
+            if (toAppend.isEmpty()) {
+                afterBlockMarker = false;
+                return;
+            }
+
             if (!afterBlockMarker) {
                 if (style.getColor() != null) {
                     int colorIndex = 0;
@@ -185,10 +201,8 @@ public class TextUtils {
                 }
             } else {
                 afterBlockMarker = false;
-                asString = asString.substring(1);
             }
-            TextVisitors.currentVisit.append(asString.replaceAll("\\n", options.newline)
-                    .replaceAll("§", options.formatCode));
+            TextVisitors.currentVisit.append(toAppend);
             if (first) first = false;
         }
     }

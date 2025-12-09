@@ -20,7 +20,7 @@ public class TomeListClientCommand extends ListClientCommand {
     private static final String ENDPOINT = "guilds/tomes/";
 
     public TomeListClientCommand() {
-        super("tome", ENDPOINT, (listItem) -> Text.literal(listItem.getAsJsonObject().get("username").getAsString()).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
+        super("tome", ENDPOINT, (listItem) -> Text.literal(listItem.getAsJsonObject().get("mcUsername").getAsString()).setStyle(Style.EMPTY.withColor(Formatting.WHITE)));
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
     }
 

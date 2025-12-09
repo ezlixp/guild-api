@@ -35,18 +35,17 @@ public class McUtils {
     }
 
     public static synchronized void sendLocalMessage(Text message, MutableText prepend, boolean wynncraftStyle) {
+        if (player() == null) {
+            Managers.Net.join.addTask(() -> McUtils.sendLocalMessage(message, prepend, wynncraftStyle));
+            GuildApi.LOGGER.warn("Tried to send local message but player was null. Queueing message...");
+            return;
+        }
         ChatHud chatHud = MinecraftClient.getInstance().inGameHud.getChatHud();
         ChatHudAccessorInvoker chatHudAccessorInvoker = (ChatHudAccessorInvoker) chatHud;
         Text withPrepend = Text.empty().append(prepend).append(message);
         if (wynncraftStyle) withPrepend = TextUtils.toBlockMessage(withPrepend, prepend.getStyle());
         Prepend.linesSinceBadge += ChatMessages.breakRenderedChatMessageLines(withPrepend, chatHudAccessorInvoker.invokeGetWidth(), MinecraftClient.getInstance().textRenderer)
                 .size();
-        if (player() == null) {
-            Text finalWithPrepend = withPrepend.copy();
-            Managers.Net.join.addTask(() -> player().sendMessage(finalWithPrepend, false));
-            GuildApi.LOGGER.warn("Tried to send local message but player was null. Queueing message...");
-            return;
-        }
         player().sendMessage(withPrepend, false);
     }
 

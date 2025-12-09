@@ -5,6 +5,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
+import pixlze.guildapi.discord.type.Message;
 import pixlze.guildapi.screens.discord.DiscordChatScreen;
 import pixlze.guildapi.screens.widgets.DynamicSizeElementListWidget;
 import pixlze.guildapi.utils.McUtils;
@@ -15,9 +16,9 @@ public class DiscordChatWidget extends DynamicSizeElementListWidget<DiscordChatW
         super(client, width, discordChatScreen.layout.getContentHeight(), discordChatScreen.layout.getHeaderHeight());
     }
 
-    public void addMessage(String author, String content, boolean confirmed, boolean isGuild) {
+    public void addMessage(Message m, boolean confirmed, boolean isGuild) {
         boolean sticky = this.getScrollY() == this.getMaxScrollY();
-        this.addEntry(Entry.create(author, content, this.width, confirmed, isGuild));
+        this.addEntry(Entry.create(m, this.width, confirmed, isGuild));
         if (sticky) this.setScrollY(this.getMaxScrollY());
     }
 
@@ -49,12 +50,12 @@ public class DiscordChatWidget extends DynamicSizeElementListWidget<DiscordChatW
     public static class Entry extends DynamicSizeElementListWidget.Entry<DiscordChatWidget.Entry> {
         private final ChatMessageWidget message;
 
-        private Entry(String author, String content, int width, boolean confirmed, boolean isGuild) {
-            message = new ChatMessageWidget(author, content, McUtils.mc().textRenderer, width, confirmed, isGuild);
+        private Entry(Message m, int width, boolean confirmed, boolean isGuild) {
+            message = new ChatMessageWidget(m, McUtils.mc().textRenderer, width, confirmed, isGuild);
         }
 
-        public static Entry create(String author, String content, int width, boolean confirmed, boolean isGuild) {
-            return new Entry(author, content, width, confirmed, isGuild);
+        public static Entry create(Message m, int width, boolean confirmed, boolean isGuild) {
+            return new Entry(m, width, confirmed, isGuild);
         }
 
         public void confirm() {

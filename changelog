@@ -1,2 +1,5 @@
+### New Features
+- Change online status (currently only online or appear offline)
+
 ### Bug Fixes
-- Implemented Wynncraft font changes
+- Fixed unverified messages being dropped

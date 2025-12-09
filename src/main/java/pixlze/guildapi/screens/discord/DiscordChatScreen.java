@@ -7,7 +7,6 @@ import net.minecraft.client.gui.widget.ThreePartsLayoutWidget;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import pixlze.guildapi.core.components.Managers;
-import pixlze.guildapi.discord.DiscordMessageManager;
 import pixlze.guildapi.screens.discord.widgets.DiscordChatWidget;
 import pixlze.guildapi.utils.McUtils;
 
@@ -91,7 +90,7 @@ public class DiscordChatScreen extends Screen {
             String content = Managers.Discord.stripIllegal(discordInput.getText());
             if (content.isBlank()) return true;
             Managers.DiscordSocket.emit("discordOnlyWynnMessage", author + ": " + content);
-            Managers.Discord.newMessage(author, "@me", content, false, DiscordMessageManager.DISCORD_MESSAGE);
+            Managers.Discord.newMessage(author, "", content, false, false);
             discordInput.setText("");
             this.body.setScrollY(this.body.getMaxScrollY());
             return true;

@@ -9,7 +9,7 @@ import pixlze.guildapi.core.features.FeatureState;
 import pixlze.guildapi.features.discord.DiscordBridgeFeature;
 import pixlze.guildapi.models.worldState.event.WorldStateEvents;
 import pixlze.guildapi.models.worldState.type.WorldState;
-import pixlze.guildapi.net.GuildApiClient;
+import pixlze.guildapi.net.WynnJoinApi;
 import pixlze.guildapi.net.event.NetEvents;
 import pixlze.guildapi.net.type.AbstractSocketManager;
 import pixlze.guildapi.net.type.Api;
@@ -25,18 +25,19 @@ import java.util.Objects;
 public class DiscordSocketManager extends AbstractSocketManager {
     public String guildId;
     public boolean onWorld = false;
+    private static Text APPEARING_OFFLINE_MESSAGE = Text.literal("§aYou are appearing offline. To disable this, type /gapi config.");
 
     public DiscordSocketManager() {
         super(List.of());
     }
 
     private void onApiLoaded(Api api) {
-        if (api.getClass().equals(GuildApiClient.class) && Managers.Feature.getFeatureState(Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)) == FeatureState.ENABLED)
+        if (api.getClass().equals(WynnJoinApi.class) && Managers.Feature.getFeatureState(Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)) == FeatureState.ENABLED)
             initSocket();
     }
 
     private void onApiUnloaded(Api api) {
-        if (api.getClass().equals(GuildApiClient.class)) disable();
+        if (api.getClass().equals(WynnJoinApi.class)) disable();
     }
 
     @Override
@@ -44,6 +45,11 @@ public class DiscordSocketManager extends AbstractSocketManager {
         if (doConnect()) {
             socket.connect();
             GuildApi.LOGGER.info("discord socket connecting");
+            // .intvalue is necessary because of an unchecked cast resulting in value possibly being double.
+            Number t = ((DiscordBridgeFeature) Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)).onlineStatus.getValue();
+            if (t.intValue() == 3) {
+                McUtils.sendLocalMessage(APPEARING_OFFLINE_MESSAGE, Prepend.GUILD.getWithStyle(ColourUtils.GREEN), true);
+            }
             return true;
         }
         return false;

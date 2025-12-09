@@ -39,9 +39,9 @@ public class NotificationManager extends Manager {
 
     @SuppressWarnings("unchecked")
     public <T extends Trigger> List<Notification<T>> getNotifications(Class<T> clazz) {
-        List<?> temp = notifications.getOrDefault(clazz, new ArrayList<>());
-        return (List<Notification<T>>) temp;
+        return (List<Notification<T>>) ((List<?>) notifications.computeIfAbsent(clazz, (k) -> new ArrayList<>()));
     }
+
 
     public void saveNotifications(List<NotificationsEditListWidget.Entry> entries) {
         List<Notification<Trigger.CHAT>> notifs = getNotifications(Trigger.CHAT.class);

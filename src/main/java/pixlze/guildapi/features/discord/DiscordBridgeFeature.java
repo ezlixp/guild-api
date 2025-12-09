@@ -13,10 +13,11 @@ import pixlze.guildapi.core.components.Handlers;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.config.Config;
 import pixlze.guildapi.core.config.Configurable;
+import pixlze.guildapi.core.config.SyncConfigurable;
 import pixlze.guildapi.core.features.FeatureState;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.core.handlers.discord.event.S2CSocketEvents;
-import pixlze.guildapi.discord.DiscordMessageManager;
+import pixlze.guildapi.discord.type.Message;
 import pixlze.guildapi.mc.mixin.accessors.SystemToastInvoker;
 import pixlze.guildapi.utils.ColourUtils;
 import pixlze.guildapi.utils.McUtils;
@@ -31,7 +32,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class DiscordBridgeFeature extends Feature {
-    private final Pattern GUILD_PATTERN = Pattern.compile("^§[b8c]((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§[b8c] (?<content>.*)$");
+    private final Pattern GUILD_PATTERN = Pattern.compile(
+            "^§.((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§. (?<content>.*)$");
     private final Pattern[] GUILD_WHITELIST_PATTERNS = Stream.of(
             // Basic guild chat message
             "^(?<pill>.*)§[38](?<header>.+?)(§[38])?:§[b8] (?<content>.*)$",
@@ -99,6 +101,15 @@ public class DiscordBridgeFeature extends Feature {
     @Configurable
     public final Config<String> highlight = new Config<>("");
 
+    /**
+     * 0 - online
+     * 1 - busy (not implemented)
+     * 2 - dnd (not implemented)
+     * 3 - appear offline
+     */
+    @SyncConfigurable(syncUri = "user/onlineStatus/", cycleLength = 4)
+    public final Config<Integer> onlineStatus = new Config<>(0);
+
     @Override
     public void init() {
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
@@ -143,31 +154,31 @@ public class DiscordBridgeFeature extends Feature {
         }
         String username = null, content, discord;
         try {
-             if (message.get("McUsername") != null)
-                 username = message.get("McUsername").toString();
-             content = message.get("Content").toString();
-             discord = message.get("DiscordUsername").toString();
-             if (discord.equals("@none")) discord = "";
+            if (message.has("McUsername"))
+                username = message.get("McUsername").toString();
+            content = message.get("Content").toString();
+            discord = message.get("DiscordUsername").toString();
+            if (discord.equals("@none")) discord = "";
         } catch (Exception e) {
             GuildApi.LOGGER.info("discord message extract: {} {}", e, e.getMessage());
             return;
         }
 
-        String combined = Managers.Discord.addDiscord(username != null ? username : discord, discord);
+        Message m = new Message(username, discord, content, false, this::highlightMessage);
         if (!useGui.getValue()) {
-                McUtils.sendLocalMessage(Managers.Discord.toDiscordMessage(highlightMessage(Managers.Discord.parse(combined)),  highlightMessage(content)), Prepend.GUILD.getWithStyle(ColourUtils.DARK_PURPLE), true);
+            McUtils.sendLocalMessage(m.get(), Prepend.GUILD.getWithStyle(ColourUtils.DARK_PURPLE), true);
         } else {
-                TextRenderer textRenderer = McUtils.mc().textRenderer;
-                List<OrderedText> lines = textRenderer.wrapLines(Text.literal(highlightMessage(content)), (int) (McUtils.mc().getWindow()
-                        .getScaledWidth() * 0.25));
-                Objects.requireNonNull(textRenderer);
-                int width = Math.max(50, lines.stream().mapToInt(textRenderer::getWidth).max()
-                        .orElse((int) (McUtils.mc().getWindow().getScaledWidth() * 0.25)));
-                McUtils.mc().getToastManager()
-                        .add(SystemToastInvoker.create(SystemToast.Type.PERIODIC_NOTIFICATION, Text.literal(highlightMessage(Managers.Discord.parse(combined))), lines, width + 30));
+            TextRenderer textRenderer = McUtils.mc().textRenderer;
+            Objects.requireNonNull(textRenderer);
+            List<OrderedText> lines = m.getContentLines((int) (McUtils.mc().getWindow()
+                    .getScaledWidth() * 0.25));
+            int width = Math.max(50, lines.stream().mapToInt(textRenderer::getWidth).max()
+                    .orElse((int) (McUtils.mc().getWindow().getScaledWidth() * 0.25)));
+            McUtils.mc().getToastManager()
+                    .add(SystemToastInvoker.create(SystemToast.Type.PERIODIC_NOTIFICATION, m.getAuthor(), lines, width + 30));
         }
 
-        Managers.Discord.newMessage(username, discord, content, true, DiscordMessageManager.DISCORD_MESSAGE);
+        Managers.Discord.newMessage(username, discord, content, false, true);
     }
 
     private void onWynnMirror(String message) {
@@ -185,11 +196,11 @@ public class DiscordBridgeFeature extends Feature {
                         .append(Text.literal(leftover).setStyle(Style.EMPTY));
                 McUtils.sendLocalMessage(mirrored, Prepend.GUILD.get(), true);
                 Handlers.Chat.postChatLine(mirrored);
-                Managers.Discord.newMessage(matcher.group("header"), matcher.group("content"), true, DiscordMessageManager.GUILD_MESSAGE);
+                Managers.Discord.newMessage(matcher.group("header"), matcher.group("content"), true, true);
             } else {
                 McUtils.sendLocalMessage(Text.literal(message), Prepend.GUILD.get(), true);
                 Handlers.Chat.postChatLine(Text.literal(message));
-                Managers.Discord.newMessage("⚠ Info",  message, true, DiscordMessageManager.GUILD_MESSAGE);
+                Managers.Discord.newMessage("⚠ Info", message, true, true);
             }
         }
     }
@@ -209,6 +220,7 @@ public class DiscordBridgeFeature extends Feature {
     }
 
     public String highlightMessage(String message) {
+        if (message == null) return null;
         String[] phrases = highlight.getValue().split(",");
         int[] diff = new int[message.length() + 1];
         for (String phrase : phrases) {
