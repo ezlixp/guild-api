@@ -1,7 +1,6 @@
 package pixlze.guildapi.utils.text;
 
 import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -15,7 +14,7 @@ public class FontUtils {
                 finalText.append("\uDAFF\uDFFF");
             }
             finalText.append("\uE062");
-            return Text.literal(finalText.toString()).setStyle(Style.EMPTY.withFont(Identifier.of("banner/pill")));
+            return Text.literal(finalText.toString()).setStyle(TextUtils.fontOf(Identifier.of("banner/pill")));
         }
     }
 }

@@ -29,8 +29,8 @@ public class NotificationWidget extends ContainerWidget {
         this.widget = widget;
 
         this.regex = new TextFieldWidget(McUtils.mc().textRenderer, 125, height, Text.literal("Notification Regex"));
-        this.regex.addFormatter(TextFieldWidget.Formatter);
         this.display = new TextFieldWidget(McUtils.mc().textRenderer, 125, height, Text.literal("Notification Display"));
+        // TODO: add formatters to handle format codes
         this.remove = ButtonWidget.builder(Text.literal("Remove"), button -> this.widget.removeNotification(button.getX() + (double) button.getWidth() / 2, button.getY() + (double) button.getHeight() / 2)).size(100, height).build();
 
         this.regex.setMaxLength(256);

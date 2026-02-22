@@ -3,11 +3,9 @@ package pixlze.guildapi.utils.text;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextHandler;
 import net.minecraft.client.gui.hud.ChatHud;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.StringVisitable;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import pixlze.guildapi.mc.mixin.accessors.ChatHudAccessorInvoker;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
@@ -39,10 +37,18 @@ public class TextUtils {
                 currentPart.append(part);
             }
         }
-        if (!currentPart.getString().isEmpty() || splitted.size() < 2) splitted.add(currentPart);
+        if (!currentPart.getString().isEmpty() || splitted.size() < 2)
+            splitted.add(currentPart);
         return splitted;
     }
 
+    /**
+     * @param text     what to wrap
+     * @param maxWidth width to wrap to
+     * @return the text but wrapped with newline characters
+     * @deprecated in favor of textrendere.wraplines
+     */
+    @Deprecated
     public static String wrapText(String text, int maxWidth) {
         MinecraftClient client = McUtils.mc();
         if (client == null || client.textRenderer == null) return text;
@@ -88,8 +94,11 @@ public class TextUtils {
         ChatHud chatHud = client.inGameHud.getChatHud();
         ChatHudAccessorInvoker chatHudAccessorInvoker = (ChatHudAccessorInvoker) chatHud;
         TextHandler textHandler = client.textRenderer.getTextHandler();
-        List<StringVisitable> lines = textHandler.wrapLines(text, chatHudAccessorInvoker.invokeGetWidth(), text.getStyle(), Text.literal("\uDAFF\uDFFC\uE001\uDB00\uDC06")
-                .append(" ").setStyle(prependStyle));
+        List<StringVisitable> lines = new ArrayList<>();
+        textHandler.wrapLines(text, chatHudAccessorInvoker.invokeGetWidth(), text.getStyle(), (textx, lastine) -> {
+            lines.add(Text.literal("\uDAFF\uDFFC\uE001\uDB00\uDC06")
+                    .append(" ").setStyle(prependStyle).append(stringVisitableToText(textx)));
+        });
         MutableText out = (MutableText) stringVisitableToText(lines.getFirst());
         for (int i = 1; i < lines.size(); ++i) {
             out.append("\n");
@@ -108,6 +117,15 @@ public class TextUtils {
         return out;
     }
 
+    public static Style fontOf(Identifier of) {
+        return Style.EMPTY.withFont(new StyleSpriteSource.Font(of));
+    }
+
+    /**
+     * @param message the message to highlight
+     * @return the message with yellow formatting codes around the users in game name
+     * @deprecated in favor of the highlight words config option
+     */
     @Deprecated
     public static String highlightUser(String message) {
         return message.replaceAll("(?i)(" + McUtils.playerName() + ")", "§e$1§d");
@@ -133,8 +151,10 @@ public class TextUtils {
 
         private static void handleStylesWithHover(Style style, String asString) {
             assert style.getHoverEvent() != null;
-            if (style.getHoverEvent().getValue(style.getHoverEvent().getAction()) instanceof Text hoverText) {
-                List<Text> siblings = hoverText.getSiblings();
+            if (style.getHoverEvent() instanceof HoverEvent.ShowText(
+                    Text value
+            )) {
+                List<Text> siblings = value.getSiblings();
                 if (siblings != null) {
                     if (siblings.size() > 2 && siblings.get(1).getString() != null && Objects.requireNonNull(
                             siblings.get(1).getString()).contains("nickname is")) {

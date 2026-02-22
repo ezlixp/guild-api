@@ -106,8 +106,7 @@ public class WynnApiClient extends Api {
                             .append(Text.literal("here")
                                     .setStyle(Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
                                             .withClickEvent(
-                                                    new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                                            "/reloadWynnInfo"))))
+                                                    new ClickEvent.RunCommand("/reloadWynnInfo"))))
                             .append(Text.literal(" to retry.").setStyle(Style.EMPTY.withColor(Formatting.RED))),
                     this);
         }

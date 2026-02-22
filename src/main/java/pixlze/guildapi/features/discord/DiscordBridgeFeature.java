@@ -4,7 +4,6 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.toast.SystemToast;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
-import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.json.JSONObject;
@@ -194,7 +193,7 @@ public class DiscordBridgeFeature extends Feature {
                 String pill = matcher.group("pill");
                 String leftover = message.substring(pill.length());
                 Text mirrored = Text.empty()
-                        .append(Text.literal(pill).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("banner/pill")))))
+                        .append(Text.literal(pill).setStyle(TextUtils.fontOf(Identifier.of("banner/pill"))))
                         .append(Text.literal(leftover).setStyle(Style.EMPTY));
                 McUtils.sendLocalMessage(mirrored, Prepend.GUILD.get(), true);
                 Handlers.Chat.postChatLine(mirrored);
