@@ -45,12 +45,10 @@ public class GuildApiClient extends Api {
     private static final String UNLINKED_ERROR = "Could not validate account linking.";
     private static final Text CLICKABLE_HERE_GREEN = Text.literal("here").setStyle(Style.EMPTY.withUnderline(true).withColor(ColourUtils.GREEN.getColor())
             .withClickEvent(
-                    new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                            "/gapi login")));
+                    new ClickEvent.RunCommand("/gapi login")));
     private static final Text CLICKABLE_HERE_RED = Text.literal("here").setStyle(Style.EMPTY.withUnderline(true).withColor(ColourUtils.RED.getColor())
             .withClickEvent(
-                    new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                            "/gapi login")));
+                    new ClickEvent.RunCommand("/gapi login")));
 
     private static final Text GUILD_NOT_SET_UP = Text.literal("§eGuild api has not been set up for your guild. Please check the modrinth for further instructions.");
     private static final Text GUILD_NOT_SET_UP_NEW = GuildApi.BASE_INFO.copy().append("\n\n").append(GUILD_NOT_SET_UP);
@@ -228,7 +226,7 @@ public class GuildApiClient extends Api {
                                 McUtils.sendLocalMessage(
                                         Text.literal("§cSomething went wrong authenticating. Click ").append(
                                                 Text.literal("here").setStyle(
-                                                        Style.EMPTY.withUnderline(true).withColor(Formatting.RED).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/gapi login")))
+                                                        Style.EMPTY.withUnderline(true).withColor(Formatting.RED).withClickEvent(new ClickEvent.RunCommand("/gapi login")))
                                         ).append(Text.literal("§c to try again.")),
                                         Prepend.DEFAULT.get(), false
                                 );
@@ -327,7 +325,8 @@ public class GuildApiClient extends Api {
                     .uri(URI.create(baseURL + API_BASE_PATH + "auth/token"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()));
-            if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
+            if (GuildApi.isDevelopment())
+                builder.version(HttpClient.Version.HTTP_1_1);
             HttpResponse<String> response = NetManager.HTTP_CLIENT.send(builder.build(),
                     HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() / 100 == 2) {
@@ -384,7 +383,8 @@ public class GuildApiClient extends Api {
         }
         HttpRequest.Builder builder = HttpRequest.newBuilder().uri(URI.create(baseURL + path))
                 .header("Authorization", "bearer " + token).GET();
-        if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
+        if (GuildApi.isDevelopment())
+            builder.version(HttpClient.Version.HTTP_1_1);
         CompletableFuture<HttpResponse<String>> response = tryToken(builder);
         response.whenCompleteAsync((res, exception) -> {
                     if (GuildApi.isTesting())
@@ -409,7 +409,8 @@ public class GuildApiClient extends Api {
                 .headers("Content-Type", "application/json", "Authorization",
                         "bearer " + token)
                 .POST(HttpRequest.BodyPublishers.ofString(body.toString()));
-        if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
+        if (GuildApi.isDevelopment())
+            builder.version(HttpClient.Version.HTTP_1_1);
         CompletableFuture<HttpResponse<String>> response = tryToken(builder);
         response.whenCompleteAsync((res, exception) -> {
             if (GuildApi.isTesting())
@@ -431,7 +432,8 @@ public class GuildApiClient extends Api {
                 .uri(URI.create(baseURL + path))
                 .header("Authorization", "bearer " + token)
                 .DELETE();
-        if (GuildApi.isDevelopment()) builder.version(HttpClient.Version.HTTP_1_1);
+        if (GuildApi.isDevelopment())
+            builder.version(HttpClient.Version.HTTP_1_1);
         CompletableFuture<HttpResponse<String>> response = tryToken(builder);
         response.whenCompleteAsync((res, exception) -> {
             if (GuildApi.isTesting())

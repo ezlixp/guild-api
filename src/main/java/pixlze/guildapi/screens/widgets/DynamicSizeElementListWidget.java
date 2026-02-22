@@ -1,13 +1,14 @@
 package pixlze.guildapi.screens.widgets;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ContainerWidget;
 import net.minecraft.client.gui.widget.ThreePartsLayoutWidget;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -84,10 +85,10 @@ public abstract class DynamicSizeElementListWidget<E extends DynamicSizeElementL
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean bl = this.checkScrollbarDragged(mouseX, mouseY, button);
+    public boolean mouseClicked(Click click, boolean doubled) {
+        boolean bl = this.checkScrollbarDragged(click);
         for (E child : children()) {
-            boolean t = child.mouseClicked(mouseX, mouseY, button);
+            boolean t = child.mouseClicked(click, doubled);
             if (t) this.setFocused(child);
             bl |= t;
         }
@@ -110,13 +111,13 @@ public abstract class DynamicSizeElementListWidget<E extends DynamicSizeElementL
         }
         context.disableScissor();
         this.drawHeaderAndFooterSeparators(context);
-        this.drawScrollbar(context);
+        this.drawScrollbar(context, mouseX, mouseY);
     }
 
     protected void drawMenuListBackground(DrawContext context) {
         Identifier identifier = this.client.world == null ? MENU_LIST_BACKGROUND_TEXTURE:INWORLD_MENU_LIST_BACKGROUND_TEXTURE;
         context.drawTexture(
-                RenderLayer::getGuiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 identifier,
                 this.getX(),
                 this.getY(),
@@ -132,8 +133,8 @@ public abstract class DynamicSizeElementListWidget<E extends DynamicSizeElementL
     protected void drawHeaderAndFooterSeparators(DrawContext context) {
         Identifier identifier = McUtils.mc().world == null ? Screen.HEADER_SEPARATOR_TEXTURE:Screen.INWORLD_HEADER_SEPARATOR_TEXTURE;
         Identifier identifier2 = McUtils.mc().world == null ? Screen.FOOTER_SEPARATOR_TEXTURE:Screen.INWORLD_FOOTER_SEPARATOR_TEXTURE;
-        context.drawTexture(RenderLayer::getGuiTextured, identifier, this.getX(), this.getY() - 2, 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
-        context.drawTexture(RenderLayer::getGuiTextured, identifier2, this.getX(), this.getBottom(), 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, identifier, this.getX(), this.getY() - 2, 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, identifier2, this.getX(), this.getBottom(), 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
     }
 
     @Override

@@ -165,10 +165,10 @@ public class ListClientCommand extends ClientCommand {
             listMessage.append("\n");
             listMessage.append(Text.literal("<< Prev")
                             .setStyle(Style.EMPTY.withColor(hasPrev ? Formatting.GREEN:Formatting.GRAY).withBold(true)
-                                    .withClickEvent(hasPrev ? new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + name + "list view " + page + " false"):null)))
+                                    .withClickEvent(hasPrev ? new ClickEvent.RunCommand("/" + name + "list view " + page + " false"):null)))
                     .append("          ").append(Text.literal("Next >>")
                             .setStyle(Style.EMPTY.withColor(hasNext ? Formatting.GREEN:Formatting.GRAY).withBold(true)
-                                    .withClickEvent(hasNext ? new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + name + "list view " + (page + 2) + " false"):null)));
+                                    .withClickEvent(hasNext ? new ClickEvent.RunCommand("/" + name + "list view " + (page + 2) + " false"):null)));
             listMessage.append("\n");
             McUtils.sendLocalMessage(listMessage, Prepend.DEFAULT.get(), false);
         });

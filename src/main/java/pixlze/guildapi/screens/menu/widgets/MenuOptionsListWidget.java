@@ -30,8 +30,8 @@ public class MenuOptionsListWidget extends ElementListWidget<MenuOptionsListWidg
         this.renderList(context, mouseX, mouseY, delta);
         context.disableScissor();
 
-        this.drawScrollbar(context);
-        this.renderDecorations(context, mouseX, mouseY);
+        this.drawHeaderAndFooterSeparators(context);
+        this.drawScrollbar(context, mouseX, mouseY);
     }
 
     public static class Entry extends ElementListWidget.Entry<MenuOptionsListWidget.Entry> {
@@ -58,10 +58,10 @@ public class MenuOptionsListWidget extends ElementListWidget<MenuOptionsListWidg
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickDelta) {
             for (ClickableWidget child : children()) {
-                child.setPosition(x, y);
-                child.setHeight(entryHeight);
+                child.setPosition(getX(), getY());
+                child.setHeight(getHeight());
                 child.render(context, mouseX, mouseY, tickDelta);
             }
         }

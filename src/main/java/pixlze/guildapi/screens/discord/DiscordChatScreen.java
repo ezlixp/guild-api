@@ -4,8 +4,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.ThreePartsLayoutWidget;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
-import org.lwjgl.glfw.GLFW;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.screens.discord.widgets.DiscordChatWidget;
 import pixlze.guildapi.utils.McUtils;
@@ -81,10 +81,10 @@ public class DiscordChatScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+    public boolean keyPressed(KeyInput input) {
+        if (super.keyPressed(input)) {
             return true;
-        } else if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+        } else if (input.isEnter()) {
             // TODO: disable input field if socket not on, and add tooltip
             String author = McUtils.playerName();
             String content = Managers.Discord.stripIllegal(discordInput.getText());

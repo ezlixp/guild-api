@@ -90,9 +90,9 @@ public class NotificationsEditListWidget extends ElementListWidget<Notifications
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-            widget.setHeight(entryHeight);
-            widget.setPosition(x + entryWidth / 2 - widget.getWidth() / 2, y);
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+            widget.setHeight(getHeight());
+            widget.setPosition(getX() + getWidth() / 2 - widget.getWidth() / 2, getY());
 
             widget.render(context, mouseX, mouseY, tickDelta);
         }

@@ -1,6 +1,7 @@
 package pixlze.guildapi.mc.mixin;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -25,7 +26,7 @@ public abstract class ChatScreenMixin extends Screen {
     }
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
-    private void onMouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<boolean[]> ci) {
+    private void onMouseClicked(Click click, boolean doubled, CallbackInfoReturnable<boolean[]> ci) {
         assert client != null;
         assert client.currentScreen != null;
         ChatHud chatHud = client.inGameHud.getChatHud();
@@ -40,7 +41,7 @@ public abstract class ChatScreenMixin extends Screen {
 
 
         double scrollOffset = chatHudAccessorInvoker.getScrolledLines();
-        if (Screen.hasControlDown() || Screen.hasAltDown() || Screen.hasShiftDown()) {
+        if (click.hasCtrl() || click.hasAlt() || click.hasShift()) {
             List<ChatHudLine> messages = chatHudAccessorInvoker.getMessages();
             int line = 0;
             for (ChatHudLine message : messages) {
@@ -49,16 +50,16 @@ public abstract class ChatScreenMixin extends Screen {
                 int lines = ChatMessages.breakRenderedChatMessageLines(message.content(), chatWidth, textRenderer)
                         .size();
                 if (line >= scrollOffset) {
-                    if (mouseX <= chatWidth && mouseY <= chatBottom - lineHeight * (line - scrollOffset) && mouseY >= chatBottom - lineHeight * (line + lines - scrollOffset)) {
-                        if (Screen.hasControlDown()) {
+                    if (click.x() <= chatWidth && click.y() <= chatBottom - lineHeight * (line - scrollOffset) && click.y() >= chatBottom - lineHeight * (line + lines - scrollOffset)) {
+                        if (click.hasCtrl()) {
                             MinecraftClient.getInstance().keyboard.setClipboard(
                                     TextUtils.parsePlain(message.content()));
                         }
-                        if (Screen.hasAltDown()) {
+                        if (click.hasAlt()) {
                             MinecraftClient.getInstance().keyboard.setClipboard(
                                     TextUtils.parseStyled(message.content(), TextParseOptions.DEFAULT));
                         }
-                        if (Screen.hasShiftDown()) {
+                        if (click.hasShift()) {
                             MinecraftClient.getInstance().keyboard.setClipboard(message.content().toString());
                         }
                     }
