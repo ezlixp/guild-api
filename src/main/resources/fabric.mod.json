@@ -25,9 +25,10 @@
   "mixins": [
     "guildapi.mixins.json"
   ],
-  "depends": {
-    "fabricloader": ">=0.15.11",
-    "minecraft": "~1.21",
+"depends": {
+    "fabricloader": ">=0.16.10",
+    "minecraft": "~1.21.11", 
+    "fabric": "*"
     "java": ">=21",
     "fabric-api": "*"
   }
