@@ -1,7 +1,7 @@
 plugins {
     id "fabric-loom" version "1.15-SNAPSHOT"
     id "maven-publish"
-    id "com.github.johnrengelman.shadow" version "8.1.1"
+//    id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
 version = project.mod_version
@@ -36,7 +36,7 @@ dependencies {
     // Other dependencies
     modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
 
-    shadow(implementation("io.socket:socket.io-client:2.1.1"))
+    include(implementation("io.socket:socket.io-client:2.1.1"))
 }
 
 processResources {
@@ -65,20 +65,6 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.base.archivesName.get()}" }
     }
-}
-
-// dev jar is jar with fabric loom sources
-// remap jar takes the dev jar and converts it to minecraft sources
-
-shadowJar {
-    configurations = [project.configurations.shadow]
-    archiveClassifier.set("dev")
-    relocate "io.socket", "pixlze.guildapi.shadow.io.socket"
-}
-
-remapJar {
-    dependsOn(shadowJar)
-    inputFile = tasks.shadowJar.archiveFile
 }
 
 // configure the maven publication
