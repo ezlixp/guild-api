@@ -1,8 +1,10 @@
 package pixlze.guildapi.screens.config.widgets;
 
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ParentElement;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.text.Text;
@@ -78,12 +80,12 @@ public class FeatureConfigListWidget extends DynamicSizeElementListWidget<Featur
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            Optional<Element> optional = this.hoveredElement(mouseX, mouseY);
+        public boolean mouseClicked(Click click, boolean doubled) {
+            Optional<Element> optional = this.hoveredElement(click.x(), click.y());
             if (optional.isPresent()) {
-                if (optional.get().mouseClicked(mouseX, mouseY, button)) {
+                if (optional.get().mouseClicked(click, doubled)) {
                     this.setFocused(optional.get());
-                    if (button == 0) {
+                    if (click.button() == 0) {
                         this.setDragging(true);
                     }
                     return true;

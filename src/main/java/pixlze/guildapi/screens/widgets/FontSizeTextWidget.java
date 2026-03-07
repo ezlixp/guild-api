@@ -9,6 +9,8 @@ import net.minecraft.text.OrderedText;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Language;
+import org.joml.Matrix3x2fStack;
+import pixlze.guildapi.utils.McUtils;
 
 public class FontSizeTextWidget extends TextWidget {
     private float horizontalAlignment = 0.5f;
@@ -19,29 +21,10 @@ public class FontSizeTextWidget extends TextWidget {
         this.height = height;
     }
 
-    private TextWidget align(float horizontalAlignment) {
-        this.horizontalAlignment = horizontalAlignment;
-        return this;
-    }
 
     @Override
     public void setHeight(int height) {
         this.height = height;
-    }
-
-    @Override
-    public TextWidget alignLeft() {
-        return this.align(0.0F);
-    }
-
-    @Override
-    public TextWidget alignCenter() {
-        return this.align(0.5F);
-    }
-
-    @Override
-    public TextWidget alignRight() {
-        return this.align(1.0F);
     }
 
     private OrderedText trim(Text text, int width) {
@@ -50,28 +33,19 @@ public class FontSizeTextWidget extends TextWidget {
         return Language.getInstance().reorder(StringVisitable.concat(stringVisitable, ScreenTexts.ELLIPSIS));
     }
 
-
-    @Override
     public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-        Text text = this.getMessage();
-        TextRenderer textRenderer = this.getTextRenderer();
-        int widgetWidth = this.getWidth();
-        int textWidth = textRenderer.getWidth(text);
-        int k = this.getX() + Math.round(this.horizontalAlignment * (float) (widgetWidth - textWidth));
-        int l = this.getY() + (this.getHeight() - 9) / 2;
-        OrderedText orderedText = textWidth > widgetWidth ? this.trim(text, widgetWidth):text.asOrderedText();
+        Matrix3x2fStack stack = context.getMatrices();
+        stack.pushMatrix();
 
-        MatrixStack stack = context.getMatrices();
-        stack.push();
+        // TODO: centering, do smth in consturctor to auto align x or do it before constructor
+        float scale = ((float) height) / McUtils.mc().textRenderer.fontHeight;
+        stack.translate(getX() + (float) this.getWidth() / 2, getY() + (float) this.getHeight() / 2, stack);
+        stack.scale(scale, scale, stack);
+        stack.translate(-(getX() + (float) this.getWidth() / 2) + 0.5f, -getY() - (float) this.getHeight() / 2 + 0.5f, stack);
 
-        float scale = ((float) height) / textRenderer.fontHeight;
-        stack.translate(getX() + (float) widgetWidth / 2, getY() + (float) this.getHeight() / 2, 0);
-        stack.scale(scale, scale, 1f);
-        stack.translate(-(getX() + (float) widgetWidth / 2) + 0.5f, -getY() - (float) this.getHeight() / 2 + 0.5f, 0);
+        super.renderWidget(context, mouseX, mouseY, delta);
 
-        context.drawText(textRenderer, orderedText, k, l, this.getTextColor(), false);
-
-        stack.pop();
+        stack.popMatrix();
     }
 }
 
