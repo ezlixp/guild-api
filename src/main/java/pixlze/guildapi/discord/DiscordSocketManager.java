@@ -9,7 +9,7 @@ import pixlze.guildapi.core.features.FeatureState;
 import pixlze.guildapi.features.discord.DiscordBridgeFeature;
 import pixlze.guildapi.models.worldState.event.WorldStateEvents;
 import pixlze.guildapi.models.worldState.type.WorldState;
-import pixlze.guildapi.net.WynnJoinApi;
+import pixlze.guildapi.net.GuildApiClient;
 import pixlze.guildapi.net.event.NetEvents;
 import pixlze.guildapi.net.type.AbstractSocketManager;
 import pixlze.guildapi.net.type.Api;
@@ -32,12 +32,12 @@ public class DiscordSocketManager extends AbstractSocketManager {
     }
 
     private void onApiLoaded(Api api) {
-        if (api.getClass().equals(WynnJoinApi.class) && Managers.Feature.getFeatureState(Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)) == FeatureState.ENABLED)
+        if (api.getClass().equals(GuildApiClient.class))
             initSocket();
     }
 
     private void onApiUnloaded(Api api) {
-        if (api.getClass().equals(WynnJoinApi.class)) disable();
+        if (api.getClass().equals(GuildApiClient.class)) disable();
     }
 
     @Override
@@ -86,7 +86,8 @@ public class DiscordSocketManager extends AbstractSocketManager {
     }
 
     public void initSocket() {
-        if (Managers.Net.guild.isDisabled()) return;
+        if (Managers.Feature.getFeatureState(Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)) != FeatureState.ENABLED)
+            return;
         boolean reload = false;
         if (!Objects.equals(Managers.Net.guild.guildId, guildId)) {
             Managers.Discord.clearMessages();
