@@ -45,13 +45,13 @@ public class ConnectionHandler {
 
     private void connect() {
         isConnected = true;
-        GuildApi.LOGGER.info("on wynn");
+        GuildApi.LOGGER.info("connecting to wynn");
         WynncraftConnectionEvents.JOIN.invoker().interact();
     }
 
     private void disconnect() {
         isConnected = false;
-        GuildApi.LOGGER.info("off wynn");
+        GuildApi.LOGGER.info("disconnecting from wynn");
         WynncraftConnectionEvents.LEAVE.invoker().interact();
     }
 
