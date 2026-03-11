@@ -44,9 +44,12 @@ public class McUtils {
         ChatHudAccessorInvoker chatHudAccessorInvoker = (ChatHudAccessorInvoker) chatHud;
         Text withPrepend = Text.empty().append(prepend).append(message);
         if (wynncraftStyle) withPrepend = TextUtils.toBlockMessage(withPrepend, prepend.getStyle());
-        Prepend.linesSinceBadge += ChatMessages.breakRenderedChatMessageLines(withPrepend, chatHudAccessorInvoker.invokeGetWidth(), MinecraftClient.getInstance().textRenderer)
-                .size();
-        player().sendMessage(withPrepend, false);
+        Text finalWithPrepend = withPrepend;
+        mc().execute(() -> {
+            Prepend.linesSinceBadge += ChatMessages.breakRenderedChatMessageLines(finalWithPrepend, chatHudAccessorInvoker.invokeGetWidth(), MinecraftClient.getInstance().textRenderer)
+                    .size();
+            player().sendMessage(finalWithPrepend, false);
+        });
     }
 
     public static void sendTitleMessage(Text message) {
