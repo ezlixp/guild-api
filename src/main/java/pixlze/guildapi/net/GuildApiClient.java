@@ -198,7 +198,7 @@ public class GuildApiClient extends Api {
             this.token = res.getLeft();
             this.refreshToken = res.getRight();
             this.saveRefreshToken();
-            successMessage();
+            this.successMessage();
             this.enable();
         });
         return 0;
