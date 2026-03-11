@@ -37,6 +37,10 @@ dependencies {
     modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
 
     include(implementation("io.socket:socket.io-client:2.1.1"))
+    include(implementation("io.socket:engine.io-client:2.1.0"))
+    include(implementation("com.squareup.okhttp3:okhttp:3.12.12"))
+    include(implementation("com.squareup.okio:okio:1.15.0"))
+    include(implementation("org.json:json:20090211"))
 }
 
 processResources {
