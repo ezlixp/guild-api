@@ -96,8 +96,8 @@ public class TextUtils {
         TextHandler textHandler = client.textRenderer.getTextHandler();
         List<StringVisitable> lines = new ArrayList<>();
         textHandler.wrapLines(text, chatHudAccessorInvoker.invokeGetWidth(), text.getStyle(), (textx, lastine) -> {
-            lines.add(Text.literal("\uDAFF\uDFFC\uE001\uDB00\uDC06")
-                    .append(" ").setStyle(prependStyle).append(stringVisitableToText(textx)));
+            lines.add(Text.empty().append(Text.literal("\uDAFF\uDFFC\uE001\uDB00\uDC06")
+                    .append(" ").setStyle(prependStyle)).append(stringVisitableToText(textx)));
         });
         MutableText out = (MutableText) stringVisitableToText(lines.getFirst());
         for (int i = 1; i < lines.size(); ++i) {
