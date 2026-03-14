@@ -30,14 +30,16 @@ public final class Managers {
     public static final TickSchedulerManager Tick = new TickSchedulerManager();
 
     public static void init() {
+        // These all need to go first bcs they have no interactions with others
         Json.init();
-        DiscordSocket.init();
-        Net.init();
         Feature.init();
         Config.init();
         Notification.init();
         Command.init();
         Tick.init();
+
+        DiscordSocket.init();
+        Net.init();
         if (GuildApi.isDevelopment() || GuildApi.isTesting())
             TestCommand.init();
     }
