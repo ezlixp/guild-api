@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pixlze.guildapi.mc.mixin.accessors.ChatHudAccessorInvoker;
+import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.TextUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
 
@@ -33,7 +34,7 @@ public abstract class ChatScreenMixin extends Screen {
         ChatHudAccessorInvoker chatHudAccessorInvoker = (ChatHudAccessorInvoker) chatHud;
 
         int chatBottom = client.currentScreen.height - 40;
-        int chatWidth = chatHudAccessorInvoker.invokeGetWidth();
+        int chatWidth = McUtils.getChatWidth();
         double lineHeight =
                 chatHudAccessorInvoker.invokeGetLineHeight() * MinecraftClient.getInstance().options.getChatScale()
                         .getValue(); //

@@ -16,9 +16,6 @@ public interface ChatHudAccessorInvoker {
     @Accessor("scrolledLines")
     int getScrolledLines();
 
-    @Invoker("getWidth")
-    int invokeGetWidth();
-
     @Invoker("getLineHeight")
     int invokeGetLineHeight();
 

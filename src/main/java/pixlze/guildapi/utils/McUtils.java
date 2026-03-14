@@ -1,14 +1,14 @@
 package pixlze.guildapi.utils;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.util.ChatMessages;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Managers;
-import pixlze.guildapi.mc.mixin.accessors.ChatHudAccessorInvoker;
 import pixlze.guildapi.utils.text.TextUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
@@ -36,20 +36,26 @@ public class McUtils {
 
     public static synchronized void sendLocalMessage(Text message, MutableText prepend, boolean wynncraftStyle) {
         if (player() == null) {
-            Managers.Net.join.addTask(() -> McUtils.sendLocalMessage(message, prepend, wynncraftStyle));
+            Managers.Net.join.addTask(() -> mc().execute(() -> sendLocalMessage(message, prepend, wynncraftStyle)));
             GuildApi.LOGGER.warn("Tried to send local message but player was null. Queueing message...");
             return;
         }
-        ChatHud chatHud = MinecraftClient.getInstance().inGameHud.getChatHud();
-        ChatHudAccessorInvoker chatHudAccessorInvoker = (ChatHudAccessorInvoker) chatHud;
+        if (!RenderSystem.isOnRenderThread()) {
+            GuildApi.LOGGER.warn("Send local message was not called on render thread: {}", TextUtils.parsePlain(message));
+            mc().execute(() -> sendLocalMessage(message, prepend, wynncraftStyle));
+            return;
+        }
         Text withPrepend = Text.empty().append(prepend).append(message);
-        if (wynncraftStyle) withPrepend = TextUtils.toBlockMessage(withPrepend, prepend.getStyle());
-        Text finalWithPrepend = withPrepend;
-        mc().execute(() -> {
-            Prepend.linesSinceBadge += ChatMessages.breakRenderedChatMessageLines(finalWithPrepend, chatHudAccessorInvoker.invokeGetWidth(), MinecraftClient.getInstance().textRenderer)
-                    .size();
-            player().sendMessage(finalWithPrepend, false);
-        });
+        if (wynncraftStyle)
+            withPrepend = TextUtils.toBlockMessage(withPrepend, prepend.getStyle());
+        Prepend.linesSinceBadge += ChatMessages.breakRenderedChatMessageLines(withPrepend, McUtils.getChatWidth(), MinecraftClient.getInstance().textRenderer)
+                .size();
+        player().sendMessage(withPrepend, false);
+    }
+
+    public static int getChatWidth() {
+        // low 40, high 320
+        return MathHelper.floor(mc().options.getChatWidth().getValue() * 280.0 + 40.0);
     }
 
     public static void sendTitleMessage(Text message) {

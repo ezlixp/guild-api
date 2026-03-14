@@ -1,12 +1,12 @@
 package pixlze.guildapi.utils.text;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextHandler;
-import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import pixlze.guildapi.mc.mixin.accessors.ChatHudAccessorInvoker;
+import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
 
@@ -90,12 +90,11 @@ public class TextUtils {
     }
 
     public static Text toBlockMessage(Text text, Style prependStyle) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        ChatHud chatHud = client.inGameHud.getChatHud();
-        ChatHudAccessorInvoker chatHudAccessorInvoker = (ChatHudAccessorInvoker) chatHud;
-        TextHandler textHandler = client.textRenderer.getTextHandler();
+        if (!RenderSystem.isOnRenderThread())
+            GuildApi.LOGGER.warn("To block message was not called on render thread: {}", TextUtils.parsePlain(text));
+        TextHandler textHandler = McUtils.mc().textRenderer.getTextHandler();
         List<StringVisitable> lines = new ArrayList<>();
-        textHandler.wrapLines(text, chatHudAccessorInvoker.invokeGetWidth(), text.getStyle(), (textx, lastine) -> {
+        textHandler.wrapLines(text, McUtils.getChatWidth(), text.getStyle(), (textx, lastine) -> {
             lines.add(Text.empty().append(Text.literal("\uDAFF\uDFFC\uE001\uDB00\uDC06")
                     .append(" ").setStyle(prependStyle)).append(stringVisitableToText(textx)));
         });
