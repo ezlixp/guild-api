@@ -86,7 +86,8 @@ public class DiscordSocketManager extends AbstractSocketManager {
     }
 
     public void initSocket() {
-        if (Managers.Feature.getFeatureState(Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)) != FeatureState.ENABLED)
+        // Need to check for if guild is disabled because this can be called directly from enabling the feature
+        if (Managers.Feature.getFeatureState(Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)) != FeatureState.ENABLED || Managers.Net.guild.isDisabled())
             return;
         boolean reload = false;
         if (!Objects.equals(Managers.Net.guild.guildId, guildId)) {
