@@ -31,8 +31,8 @@ public final class Managers {
 
     public static void init() {
         Json.init();
-        Net.init();
         DiscordSocket.init();
+        Net.init();
         Feature.init();
         Config.init();
         Notification.init();
