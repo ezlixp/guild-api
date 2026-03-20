@@ -4,7 +4,6 @@ import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.ParentElement;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.text.Text;
@@ -63,8 +62,9 @@ public class FeatureConfigListWidget extends DynamicSizeElementListWidget<Featur
 
         @Override
         public void render(DrawContext context, int index, int x, int y, int entryWidth, int entryHeight, int mouseX, int mouseY, float tickDelta) {
-//            context.fill(x, y, x + entryWidth, y + entryHeight, 0x8000FF00 + index * 100);
-            headerWidget.setPosition(x, y);
+            // Debug:
+            // context.fill(x, y, x + entryWidth, y + entryHeight, 0x8000FF00 + index * 100);
+            headerWidget.setPosition(x + 5, y);
             headerWidget.setWidth(entryWidth);
             headerWidget.render(context, mouseX, mouseY, tickDelta);
             int top = y + headerHeight + 4;
