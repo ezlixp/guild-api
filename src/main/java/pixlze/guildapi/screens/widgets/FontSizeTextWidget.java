@@ -3,7 +3,6 @@ package pixlze.guildapi.screens.widgets;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.StringVisitable;
@@ -13,7 +12,6 @@ import org.joml.Matrix3x2fStack;
 import pixlze.guildapi.utils.McUtils;
 
 public class FontSizeTextWidget extends TextWidget {
-    private float horizontalAlignment = 0.5f;
     private int height;
 
     public FontSizeTextWidget(int height, Text message, TextRenderer textRenderer) {
