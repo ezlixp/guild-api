@@ -1,7 +1,6 @@
 plugins {
     id "fabric-loom" version "1.15-SNAPSHOT"
     id "maven-publish"
-//    id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
 version = project.mod_version
@@ -36,11 +35,11 @@ dependencies {
     // Other dependencies
     modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
 
-    include(implementation("io.socket:socket.io-client:2.1.1"))
-    include(implementation("io.socket:engine.io-client:2.1.0"))
-    include(implementation("com.squareup.okhttp3:okhttp:3.12.12"))
-    include(implementation("com.squareup.okio:okio:1.15.0"))
-    include(implementation("org.json:json:20090211"))
+    include(implementation("io.socket:socket.io-client:${project.socketio_client_version}"))
+    include(implementation("io.socket:engine.io-client:${project.engineio_client_version}"))
+    include(implementation("com.squareup.okhttp3:okhttp:${project.okhttp_version}"))
+    include(implementation("com.squareup.okio:okio:${project.okio_version}"))
+    include(implementation("org.json:json:${project.json_version}"))
 }
 
 processResources {
