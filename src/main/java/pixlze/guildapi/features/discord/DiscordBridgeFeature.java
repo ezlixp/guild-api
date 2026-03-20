@@ -2,6 +2,7 @@ package pixlze.guildapi.features.discord;
 
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.toast.SystemToast;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -25,10 +26,12 @@ import pixlze.guildapi.utils.text.TextUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
 import pixlze.guildapi.utils.type.Prepend;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DiscordBridgeFeature extends Feature {
@@ -172,7 +175,7 @@ public class DiscordBridgeFeature extends Feature {
             TextRenderer textRenderer = McUtils.mc().textRenderer;
             Objects.requireNonNull(textRenderer);
             List<OrderedText> lines = m.getContentLines((int) (McUtils.mc().getWindow()
-                    .getScaledWidth() * 0.25));
+                    .getScaledWidth() * 0.25)).stream().map(MutableText::asOrderedText).collect(Collectors.toCollection(ArrayList::new));
             int width = Math.max(50, lines.stream().mapToInt(textRenderer::getWidth).max()
                     .orElse((int) (McUtils.mc().getWindow().getScaledWidth() * 0.25)));
             McUtils.mc().getToastManager()
