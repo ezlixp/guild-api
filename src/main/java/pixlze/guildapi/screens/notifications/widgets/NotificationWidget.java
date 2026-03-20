@@ -6,11 +6,11 @@ import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.ContainerWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import pixlze.guildapi.core.notifications.Notification;
 import pixlze.guildapi.core.notifications.Trigger;
+import pixlze.guildapi.screens.widgets.AllowSectionSignTextField;
 import pixlze.guildapi.utils.McUtils;
 
 import java.util.List;
@@ -19,8 +19,8 @@ import java.util.regex.PatternSyntaxException;
 
 public class NotificationWidget extends ContainerWidget {
     private Element focused;
-    private final TextFieldWidget regex;
-    private final TextFieldWidget display;
+    private final AllowSectionSignTextField regex;
+    private final AllowSectionSignTextField display;
     private final ButtonWidget remove;
     private final NotificationsEditListWidget widget;
 
@@ -28,8 +28,8 @@ public class NotificationWidget extends ContainerWidget {
         super(0, 0, width, height, text);
         this.widget = widget;
 
-        this.regex = new TextFieldWidget(McUtils.mc().textRenderer, 125, height, Text.literal("Notification Regex"));
-        this.display = new TextFieldWidget(McUtils.mc().textRenderer, 125, height, Text.literal("Notification Display"));
+        this.regex = new AllowSectionSignTextField(McUtils.mc().textRenderer, 125, height, Text.literal("Notification Regex"));
+        this.display = new AllowSectionSignTextField(McUtils.mc().textRenderer, 125, height, Text.literal("Notification Display"));
         // TODO: add formatters to handle format codes
         this.remove = ButtonWidget.builder(Text.literal("Remove"), button -> this.widget.removeNotification(button.getX() + (double) button.getWidth() / 2, button.getY() + (double) button.getHeight() / 2)).size(100, height).build();
 
