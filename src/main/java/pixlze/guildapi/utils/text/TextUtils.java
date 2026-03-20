@@ -93,18 +93,28 @@ public class TextUtils {
         if (!RenderSystem.isOnRenderThread())
             GuildApi.LOGGER.warn("To block message was not called on render thread: {}", TextUtils.parsePlain(text));
         TextHandler textHandler = McUtils.mc().textRenderer.getTextHandler();
-        List<StringVisitable> lines = new ArrayList<>();
+        List<MutableText> lines = new ArrayList<>();
         textHandler.wrapLines(text, McUtils.getChatWidth(), text.getStyle(), (textx, lastine) -> {
             lines.add(Text.empty().append(Text.literal("\uDAFF\uDFFC\uE001\uDB00\uDC06")
                     .append(" ").setStyle(prependStyle)).append(stringVisitableToText(textx)));
         });
-        MutableText out = (MutableText) stringVisitableToText(lines.getFirst());
+        MutableText out = lines.getFirst();
         for (int i = 1; i < lines.size(); ++i) {
             out.append("\n");
             out.append(stringVisitableToText(lines.get(i)));
         }
 
         return out;
+    }
+
+    public static List<MutableText> wrapToMutableText(Text text, int maxWidth) {
+        List<MutableText> lines = new ArrayList<>();
+        TextHandler textHandler = McUtils.mc().textRenderer.getTextHandler();
+        textHandler.wrapLines(text, maxWidth, text.getStyle(), (textx, lastine) -> {
+            lines.add(Text.empty().append(stringVisitableToText(textx)));
+        });
+        return lines;
+
     }
 
     public static Text stringVisitableToText(StringVisitable visitable) {
