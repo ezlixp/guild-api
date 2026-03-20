@@ -2,10 +2,9 @@ package pixlze.guildapi.screens.discord.widgets;
 
 import net.minecraft.client.font.DrawnTextConsumer;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.AbstractTextWidget;
 import net.minecraft.client.gui.widget.ScrollableWidget;
-import net.minecraft.text.OrderedText;
+import net.minecraft.text.MutableText;
 import pixlze.guildapi.discord.type.Message;
 
 import java.util.List;
@@ -22,6 +21,8 @@ public class ChatMessageWidget extends AbstractTextWidget {
         this.message = message;
         if (!confirmed) {
             this.setTextColor(0xAAAAAA);
+        } else {
+            confirm();
         }
         shadowColor = isGuild ? 0x24ABFF:0x9003FC;
     }
@@ -48,15 +49,11 @@ public class ChatMessageWidget extends AbstractTextWidget {
         int y = this.getY() + PADDING;
 
         textConsumer.text(x, y, message.getAuthor().withColor(shadowColor).asOrderedText());
-        List<OrderedText> contentLines = message.getContentLines(this.getWidth() - 8 - ScrollableWidget.SCROLLBAR_WIDTH);
+        List<MutableText> contentLines = message.getContentLines(this.getWidth() - 8 - ScrollableWidget.SCROLLBAR_WIDTH);
         y += 2;
-        for (OrderedText line : contentLines) {
+        for (MutableText line : contentLines) {
             y += 10;
-            textConsumer.text(x, y, line);
+            textConsumer.text(x, y, line.withColor(textColor));
         }
-    }
-
-    @Override
-    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
     }
 }
