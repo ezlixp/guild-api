@@ -96,8 +96,9 @@ public abstract class AbstractSocketManager extends Manager {
 
         registerListener(Socket.EVENT_CONNECT_ERROR, (err) -> {
             if (connectAttempt % 5 == 0) {
-                if (firstConnect) McUtils.sendLocalMessage(Text.literal("§eConnecting to chat server..."),
-                        Prepend.GUILD.getWithStyle(ColourUtils.YELLOW), true);
+                if (firstConnect)
+                    McUtils.sendLocalMessage(Text.literal("§eConnecting to chat server..."),
+                            Prepend.GUILD.getWithStyle(ColourUtils.YELLOW), true);
                 else McUtils.sendLocalMessage(Text.literal("§eReconnecting..."),
                         Prepend.GUILD.getWithStyle(ColourUtils.YELLOW), true);
             }
@@ -164,7 +165,8 @@ public abstract class AbstractSocketManager extends Manager {
     public void registerListener(String name, Consumer<Object[]> listener) {
         if (socket != null)
             socket.on(name, listener::accept);
-        else GuildApi.LOGGER.warn("tried to register listener for event: {} while socket was null", name);
+        else
+            GuildApi.LOGGER.warn("tried to register listener for event: {} while socket was null", name);
     }
 
     protected abstract boolean doConnect();
