@@ -12,7 +12,6 @@ import pixlze.guildapi.core.notifications.Trigger;
 import pixlze.guildapi.screens.notifications.NotificationsEditScreen;
 
 import java.util.List;
-import java.util.Objects;
 
 public class NotificationsEditListWidget extends ElementListWidget<NotificationsEditListWidget.Entry> {
     public NotificationsEditListWidget(MinecraftClient client, int width, NotificationsEditScreen notificationsScreen) {
@@ -95,11 +94,6 @@ public class NotificationsEditListWidget extends ElementListWidget<Notifications
             widget.setPosition(getX() + getWidth() / 2 - widget.getWidth() / 2, getY());
 
             widget.render(context, mouseX, mouseY, tickDelta);
-        }
-
-        @Override
-        public boolean isMouseOver(double mouseX, double mouseY) {
-            return Objects.equals(parent.getEntryAtPosition(mouseX, mouseY), this);
         }
     }
 }
