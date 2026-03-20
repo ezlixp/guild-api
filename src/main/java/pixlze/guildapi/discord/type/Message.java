@@ -1,10 +1,14 @@
 package pixlze.guildapi.discord.type;
 
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.text.*;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import pixlze.guildapi.utils.ColourUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.FontUtils;
+import pixlze.guildapi.utils.text.TextUtils;
 
 import java.util.List;
 import java.util.function.Function;
@@ -60,7 +64,7 @@ public class Message {
         return highlight.apply(this.content);
     }
 
-    public List<OrderedText> getContentLines(int maxWidth) {
-        return textRenderer.wrapLines(Text.literal(highlight.apply(content)), maxWidth);
+    public List<MutableText> getContentLines(int maxWidth) {
+        return TextUtils.wrapToMutableText(Text.literal(highlight.apply(content)), maxWidth);
     }
 }
