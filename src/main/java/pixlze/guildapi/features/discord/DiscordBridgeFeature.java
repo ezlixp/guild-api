@@ -198,11 +198,11 @@ public class DiscordBridgeFeature extends Feature {
                 Text mirrored = Text.empty()
                         .append(Text.literal(pill).setStyle(TextUtils.fontOf(Identifier.of("banner/pill"))))
                         .append(Text.literal(leftover).setStyle(Style.EMPTY));
-                McUtils.sendLocalMessage(mirrored, Prepend.GUILD.get(), true);
+                McUtils.sendLocalMessage(mirrored, Prepend.EMPTY.get(), true);
                 Handlers.Chat.postChatLine(mirrored);
                 Managers.Discord.newMessage(matcher.group("header"), matcher.group("content"), true, true);
             } else {
-                McUtils.sendLocalMessage(Text.literal(message), Prepend.GUILD.get(), true);
+                McUtils.sendLocalMessage(Text.literal(message), Prepend.EMPTY.get(), true);
                 Handlers.Chat.postChatLine(Text.literal(message));
                 Managers.Discord.newMessage("⚠ Info", message, true, true);
             }
