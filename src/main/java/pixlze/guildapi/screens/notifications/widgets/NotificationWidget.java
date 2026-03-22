@@ -28,9 +28,9 @@ public class NotificationWidget extends ContainerWidget {
         super(0, 0, width, height, text);
         this.widget = widget;
 
-        this.regex = new AllowSectionSignTextField(McUtils.mc().textRenderer, 125, height, Text.literal("Notification Regex"));
-        this.display = new AllowSectionSignTextField(McUtils.mc().textRenderer, 125, height, Text.literal("Notification Display"));
-        // TODO: add formatters to handle format codes
+        int t = McUtils.mc().textRenderer.fontHeight;
+        this.regex = new AllowSectionSignTextField(McUtils.mc().textRenderer, 125, t, Text.literal("Notification Regex"));
+        this.display = new AllowSectionSignTextField(McUtils.mc().textRenderer, 125, t, Text.literal("Notification Display"));
         this.remove = ButtonWidget.builder(Text.literal("Remove"), button -> this.widget.removeNotification(button.getX() + (double) button.getWidth() / 2, button.getY() + (double) button.getHeight() / 2)).size(100, height).build();
 
         this.regex.setMaxLength(256);
@@ -61,9 +61,9 @@ public class NotificationWidget extends ContainerWidget {
 
     @Nullable
     public Notification<Trigger.CHAT> getNotification() {
-        if (regex.getText().isBlank() && display.getText().isBlank())
+        if (regex.getRealText().isBlank() && display.getRealText().isBlank())
             return null;
-        return Notification.ofChat(regex.getText(), display.getText());
+        return Notification.ofChat(regex.getRealText(), display.getRealText());
     }
 
     @Override
@@ -78,7 +78,7 @@ public class NotificationWidget extends ContainerWidget {
 
     @Override
     public void setFocused(@Nullable Element focused) {
-        if (this.focused != null) {
+        if (this.focused != null && !this.focused.equals(focused)) {
             this.focused.setFocused(false);
         }
 
@@ -93,14 +93,16 @@ public class NotificationWidget extends ContainerWidget {
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         context.fill(this.regex.getX() - 4, this.remove.getY() - 2, this.remove.getRight() + 4, this.remove.getY() + this.remove.getHeight() + 2, 0xAA000000);
 
-        this.regex.setPosition(this.getX() + 4, this.getY() + (this.height - 10) / 2);
+        int t = McUtils.mc().textRenderer.fontHeight;
+        // 10 is the offset between each notif
+        this.regex.setPosition(this.getX() + 4, this.getY() + (this.height - t) / 2 - 3);
+        this.display.setPosition((this.regex.getX() + this.remove.getX()) / 2, this.getY() + (this.height - t) / 2 - 3);
         this.remove.setPosition(this.getRight() - this.remove.getWidth() - 4, this.getY());
-        this.display.setPosition((this.regex.getX() + this.remove.getX()) / 2, this.getY() + (this.height - 10) / 2);
 
         try {
             Pattern.compile(this.regex.getText());
         } catch (PatternSyntaxException e) {
-            context.drawTooltip(McUtils.mc().textRenderer, Text.literal("§cInvalid Regex."), this.regex.getX() + this.regex.getWidth() / 2 - 4, this.regex.getY() + this.regex.getHeight() + 4);
+            context.drawTooltip(McUtils.mc().textRenderer, Text.literal("§cInvalid Regex. Will not be saved."), this.regex.getX() + this.regex.getWidth() / 2 - 4, this.regex.getY() + this.regex.getHeight() + 4);
         }
 
 
