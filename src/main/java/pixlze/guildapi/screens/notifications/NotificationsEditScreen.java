@@ -24,7 +24,7 @@ public class NotificationsEditScreen extends Screen {
         this.parent = parent;
         helpButton = ButtonWidget.builder(Text.literal("?"), (button) -> {
             McUtils.mc().keyboard.setClipboard("§");
-        }).size(20, 20).tooltip(Tooltip.of(Text.literal("The left box accepts regex, or regular expressions. Visit https://regexr.com/ to learn more. \nFor reference, the exact text of chat messages can be copied by alt-clicking on them. \n\nClick here to copy the formatting code."))).build();
+        }).size(20, 20).tooltip(Tooltip.of(Text.literal("The left box accepts regex, or regular expressions. Visit https://regexr.com/ to learn more. \nFor reference, the exact text of chat messages can be copied by alt-clicking on them. \n\nClick here to copy the symbol used for formatted text."))).build();
     }
 
     @Override
