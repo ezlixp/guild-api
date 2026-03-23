@@ -5,6 +5,7 @@ import pixlze.guildapi.core.components.Feature;
 import pixlze.guildapi.core.components.Manager;
 import pixlze.guildapi.features.AutoUpdateFeature;
 import pixlze.guildapi.features.GuildRaidFeature;
+import pixlze.guildapi.features.InfoPanelsFeature;
 import pixlze.guildapi.features.discord.DiscordBridgeFeature;
 
 import java.util.LinkedHashMap;
@@ -24,6 +25,7 @@ public class FeatureManager extends Manager {
             registerFeature(new GuildRaidFeature());
         registerFeature(new DiscordBridgeFeature());
         registerFeature(new AutoUpdateFeature());
+        registerFeature(new InfoPanelsFeature());
     }
 
     private void registerFeature(Feature feature) {

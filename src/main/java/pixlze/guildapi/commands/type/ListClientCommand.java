@@ -16,7 +16,6 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.commands.ClientCommand;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.utils.McUtils;
-import pixlze.guildapi.utils.NetUtils;
 import pixlze.guildapi.utils.type.Prepend;
 
 import java.util.List;
@@ -28,7 +27,7 @@ public class ListClientCommand extends ClientCommand {
     protected String endpoint;
     private final String name;
     private final BiFunction<JsonElement, String, MutableText> lineParser;
-    private JsonElement cachedResponse;
+    private List<JsonElement> cachedResponse;
     private String sortMember;
     private String extra;
 
@@ -106,32 +105,14 @@ public class ListClientCommand extends ClientCommand {
         this.sortMember = sortMember;
     }
 
-    private void applySort(List<JsonElement> listElements) {
-        if (sortMember == null) return;
-        listElements.sort((a, b) -> {
-            try {
-                double val1 = a.getAsJsonObject().get(sortMember).getAsDouble();
-                double val2 = b.getAsJsonObject().get(sortMember).getAsDouble();
-                if (val1 < val2) return 1;
-                else if (Math.abs(val1 - val2) < 0.0000001) return 0;
-                else return -1;
-            } catch (Exception error) {
-                return 0;
-            }
-        });
-    }
-
     private void listItems(int page, boolean reload) {
-        CompletableFuture<JsonElement> response = new CompletableFuture<>();
+        CompletableFuture<List<JsonElement>> response;
         if (reload) {
-            Managers.Net.guild.get(endpoint + getExtra(), false).whenCompleteAsync((res, exception) -> {
-                try {
-                    NetUtils.applyDefaultCallback(res, exception, response::complete, (error) -> response.completeExceptionally(null));
-                } catch (Exception e) {
-                    response.completeExceptionally(e);
-                }
-            });
-        } else response.complete(cachedResponse);
+            response = Managers.Net.guild.getList(endpoint + getExtra(), false, sortMember);
+        } else {
+            response = new CompletableFuture<>();
+            response.complete(cachedResponse);
+        }
         response.whenCompleteAsync((res, exception) -> {
             if (exception != null) {
                 McUtils.sendLocalMessage(Text.literal("§cSomething went wrong. Check logs for more details."), Prepend.DEFAULT.get(), false);
@@ -141,27 +122,28 @@ public class ListClientCommand extends ClientCommand {
             cachedResponse = res;
             if (res == null) {
                 assert Formatting.YELLOW.getColorValue() != null;
-                if (!reload) McUtils.sendLocalMessage(Text.literal("No list data")
-                        .withColor(Formatting.YELLOW.getColorValue()), Prepend.DEFAULT.get(), false);
+                // if not reload and we have res == null that means that we have no cached data and didn't fetch any data
+                // if reload is true, res should never be null if it completed non exceptionally because it'll return empty array if no data
+                if (!reload)
+                    McUtils.sendLocalMessage(Text.literal("No list data")
+                            .withColor(Formatting.YELLOW.getColorValue()), Prepend.DEFAULT.get(), false);
                 return;
             }
-            List<JsonElement> listItems = res.getAsJsonArray().asList();
-            applySort(listItems);
             MutableText listMessage = Text.literal(name.substring(0, 1)
                             .toUpperCase() + name.substring(1) + " list page " + (page + 1) + ":\n")
                     .setStyle(Style.EMPTY.withColor(Formatting.WHITE));
             for (int i = 5 * page; i < 5 * (page + 1); i++) {
-                if (i >= listItems.size()) {
+                if (i >= res.size()) {
                     break;
                 }
                 listMessage.append(Text.literal(i + 1 + ". ")).withColor(0xFFFFFF);
-                listMessage.append(lineParser.apply(listItems.get(i), sortMember));
-                if (i != Math.min(page, listItems.size()) - 1) {
+                listMessage.append(lineParser.apply(res.get(i), sortMember));
+                if (i != Math.min(page, res.size()) - 1) {
                     listMessage.append(Text.literal("\n"));
                 }
             }
             boolean hasPrev = page > 0;
-            boolean hasNext = 5 * (page + 1) < listItems.size();
+            boolean hasNext = 5 * (page + 1) < res.size();
             listMessage.append("\n");
             listMessage.append(Text.literal("<< Prev")
                             .setStyle(Style.EMPTY.withColor(hasPrev ? Formatting.GREEN:Formatting.GRAY).withBold(true)

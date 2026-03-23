@@ -1,7 +1,5 @@
 package pixlze.guildapi;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
@@ -13,8 +11,6 @@ import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.models.Models;
 
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 
 public class GuildApi implements ClientModInitializer {

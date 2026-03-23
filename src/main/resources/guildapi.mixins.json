@@ -5,7 +5,9 @@
   "mixins": [
     "ChatScreenMixin",
     "ClientPacketListenerMixin",
+    "MinecraftClientMixin",
     "accessors.ChatHudAccessorInvoker",
+    "accessors.ScreenInvoker",
     "accessors.SystemToastInvoker"
   ],
   "injectors": {

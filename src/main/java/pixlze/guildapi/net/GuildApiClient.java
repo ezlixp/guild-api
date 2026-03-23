@@ -1,5 +1,6 @@
 package pixlze.guildapi.net;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
@@ -392,6 +393,35 @@ public class GuildApiClient extends Api {
                     applyCallback(out, res, exception);
                 }
         );
+        return out;
+    }
+
+    public CompletableFuture<List<JsonElement>> getList(String path, boolean skipDisableCheck, String sortMember) {
+        CompletableFuture<List<JsonElement>> out = new CompletableFuture<>();
+        this.get(path, skipDisableCheck).whenComplete((res, exception) -> {
+            try {
+                NetUtils.applyDefaultCallback(res, exception, (response) -> {
+                    List<JsonElement> listItems = response.getAsJsonArray().asList();
+                    if (sortMember != null) {
+                        listItems.sort((a, b) -> {
+                            try {
+                                double val1 = a.getAsJsonObject().get(sortMember).getAsDouble();
+                                double val2 = b.getAsJsonObject().get(sortMember).getAsDouble();
+                                if (val1 < val2) return 1;
+                                else if (Math.abs(val1 - val2) < 0.0000001)
+                                    return 0;
+                                else return -1;
+                            } catch (Exception error) {
+                                return 0;
+                            }
+                        });
+                    }
+                    out.complete(listItems);
+                }, (error) -> out.completeExceptionally(new Exception(error)));
+            } catch (Exception e) {
+                out.completeExceptionally(e);
+            }
+        });
         return out;
     }
 
