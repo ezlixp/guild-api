@@ -190,7 +190,7 @@ public class DiscordBridgeFeature extends Feature {
             GuildApi.LOGGER.warn("received wynn mirror with disabled feature.");
             return;
         }
-        if (!Managers.DiscordSocket.onWorld || GuildApi.isTesting()) {
+        if (!Managers.DiscordSocket.onWorld) {
             Matcher matcher = GUILD_WHITELIST_PATTERNS[0].matcher(message);
             if (matcher.find()) {
                 String pill = matcher.group("pill");
