@@ -193,6 +193,8 @@ public class InfoPanelWidget extends ClickableWidget {
 
     @Override
     protected void onDrag(Click click, double offsetX, double offsetY) {
+        // We don't simply increment the position by the offsets because of rounding errors making any offset below 1 not move the widget at all
+        // making it possible to move the mouse all the way across the screen without moving the widget.
         int padx = (int) (click.x() - offsetX - this.getX());
         int pady = (int) (click.y() - offsetY - this.getY());
         this.setX((int) (click.x() - padx));
