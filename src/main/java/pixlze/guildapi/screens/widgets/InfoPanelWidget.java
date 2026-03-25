@@ -115,7 +115,8 @@ public class InfoPanelWidget extends ClickableWidget {
     }
 
     private void renderHeader(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
-        context.drawText(McUtils.mc().textRenderer, Text.literal(this.title), getX() + 5, getY() + 5, 0xFF444444, false);
+        context.drawText(McUtils.mc().textRenderer, Text.literal(this.title), getX() + 5, getY() + 6, 0xFF444444, false);
+        context.fill(getX() + getWidth() - 22, getY() + 7, getX() + getWidth() - 17, getY() + 12, highlightColour);
         closeButton.setX(this.getX() + getWidth() - closeButton.getWidth() - 5);
         closeButton.setY(this.getY() + 5);
         closeButton.render(context, mouseX, mouseY, deltaTicks);
