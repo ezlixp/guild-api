@@ -1,39 +1,45 @@
 package pixlze.guildapi.screens.widgets;
 
-import com.google.gson.JsonElement;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.utils.McUtils;
-import pixlze.guildapi.utils.type.Prepend;
+import pixlze.guildapi.utils.text.TextUtils;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class InfoPanelWidget extends ClickableWidget {
-    // like browser thingie
+    public static final Identifier BACKGROUND_TEXTURE = Identifier.ofVanilla("textures/gui/container/generic_54.png");
     private final static int ITEMS_PER_PAGE = 10;
 
-    private final int headerHeight = 15;
-    private int x, y, width, height, page;
+    private Screen parent;
+    private final int headerHeight = 13;
+    private int x, y, width, height, page, highlightColour;
     private double valthresh;
-    private final String title, sortMember, endpoint;
-    private final List<Entry> entries = new ArrayList<>();
-    private final Function<JsonElement, Entry> elementConverter;
+
+    private final String title;
+
+    private final List<Entry> entries;
+
     private final ButtonWidget closeButton, prevButton, nextButton;
 
-    public InfoPanelWidget(String sortMember, int x, int y, int width, int height, String title, String endpoint, ButtonWidget.PressAction onClose, Function<JsonElement, Entry> elementConverter) {
-        this(sortMember, x, y, width, height, title, endpoint, onClose, elementConverter, 1);
+    public InfoPanelWidget(int x, int y, int width, int height, String title, ButtonWidget.PressAction onClose, List<Entry> entries) {
+        this(x, y, width, height, title, onClose, entries, 1);
     }
-    public InfoPanelWidget(String sortMember, int x, int y, int width, int height, String title, String endpoint, ButtonWidget.PressAction onClose, Function<JsonElement, Entry> elementConverter, double valthresh) {
+
+    public InfoPanelWidget(int x, int y, int width, int height, String title, ButtonWidget.PressAction onClose, List<Entry> entries, double valthresh) {
         super(x, y, width, height, Text.literal("Raid reward list."));
         this.x = x;
         this.y = y;
@@ -41,12 +47,11 @@ public class InfoPanelWidget extends ClickableWidget {
         this.height = height;
         this.valthresh = valthresh;
 
+        this.entries = entries;
+
         this.page = 0;
 
-        this.sortMember = sortMember;
         this.title = title;
-        this.endpoint = endpoint;
-        this.elementConverter = elementConverter;
         this.closeButton = ButtonWidget.builder(Text.literal("×"), onClose).build();
         closeButton.setWidth(9);
         closeButton.setHeight(9);
@@ -61,6 +66,11 @@ public class InfoPanelWidget extends ClickableWidget {
         }).build();
         nextButton.setWidth(20);
         nextButton.setHeight(11);
+        this.changePage(0);
+    }
+
+    public void setHighlightColour(int highlightColour) {
+        this.highlightColour = highlightColour;
     }
 
     public void update(String key, double delta) {
@@ -76,7 +86,7 @@ public class InfoPanelWidget extends ClickableWidget {
         }
         if (rmvidx != -1)
             entries.remove(rmvidx);
-        changePage(page);
+        this.changePage(0);
 //      entries.sort(Comparator.comparingDouble(a -> -a.value));
     }
 
@@ -89,48 +99,34 @@ public class InfoPanelWidget extends ClickableWidget {
     }
 
     private int getMaxPage() {
-        return (int) (Math.ceil((double) entries.size() / ITEMS_PER_PAGE) - 1);
+        return Math.max(0, (int) (Math.ceil((double) entries.size() / ITEMS_PER_PAGE) - 1));
     }
 
-    private void changePage(int dx) {
+    public void changePage(int dx) {
         int newpage = Math.clamp(page + dx, 0, getMaxPage());
         prevButton.active = newpage != 0;
         nextButton.active = newpage != getMaxPage();
         page = newpage;
     }
 
-    public void refresh() {
-        entries.clear();
-        Managers.Net.guild.getList(endpoint + Managers.Net.guild.guildId, false, sortMember).whenComplete((res, exception) -> {
-            if (exception != null) {
-                McUtils.sendLocalMessage(Text.literal("§cSomething went wrong. Check logs for more details."), Prepend.DEFAULT.get(), false);
-                GuildApi.LOGGER.error("Reward list widget error: {} {}", exception, exception.getMessage());
-                return;
-            }
-            for (JsonElement reward : res) {
-                Entry t = elementConverter.apply(reward);
-                if (t.value >= valthresh)
-                    entries.add(elementConverter.apply(reward));
-            }
-            changePage(0);
-        });
+    private void renderBackground(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, BACKGROUND_TEXTURE, getX(), getY(), 0.0f, 0.0f, getWidth(), getHeight() - 4, 146, 276);
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, BACKGROUND_TEXTURE, getX(), getY() + getHeight() - 4, 0.0f, 235, getWidth(), 4, 146, 276);
     }
 
     private void renderHeader(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
-        context.drawText(McUtils.mc().textRenderer, Text.literal(this.title), getX() + 2, getY() + 2, 0xFF7FB5B5, false);
-        context.drawHorizontalLine(getX(), getX() + getWidth(), getY() + 13, 0xFF000000);
-        closeButton.setX(this.getX() + getWidth() - closeButton.getWidth() - 2);
-        closeButton.setY(this.getY() + 2);
+        context.drawText(McUtils.mc().textRenderer, Text.literal(this.title), getX() + 5, getY() + 5, 0xFF444444, false);
+        closeButton.setX(this.getX() + getWidth() - closeButton.getWidth() - 5);
+        closeButton.setY(this.getY() + 5);
         closeButton.render(context, mouseX, mouseY, deltaTicks);
     }
 
     private void renderFooter(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
-        context.drawHorizontalLine(getX(), getX() + getWidth(), getY() + getHeight() - 20, 0xFF000000);
         prevButton.setX(this.getX() + 19);
-        prevButton.setY(this.getY() + this.getHeight() - prevButton.getHeight() - 4);
+        prevButton.setY(this.getY() + this.getHeight() - prevButton.getHeight() - 2);
 
         nextButton.setX(this.getX() + this.getWidth() - prevButton.getWidth() - 20);
-        nextButton.setY(this.getY() + this.getHeight() - prevButton.getHeight() - 4);
+        nextButton.setY(this.getY() + this.getHeight() - prevButton.getHeight() - 2);
 
         prevButton.render(context, mouseX, mouseY, deltaTicks);
         nextButton.render(context, mouseX, mouseY, deltaTicks);
@@ -139,14 +135,33 @@ public class InfoPanelWidget extends ClickableWidget {
 
     @Override
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
-        context.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0xFFFFFFFF);
+        renderBackground(context, mouseX, mouseY, deltaTicks);
         renderHeader(context, mouseX, mouseY, deltaTicks);
         int y = getY() + 20;
-        for (Entry reward : getPageEntries()) {
-            context.drawText(McUtils.mc().textRenderer, Text.literal(reward.key + ": " + reward.value), getX() + 2, y, 0xFF7FB5B5, false);
-            y += 10;
+        if (!Managers.Net.guild.isDisabled()) {
+            for (Entry reward : getPageEntries()) {
+                context.drawText(McUtils.mc().textRenderer, Text.literal(reward.key + ": " + reward.value), getX() + 7, y, 0xFF555555, false);
+                y += 10;
+            }
+        } else {
+            context.drawText(McUtils.mc().textRenderer, Text.literal("§cPlease login"), getX() + 19, y + getHeight() / 2 - 30, 0xFF7FB5B5, false);
         }
         renderFooter(context, mouseX, mouseY, deltaTicks);
+    }
+
+    public void onSlotDrawn(DrawContext context, Slot slot) {
+        Text customName = slot.inventory.getStack(slot.getIndex()).getComponents().get(DataComponentTypes.CUSTOM_NAME);
+        if (customName == null) return;
+        String name = TextUtils.parsePlain(customName).toLowerCase();
+        boolean doHighlight = false;
+        for (Entry entry : entries) {
+            if (name.equals(entry.key.toLowerCase())) {
+                doHighlight = true;
+            }
+        }
+        if (doHighlight) {
+            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, highlightColour);
+        }
     }
 
     @Override
@@ -222,7 +237,7 @@ public class InfoPanelWidget extends ClickableWidget {
 
     public static class Entry {
         String key;
-        double value;
+        public double value;
 
         public Entry(String key, double value) {
             this.key = key;

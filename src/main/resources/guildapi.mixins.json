@@ -5,6 +5,7 @@
   "mixins": [
     "ChatScreenMixin",
     "ClientPacketListenerMixin",
+    "HandledScreenMixin",
     "MinecraftClientMixin",
     "accessors.ChatHudAccessorInvoker",
     "accessors.ScreenInvoker",
