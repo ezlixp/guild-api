@@ -24,17 +24,22 @@ public class InfoPanelWidget extends ClickableWidget {
 
     private final int headerHeight = 15;
     private int x, y, width, height, page;
+    private double valthresh;
     private final String title, sortMember, endpoint;
     private final List<Entry> entries = new ArrayList<>();
     private final Function<JsonElement, Entry> elementConverter;
     private final ButtonWidget closeButton, prevButton, nextButton;
 
     public InfoPanelWidget(String sortMember, int x, int y, int width, int height, String title, String endpoint, ButtonWidget.PressAction onClose, Function<JsonElement, Entry> elementConverter) {
+        this(sortMember, x, y, width, height, title, endpoint, onClose, elementConverter, 1);
+    }
+    public InfoPanelWidget(String sortMember, int x, int y, int width, int height, String title, String endpoint, ButtonWidget.PressAction onClose, Function<JsonElement, Entry> elementConverter, double valthresh) {
         super(x, y, width, height, Text.literal("Raid reward list."));
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.valthresh = valthresh;
 
         this.page = 0;
 
@@ -59,13 +64,20 @@ public class InfoPanelWidget extends ClickableWidget {
     }
 
     public void update(String key, double delta) {
-        for (Entry reward : entries) {
-            if (reward.key.equals(key)) {
-                reward.value += delta;
+        int rmvidx = -1;
+        for (int i = 0; i < entries.size(); i++) {
+            Entry entry = entries.get(i);
+            if (entry.key.equals(key)) {
+                entry.value += delta;
+                if (entry.value < valthresh)
+                    rmvidx = i;
+                break;
             }
         }
-        changePage(0);
-        entries.sort(Comparator.comparingDouble(a -> -a.value));
+        if (rmvidx != -1)
+            entries.remove(rmvidx);
+        changePage(page);
+//      entries.sort(Comparator.comparingDouble(a -> -a.value));
     }
 
     private List<Entry> getPageEntries() {
@@ -96,7 +108,9 @@ public class InfoPanelWidget extends ClickableWidget {
                 return;
             }
             for (JsonElement reward : res) {
-                entries.add(elementConverter.apply(reward));
+                Entry t = elementConverter.apply(reward);
+                if (t.value >= valthresh)
+                    entries.add(elementConverter.apply(reward));
             }
             changePage(0);
         });

@@ -28,7 +28,7 @@ public class InfoPanelsFeature extends Feature {
     public final Config<Boolean> tomesEnabled = new Config<>(true);
 
     private final InfoPanelWidget aspectsPanel = new InfoPanelWidget("aspects", 10, 10, 100, 150, "Aspects", "guilds/raids/rewards/", (button) -> {
-        aspectsEnabled.setPending(false);
+        aspectsEnabled.setPending(Boolean.FALSE);
         aspectsEnabled.applyPending();
         Managers.Config.saveConfig();
     },
@@ -36,7 +36,7 @@ public class InfoPanelsFeature extends Feature {
                 return new InfoPanelWidget.Entry(element.getAsJsonObject().get("mcUsername").getAsString(), element.getAsJsonObject().get("aspects").getAsDouble());
             });
     private final InfoPanelWidget tomesPanel = new InfoPanelWidget(null, 10, 10, 100, 150, "Tomes", "guilds/tomes/", (button) -> {
-        tomesEnabled.setPending(false);
+        tomesEnabled.setPending(Boolean.FALSE);
         tomesEnabled.applyPending();
         Managers.Config.saveConfig();
     },
@@ -89,7 +89,6 @@ public class InfoPanelsFeature extends Feature {
         ((ScreenInvoker) screen).invokeAddDrawableChild(aspectsPanel);
     }
 
-    // TODO: updating
     private void putTomes(Screen screen, boolean refresh) {
         if (!tomesEnabled.getValue()) return;
         if (refresh) {tomesPanel.refresh();}
@@ -117,7 +116,7 @@ public class InfoPanelsFeature extends Feature {
         if (m1.find()) {
             aspectsPanel.update(m1.group("receiver"), -1);
         } else if (m2.find()) {
-            tomesPanel.update(m1.group("receiver"), -1);
+            tomesPanel.update(m2.group("receiver"), -1);
         }
     }
 }
