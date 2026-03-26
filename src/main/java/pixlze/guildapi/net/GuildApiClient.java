@@ -120,7 +120,7 @@ public class GuildApiClient extends Api {
                 promptNew();
             } else if (!fetchGuildServerToken())
                 promptLogin();
-            else this.enable();
+            else super.ready();
         } catch (NullPointerException exception) {
             GuildApi.LOGGER.warn("expected nullpointer: {} {}", exception, exception.getMessage());
             promptNew();

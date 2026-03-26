@@ -1,5 +1,6 @@
 package pixlze.guildapi.net.type;
 
+import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.net.event.NetEvents;
 
@@ -30,7 +31,7 @@ public abstract class Api {
         if (this.depends(api)) dependencyUnloaded();
     }
 
-    public boolean depends(Api api) {
+    public final boolean depends(Api api) {
         return dependencies.contains(api.getClass());
     }
 
@@ -46,14 +47,17 @@ public abstract class Api {
         unready();
     }
 
+    @MustBeInvokedByOverriders
     protected void ready() {
         enable();
     }
 
+    @MustBeInvokedByOverriders
     protected void unready() {
         disable();
     }
 
+    @MustBeInvokedByOverriders
     public void enable() {
         if (!enabled) {
             GuildApi.LOGGER.info("enabling {}", name);
@@ -62,6 +66,7 @@ public abstract class Api {
         }
     }
 
+    @MustBeInvokedByOverriders
     public void disable() {
         if (enabled) {
             GuildApi.LOGGER.warn("disabling {} service", name);
@@ -70,11 +75,11 @@ public abstract class Api {
         }
     }
 
-    public boolean isDisabled() {
+    public final boolean isDisabled() {
         return !enabled;
     }
 
     public void init() {
-        this.ready();
+        if (missingDeps == 0) ready();
     }
 }
