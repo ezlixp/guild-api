@@ -122,7 +122,7 @@ public class InfoPanelsFeature extends Feature {
             }
             for (JsonElement element : res) {
                 InfoPanelWidget.Entry t = new InfoPanelWidget.Entry(element.getAsJsonObject().get("mcUsername").getAsString(), 1);
-                if (t.value >= ASPECTS_THRESHOLD)
+                if (t.value >= TOMES_THRESHOLD)
                     tomesList.add(t);
             }
             tomesPanel.changePage(0);
@@ -140,7 +140,7 @@ public class InfoPanelsFeature extends Feature {
     private void putTomes(GenericContainerScreen screen, boolean refresh) {
         if (!tomesEnabled.getValue()) return;
         if (refresh) {refreshTomes();}
-        tomesPanel = new InfoPanelWidget(screen.width - 110, 10, 100, 150, "Tomes", tomesOnPress, tomesList, ASPECTS_THRESHOLD);
+        tomesPanel = new InfoPanelWidget(screen.width - 110, 10, 100, 150, "Tomes", tomesOnPress, tomesList, TOMES_THRESHOLD);
         tomesPanel.setHighlightColour(0xAA0000FF);
         ((ScreenInvoker) screen).invokeAddDrawableChild(tomesPanel);
     }
