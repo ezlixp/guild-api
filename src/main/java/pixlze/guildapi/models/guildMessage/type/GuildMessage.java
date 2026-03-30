@@ -52,6 +52,13 @@ public enum GuildMessage {
         regex = Pattern.compile(pattern);
     }
 
+    /**
+     * Gets the matcher for the message, expecting it to be the content group from the guild
+     * matcher.
+     *
+     * @param message to check
+     * @return the matcher object if it the regex matches in the message, null otherwise
+     */
     public Matcher getMatcher(String message) {
         Matcher t = regex.matcher(message);
         if (t.find())
