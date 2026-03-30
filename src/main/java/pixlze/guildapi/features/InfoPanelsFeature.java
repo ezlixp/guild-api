@@ -15,6 +15,8 @@ import pixlze.guildapi.core.config.Configurable;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.mc.event.ScreenEvents;
 import pixlze.guildapi.mc.mixin.accessors.ScreenInvoker;
+import pixlze.guildapi.models.Models;
+import pixlze.guildapi.models.guildMessage.type.GuildMessage;
 import pixlze.guildapi.screens.widgets.InfoPanelWidget;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.TextUtils;
@@ -28,8 +30,6 @@ import java.util.regex.Pattern;
 
 public class InfoPanelsFeature extends Feature {
     private static final Pattern MEMBERS_SCREEN_PATTERN = Pattern.compile("^.+: Members$");
-    private static final Pattern ASPECT_PATTERN = Pattern.compile("^§.(?<giver>.*?)(§.)? rewarded §.an Aspect§. to §.(?<receiver>.*?)(§.)?$");
-    private static final Pattern TOME_PATTERN = Pattern.compile("^§.(?<giver>.*?)(§.)? rewarded §.a Guild Tome§. to §.(?<receiver>.*?)(§.)?$");
     // maybe make these configs
     private static final double ASPECTS_THRESHOLD = 1;
     private static final double TOMES_THRESHOLD = 1;
@@ -162,11 +162,12 @@ public class InfoPanelsFeature extends Feature {
 
     private void onWynnMessage(Text message) {
         String asString = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));
-        Matcher m1 = ASPECT_PATTERN.matcher(asString);
-        Matcher m2 = TOME_PATTERN.matcher(asString);
-        if (m1.find() && aspectsPanel != null) {
+        String content = Models.guildMessage.getContent(asString);
+        Matcher m1 = GuildMessage.ASPECT_GIVE.getMatcher(content);
+        Matcher m2 = GuildMessage.TOME_GIVE.getMatcher(content);
+        if (aspectsPanel != null && m1 != null) {
             aspectsPanel.update(m1.group("receiver"), -1);
-        } else if (m2.find() && tomesPanel != null) {
+        } else if (tomesPanel != null && m2 != null) {
             tomesPanel.update(m2.group("receiver"), -1);
         }
     }

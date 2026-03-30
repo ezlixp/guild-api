@@ -60,6 +60,7 @@ public enum GuildMessage {
      * @return the matcher object if it the regex matches in the message, null otherwise
      */
     public Matcher getMatcher(String message) {
+        if (message == null) return null;
         Matcher t = regex.matcher(message);
         if (t.find())
             return t;

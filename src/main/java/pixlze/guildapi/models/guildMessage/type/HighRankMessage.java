@@ -25,7 +25,7 @@ public enum HighRankMessage {
     ALIANCE_REVOKE("^(?<username>.+?) revoked the alliance with (?<guild>.*?)$");
     public final Pattern regex;
 
-    private HighRankMessage(String message) {
+    HighRankMessage(String message) {
         this.regex = Pattern.compile(message);
     }
 
@@ -37,6 +37,7 @@ public enum HighRankMessage {
      * @return the matcher object if it the regex matches in the message, null otherwise
      */
     public Matcher getMatcher(String message) {
+        if (message == null) return null;
         Matcher t = regex.matcher(message);
         if (t.find())
             return t;
