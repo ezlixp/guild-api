@@ -85,10 +85,10 @@ public class DiscordBridgeFeature extends Feature {
         GuildApi.LOGGER.info("received: {}", m);
         // !m.contains("\uE003") is to ensure private messages do not get matched as base guild messages if they have the line instead of the badge
         if (Managers.DiscordSocket.onWorld && !m.contains("\uE003")) {
-            if (Models.guildMessage.isGuildMessage(m) != null)
-                Managers.DiscordSocket.emit("wynnMessage", Models.guildMessage.getContent(m));
-            else if (Models.guildMessage.isHighRankMessage(m) != null)
-                Managers.DiscordSocket.emit("hrMessage", Models.guildMessage.getContent(m));
+            if (Models.GuildMessage.isGuildMessage(m) != null)
+                Managers.DiscordSocket.emit("wynnMessage", Models.GuildMessage.getContent(m));
+            else if (Models.GuildMessage.isHighRankMessage(m) != null)
+                Managers.DiscordSocket.emit("hrMessage", Models.GuildMessage.getContent(m));
         }
     }
 

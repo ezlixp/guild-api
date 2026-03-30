@@ -162,7 +162,7 @@ public class InfoPanelsFeature extends Feature {
 
     private void onWynnMessage(Text message) {
         String asString = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));
-        String content = Models.guildMessage.getContent(asString);
+        String content = Models.GuildMessage.getContent(asString);
         Matcher m1 = GuildMessage.ASPECT_GIVE.getMatcher(content);
         Matcher m2 = GuildMessage.TOME_GIVE.getMatcher(content);
         if (aspectsPanel != null && m1 != null) {
