@@ -17,6 +17,7 @@ public class TestClientCommandManager extends Manager {
         registerCommand(new DiscordMessageTestCommand());
         registerCommand(new GuildRaidTestCommand());
         registerCommand(new SetPlayerTestCommand());
+        registerCommand(new SendLocalMessageTestCommand());
         registerCommand(new TomeRewardTestCommand());
         registerCommand(new TokenResetTestCommand());
         registerCommand(new RefreshTokenResetTestCommand());
