@@ -20,7 +20,7 @@ public class GuildMessageModel {
         String m = getContent(message);
         if (m == null) return null;
         for (GuildMessage guildMessage : GuildMessage.values())
-            if (guildMessage.regex.matcher(m).find())
+            if (guildMessage.getMatcher(m) != null)
                 return guildMessage;
         return null;
     }
@@ -35,7 +35,7 @@ public class GuildMessageModel {
         String m = getContent(message);
         if (m == null) return null;
         for (HighRankMessage highRankMessage : HighRankMessage.values())
-            if (highRankMessage.regex.matcher(m).find())
+            if (highRankMessage.getMatcher(m) != null)
                 return highRankMessage;
         return null;
     }
