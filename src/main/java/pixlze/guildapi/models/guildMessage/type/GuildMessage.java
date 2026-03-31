@@ -8,27 +8,27 @@ public enum GuildMessage {
     BASIC("^(?<pill>.*)§[38](?<header>.+?)(§[38])?:§[b8] (?<content>.*)$"),
 
     // Guild raid finished
-    RAID_FINISH("^§[e8](?<player1>.*?)§[b8], §[e8](?<player2>.*?)§[b8], §[e8](?<player3>.*?)§[b8], and §[e8](?<player4>.*?)§[b8] finished §[38](?<raid>.*?)§[b8].*$"),
+    RAID_FINISH("^§[e8](?<player1>\\S*?)§[b8], ?§[e8](?<player2>\\S*?)§[b8], ?§[e8](?<player3>\\S*?)§[b8], ?and ?§[e8](?<player4>\\S*?)§[b8] ?finished ?§[38](?<raid>.*?)§[b8].*$"),
 
     // Giving out resources
-    ASPECT_GIVE("^§.(?<giver>.*?)(§.)? rewarded §.an Aspect§. to §.(?<receiver>.*?)(§.)?$"),
-    TOME_GIVE("^§.(?<giver>.*?)(§.)? rewarded §.a Guild Tome§. to §.(?<receiver>.*?)(§.)?$"),
-    EMERALD_GIVE("^§.(?<giver>.*?)(§.)? rewarded §.1024 Emeralds§. to §.(?<receiver>.*?)(§.)?$"),
+    ASPECT_GIVE("^§.(?<giver>\\S?)(§.)? rewarded §.an ?Aspect§. ?to ?§.(?<receiver>\\S?)(§.)?$"),
+    TOME_GIVE("^§.(?<giver>\\S?)(§.)? rewarded §.a Guild ?Tome§. ?to ?§.(?<receiver>\\S?)(§.)?$"),
+    EMERALD_GIVE("^§.(?<giver>\\S?)(§.)? rewarded §.1024 ?Emeralds§. ?to ?§.(?<receiver>\\S?)(§.)?$"),
 
     // Guild bank
-    GUILD_BANK("^§.(?<username>.+?)§. (?<action>\\w+) §.(?<item>.+?)§. (?:to|from) the Guild Bank \\(§.Everyone§.\\)"),
+    GUILD_BANK("^§.(?<username>\\S+?)§. (?<action>\\w+) §.(?<item>.+?)§. (?:to|from) the Guild ?Bank ?\\(§.Everyone§.\\)"),
 
     // Weekly objective
-    WEEKLY_OBJECTIVE("^(?<username>.+?) has finished their weekly objective\\.$"),
-    WEEKLY_OBJECTIVE_REMINDER("^Only (?<time>.+?) left to complete the Weekly Guild Objectives!$"),
+    WEEKLY_OBJECTIVE("^(?<username>\\S+?) has finished their ?weekly ?objective\\.$"),
+    WEEKLY_OBJECTIVE_REMINDER("^Only (?<time>.+?) left to complete ?the ?Weekly ?Guild ?Objectives!$"),
 
     // Guild member management
-    MEMBER_INVITE("^(?<recruiter>.+?) has invited (?<recruit>.+?) to the guild$"),
-    MEMBER_UNINVITE("^(?<recruiter>.+?) has uninvited (?<recruit>.+?) from the guild$"),
-    MEMBER_JOIN("^(?<recruit>.+?) has joined the guild, say hello!$"),
-    MEMBER_LEAVE("^(?<username>.+?) has left the guild$"),
-    MEMBER_KICK("^(?<kicker>.+?) has kicked (?<kicked>.+?) from the guild$"),
-    MEMBER_RANK("^(?<setter>.+?) has set (?<set>.+?) guild rank from §.(?<original>\\w+)§. to §.(?<new>\\w+)$"),
+    MEMBER_INVITE("^(?<recruiter>\\S+?) has invited (?<recruit>\\S+?) ?to ?the ?guild$"),
+    MEMBER_UNINVITE("^(?<recruiter>\\S+?) has uninvited (?<recruit>\\S+?) ?from ?the ?guild$"),
+    MEMBER_JOIN("^(?<recruit>\\S+?) has joined the guild, say hello!$"),
+    MEMBER_LEAVE("^(?<username>\\S+?) has left the guild$"),
+    MEMBER_KICK("^(?<kicker>\\S+?) has kicked (?<kicked>\\S+?) from the guild$"),
+    MEMBER_RANK("^(?<setter>\\S+?) has set (?<set>\\S+?) guild rank ?from ?§.(?<original>\\w+)§. ?to ?§.(?<new>\\w+)$"),
 
     // War
     WAR_COUNTDOWN("^The war for (?<territory>.+?) will start in .*$"),
