@@ -72,6 +72,7 @@ public class TextUtils {
         TextVisitors.first = true;
         TextVisitors.options = options;
         TextVisitors.currentVisit = new StringBuilder();
+        TextVisitors.prevCode = null;
         text.visit(TextVisitors.STYLED_VISITOR, Style.EMPTY);
         return TextVisitors.currentVisit.toString();
     }
