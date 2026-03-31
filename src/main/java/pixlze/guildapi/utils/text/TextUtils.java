@@ -83,17 +83,11 @@ public class TextUtils {
         return TextVisitors.currentVisit.toString();
     }
 
-    public static boolean isFormatting(String text, int index) {
-        if (index + 1 >= text.length() || index < 0) return false;
-        return text.charAt(index) == '§' && Formatting.byCode(text.charAt(index + 1)) != null;
-    }
-
     public static Text toBlockMessage(Text text, Style prependStyle) {
         if (!RenderSystem.isOnRenderThread())
             GuildApi.LOGGER.warn("To block message was not called on render thread: {}", TextUtils.parsePlain(text));
         TextHandler textHandler = McUtils.mc().textRenderer.getTextHandler();
         List<MutableText> lines = new ArrayList<>();
-        boolean block = false;
         textHandler.wrapLines(text, McUtils.getChatWidth(), text.getStyle(), (textx, endsInNewline) -> {
             if (endsInNewline)
                 lines.add(Text.empty().append(Text.literal("\uDAFF\uDFFC\uE001\uDB00\uDC06")
