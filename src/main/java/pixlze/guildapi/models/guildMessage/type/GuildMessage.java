@@ -11,9 +11,9 @@ public enum GuildMessage {
     RAID_FINISH("^§[e8](?<player1>\\S*?)§[b8], ?§[e8](?<player2>\\S*?)§[b8], ?§[e8](?<player3>\\S*?)§[b8], ?and ?§[e8](?<player4>\\S*?)§[b8] ?finished ?§[38](?<raid>.*?)§[b8].*$"),
 
     // Giving out resources
-    ASPECT_GIVE("^§.(?<giver>\\S?)(§.)? rewarded §.an ?Aspect§. ?to ?§.(?<receiver>\\S?)(§.)?$"),
-    TOME_GIVE("^§.(?<giver>\\S?)(§.)? rewarded §.a Guild ?Tome§. ?to ?§.(?<receiver>\\S?)(§.)?$"),
-    EMERALD_GIVE("^§.(?<giver>\\S?)(§.)? rewarded §.1024 ?Emeralds§. ?to ?§.(?<receiver>\\S?)(§.)?$"),
+    ASPECT_GIVE("^§.(?<giver>\\S*?)(§.)? rewarded §.an ?Aspect§. ?to ?§.(?<receiver>\\S*?)(§.)?$"),
+    TOME_GIVE("^§.(?<giver>\\S*?)(§.)? rewarded §.a Guild ?Tome§. ?to ?§.(?<receiver>\\S*?)(§.)?$"),
+    EMERALD_GIVE("^§.(?<giver>\\S*?)(§.)? rewarded §.1024 ?Emeralds§. ?to ?§.(?<receiver>\\S*?)(§.)?$"),
 
     // Guild bank
     GUILD_BANK("^§.(?<username>\\S+?)§. (?<action>\\w+) §.(?<item>.+?)§. (?:to|from) the Guild ?Bank ?\\(§.Everyone§.\\)"),
@@ -43,7 +43,7 @@ public enum GuildMessage {
     GUILD_SEASON_REWARD_REMINDER("^The last standing territories you control once it ends will grant you 2048² each!$"),
 
     // Misc
-    MEMBER_BOOST("^§.(?<username>.+?) has started boosting the guild$");
+    MEMBER_BOOST("^§.(?<username>\\S+?) has started boosting the guild$");
 
 
     public final Pattern regex;
