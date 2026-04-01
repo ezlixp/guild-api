@@ -53,7 +53,7 @@ public class DiscordBridgeFeature extends Feature {
      * 3 - appear offline
      */
     @SyncConfigurable(syncUri = "user/onlineStatus/", cycleLength = 4)
-    public final Config<Integer> onlineStatus = new Config<>(0);
+    public final Config<Number> onlineStatus = new Config<>(0);
 
     @Override
     public void init() {
@@ -64,9 +64,8 @@ public class DiscordBridgeFeature extends Feature {
 
     @Override
     public void onConfigUpdate(Config<?> config) {
-        if (config.equals(onlineStatus)) {
+        if (config.equals(onlineStatus) && !Managers.Net.join.isDisabled()) {
             Managers.DiscordSocket.emit("onlineStatus", onlineStatus.getValue());
-            Double t = Double.valueOf(onlineStatus.getValue());
             if (onlineStatus.getValue().intValue() == OnlineStatus.INVISIBLE.value)
                 Managers.DiscordSocket.checkOffline();
         }

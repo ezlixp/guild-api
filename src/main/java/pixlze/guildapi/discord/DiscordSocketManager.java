@@ -7,6 +7,7 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.features.FeatureState;
 import pixlze.guildapi.features.discord.DiscordBridgeFeature;
+import pixlze.guildapi.features.discord.type.OnlineStatus;
 import pixlze.guildapi.models.worldState.event.WorldStateEvents;
 import pixlze.guildapi.models.worldState.type.WorldState;
 import pixlze.guildapi.net.GuildApiClient;
@@ -51,7 +52,6 @@ public class DiscordSocketManager extends AbstractSocketManager {
         if (doConnect()) {
             socket.connect();
             GuildApi.LOGGER.info("discord socket connecting");
-            // .intvalue is necessary because of an unchecked cast resulting in value possibly being double.
             checkOffline();
             return true;
         }
@@ -60,7 +60,7 @@ public class DiscordSocketManager extends AbstractSocketManager {
 
     public void checkOffline() {
         Number t = ((DiscordBridgeFeature) Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)).onlineStatus.getValue();
-        if (t.intValue() == 3)
+        if (t.intValue() == OnlineStatus.INVISIBLE.value)
             Managers.Tick.scheduleLater(() -> {
                 McUtils.sendLocalMessage(APPEARING_OFFLINE_MESSAGE, Prepend.GUILD.getWithStyle(ColourUtils.GREEN), true);
             }, 40);
