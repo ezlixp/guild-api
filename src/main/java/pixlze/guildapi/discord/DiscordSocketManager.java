@@ -2,12 +2,14 @@ package pixlze.guildapi.discord;
 
 import io.socket.client.Ack;
 import io.socket.client.IO;
+import io.socket.client.Socket;
 import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.features.FeatureState;
 import pixlze.guildapi.features.discord.DiscordBridgeFeature;
 import pixlze.guildapi.features.discord.type.OnlineStatus;
+import pixlze.guildapi.models.Models;
 import pixlze.guildapi.models.worldState.event.WorldStateEvents;
 import pixlze.guildapi.models.worldState.type.WorldState;
 import pixlze.guildapi.net.GuildApiClient;
@@ -31,6 +33,15 @@ public class DiscordSocketManager extends AbstractSocketManager {
 
     public DiscordSocketManager() {
         super(List.of());
+        saveListener(Socket.EVENT_CONNECT, (data) -> {
+            if (Models.WorldState.onWorld()) {
+                GuildApi.LOGGER.info("syncing with chat server on connect");
+                Managers.DiscordSocket.emit("sync", (Ack) args -> {
+                    GuildApi.LOGGER.info("synced from connect. on world");
+                    onWorld = true;
+                });
+            }
+        });
     }
 
     private void onApiLoaded(Api api) {
