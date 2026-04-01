@@ -19,6 +19,7 @@ import pixlze.guildapi.core.features.FeatureState;
 import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.core.handlers.discord.event.S2CSocketEvents;
 import pixlze.guildapi.discord.type.Message;
+import pixlze.guildapi.features.discord.type.OnlineStatus;
 import pixlze.guildapi.mc.mixin.accessors.SystemToastInvoker;
 import pixlze.guildapi.models.Models;
 import pixlze.guildapi.models.guildMessage.type.GuildMessage;
@@ -63,7 +64,12 @@ public class DiscordBridgeFeature extends Feature {
 
     @Override
     public void onConfigUpdate(Config<?> config) {
-
+        if (config.equals(onlineStatus)) {
+            Managers.DiscordSocket.emit("onlineStatus", onlineStatus.getValue());
+            Double t = Double.valueOf(onlineStatus.getValue());
+            if (onlineStatus.getValue().intValue() == OnlineStatus.INVISIBLE.value)
+                Managers.DiscordSocket.checkOffline();
+        }
     }
 
     @Override

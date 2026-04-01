@@ -37,7 +37,7 @@ public class Config<T> {
     }
 
     public T getValue() {
-        return (T) value;
+        return value;
     }
 
     public Type getTypeToken() {
@@ -46,6 +46,10 @@ public class Config<T> {
 
     public Class<?> getType() {
         return value.getClass();
+    }
+
+    private void setValue(T value) {
+        this.value = value;
     }
 
     public void setPending(T value) {
@@ -86,7 +90,7 @@ public class Config<T> {
 
     public void applyPending() {
         if (pending != null && !pending.equals(value)) {
-            this.value = pending;
+            setValue(pending);
             pending = null;
             owner.updateConfig(this);
         }

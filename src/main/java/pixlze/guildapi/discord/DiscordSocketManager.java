@@ -10,6 +10,7 @@ import pixlze.guildapi.features.discord.DiscordBridgeFeature;
 import pixlze.guildapi.models.worldState.event.WorldStateEvents;
 import pixlze.guildapi.models.worldState.type.WorldState;
 import pixlze.guildapi.net.GuildApiClient;
+import pixlze.guildapi.net.WynnJoinApi;
 import pixlze.guildapi.net.event.NetEvents;
 import pixlze.guildapi.net.type.AbstractSocketManager;
 import pixlze.guildapi.net.type.Api;
@@ -34,10 +35,15 @@ public class DiscordSocketManager extends AbstractSocketManager {
     private void onApiLoaded(Api api) {
         if (api.getClass().equals(GuildApiClient.class))
             initSocket();
+        if (api.getClass().equals(WynnJoinApi.class) && !Managers.Net.guild.isDisabled()) {
+            checkOffline();
+            initSocket();
+        }
     }
 
     private void onApiUnloaded(Api api) {
-        if (api.getClass().equals(GuildApiClient.class)) disable();
+        if (api.getClass().equals(GuildApiClient.class) || api.getClass().equals(WynnJoinApi.class))
+            disable();
     }
 
     @Override
@@ -46,13 +52,18 @@ public class DiscordSocketManager extends AbstractSocketManager {
             socket.connect();
             GuildApi.LOGGER.info("discord socket connecting");
             // .intvalue is necessary because of an unchecked cast resulting in value possibly being double.
-            Number t = ((DiscordBridgeFeature) Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)).onlineStatus.getValue();
-            if (t.intValue() == 3) {
-                McUtils.sendLocalMessage(APPEARING_OFFLINE_MESSAGE, Prepend.GUILD.getWithStyle(ColourUtils.GREEN), true);
-            }
+            checkOffline();
             return true;
         }
         return false;
+    }
+
+    public void checkOffline() {
+        Number t = ((DiscordBridgeFeature) Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)).onlineStatus.getValue();
+        if (t.intValue() == 3)
+            Managers.Tick.scheduleLater(() -> {
+                McUtils.sendLocalMessage(APPEARING_OFFLINE_MESSAGE, Prepend.GUILD.getWithStyle(ColourUtils.GREEN), true);
+            }, 40);
     }
 
     @Override

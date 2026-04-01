@@ -13,7 +13,7 @@
   "feature.guildapi.discordBridge.onlineStatus.display.2": "Do not disturb §c⛔",
   "feature.guildapi.discordBridge.onlineStatus.description.2": "Current online status: Do not disturb\n\nnot implemented.",
   "feature.guildapi.discordBridge.onlineStatus.display.3": "Appear offline §7⭕",
-  "feature.guildapi.discordBridge.onlineStatus.description.3": "Current online status: Appear offline\n\nJoin messages will not be logged in the bridging channel, and there will be no star next to your name in your merssages.\n\nMessages will still be bridged.",
+  "feature.guildapi.discordBridge.onlineStatus.description.3": "Current online status: Appear offline\n\nYour join and leave notifications will not be logged in the bridging channel, and you will not show up if someone runs /online.\n\nMessages will still be bridged.",
   "feature.guildapi.infoPanels.aspectsEnabled.name": "Aspects Panel Enabled",
   "feature.guildapi.infoPanels.aspectsEnabled.description": "Should the aspects panel be shown in the guild members menu?",
   "feature.guildapi.infoPanels.tomesEnabled.name": "Tomes Panel Enabled",
