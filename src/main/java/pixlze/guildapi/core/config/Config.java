@@ -117,15 +117,17 @@ public class Config<T> {
         ClickableWidget out;
         if (getType().equals(Boolean.class)) {
             setPending(this.value);
+
             out = ButtonWidget.builder(Text.of((boolean) this.pending ? "Yes":"No"), (button) -> {
                 this.setPending((T) (this.pending.equals(Boolean.TRUE) ? Boolean.FALSE:Boolean.TRUE));
                 button.setMessage(Text.of((boolean) this.pending ? "Yes":"No"));
             }).tooltip(Tooltip.of(Text.translatable(i18nKey + ".description"))).dimensions(0, 0, 100, 25 - 4).build();
         } else if (Number.class.isAssignableFrom(getType()) && cycleLength > 0) {
-            if (this.value.getClass() == Double.class) {
+            if (this.value.getClass() == Double.class)
                 this.value = (T) Integer.valueOf(((Double) this.value).intValue());
-            }
+
             setPending(this.value);
+
             out = ButtonWidget.builder(Text.translatable(i18nKey + ".display." + this.pending), (button) -> {
                 this.setPending((T) Integer.valueOf((((int) this.pending + 1) % this.cycleLength)));
                 button.setMessage(Text.translatable(i18nKey + ".display." + this.pending));
