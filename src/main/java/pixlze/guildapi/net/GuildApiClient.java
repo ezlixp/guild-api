@@ -82,8 +82,8 @@ public class GuildApiClient extends Api {
     public GuildApiClient() {
         super("guild", List.of(WynnApiClient.class));
         instance = this;
-//        baseURL = "https://ico-server.onrender.com/";
-        baseURL = "http://localhost/";
+        baseURL = "https://ico-server.onrender.com/";
+//        baseURL = "http://localhost/";
         refreshTokenFile = new File(CACHE_DIR, "webapi.json");
     }
 
