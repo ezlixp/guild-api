@@ -6,12 +6,14 @@ import net.minecraft.client.font.TextHandler;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.NotNull;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class TextUtils {
@@ -72,7 +74,6 @@ public class TextUtils {
         TextVisitors.first = true;
         TextVisitors.options = options;
         TextVisitors.currentVisit = new StringBuilder();
-        TextVisitors.prevCode = null;
         text.visit(TextVisitors.STYLED_VISITOR, Style.EMPTY);
         return TextVisitors.currentVisit.toString();
     }
@@ -143,7 +144,6 @@ public class TextUtils {
             return Optional.empty();
         };
         static boolean first = false;
-        static HashSet<String> prevCode;
         static boolean afterBlockMarker;
         static TextParseOptions options;
         public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = (style, asString) -> {
@@ -198,47 +198,38 @@ public class TextUtils {
             }
 
             if (!afterBlockMarker) {
-                HashSet<String> curCode = getCodes(style);
-                for (String code : curCode)
-                    if (prevCode == null || !prevCode.contains(code))
-                        TextVisitors.currentVisit.append(code);
-                prevCode = curCode;
+                if (style.getColor() != null) {
+                    int colorIndex = 0;
+                    for (Formatting format : Formatting.values()) {
+                        if (format.getColorValue() != null && format.getColorValue()
+                                .equals(style.getColor().getRgb())) {
+                            colorIndex = format.getColorIndex();
+                            break;
+                        }
+                    }
+                    TextVisitors.currentVisit.append(options.formatCode)
+                            .append(Objects.requireNonNull(Formatting.byColorIndex(colorIndex)).getCode());
+                }
+                if (style.isBold()) {
+                    TextVisitors.currentVisit.append(options.formatCode).append(Formatting.BOLD.getCode());
+                }
+                if (style.isItalic()) {
+                    TextVisitors.currentVisit.append(options.formatCode).append(Formatting.ITALIC.getCode());
+                }
+                if (style.isUnderlined()) {
+                    TextVisitors.currentVisit.append(options.formatCode).append(Formatting.UNDERLINE.getCode());
+                }
+                if (style.isStrikethrough()) {
+                    TextVisitors.currentVisit.append(options.formatCode).append(Formatting.STRIKETHROUGH.getCode());
+                }
+                if (style.isObfuscated()) {
+                    TextVisitors.currentVisit.append(options.formatCode).append(Formatting.OBFUSCATED.getCode());
+                }
             } else {
                 afterBlockMarker = false;
             }
             TextVisitors.currentVisit.append(toAppend);
             if (first) first = false;
-        }
-
-        private static @NotNull HashSet<String> getCodes(Style style) {
-            HashSet<String> curCode = new HashSet<>();
-            if (style.getColor() != null) {
-                int colorIndex = 0;
-                for (Formatting format : Formatting.values()) {
-                    if (format.getColorValue() != null && format.getColorValue()
-                            .equals(style.getColor().getRgb())) {
-                        colorIndex = format.getColorIndex();
-                        break;
-                    }
-                }
-                curCode.add(("" + Formatting.byColorIndex(colorIndex)).replaceAll("§", options.formatCode));
-            }
-            if (style.isBold()) {
-                curCode.add(options.formatCode + Formatting.BOLD.getCode());
-            }
-            if (style.isItalic()) {
-                curCode.add(options.formatCode + Formatting.ITALIC.getCode());
-            }
-            if (style.isUnderlined()) {
-                curCode.add(options.formatCode + Formatting.UNDERLINE.getCode());
-            }
-            if (style.isStrikethrough()) {
-                curCode.add(options.formatCode + Formatting.STRIKETHROUGH.getCode());
-            }
-            if (style.isObfuscated()) {
-                curCode.add(options.formatCode + Formatting.OBFUSCATED.getCode());
-            }
-            return curCode;
         }
     }
 }
