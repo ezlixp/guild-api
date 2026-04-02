@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 public class GuildMessageModel {
     private final Pattern GUILD_PATTERN = Pattern.compile(
-            "^§.((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))(§.)? (?<content>.*)$");
+            "^§.((\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE)|(\uDAFF\uDFFC\uE001\uDB00\uDC06))§. (?<content>.*)$");
 
     /**
      * Check if a message is a guild message
