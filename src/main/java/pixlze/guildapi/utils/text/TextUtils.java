@@ -6,6 +6,7 @@ import net.minecraft.client.font.TextHandler;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
@@ -74,6 +75,8 @@ public class TextUtils {
         TextVisitors.first = true;
         TextVisitors.options = options;
         TextVisitors.currentVisit = new StringBuilder();
+        TextVisitors.prevCodes = null;
+        TextVisitors.firstOnNewLine = false;
         text.visit(TextVisitors.STYLED_VISITOR, Style.EMPTY);
         return TextVisitors.currentVisit.toString();
     }
@@ -145,6 +148,8 @@ public class TextUtils {
         };
         static boolean first = false;
         static boolean afterBlockMarker;
+        static boolean firstOnNewLine;
+        static ArrayList<String> prevCodes;
         static TextParseOptions options;
         public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = (style, asString) -> {
             if (options.extractUsernames && style.getHoverEvent() != null) {
@@ -194,42 +199,56 @@ public class TextUtils {
                     .replaceAll("§", options.formatCode);
             if (toAppend.isEmpty()) {
                 afterBlockMarker = false;
+                firstOnNewLine = true;
                 return;
             }
 
             if (!afterBlockMarker) {
+                ArrayList<String> curCodes = new ArrayList<>();
                 if (style.getColor() != null) {
-                    int colorIndex = 0;
-                    for (Formatting format : Formatting.values()) {
-                        if (format.getColorValue() != null && format.getColorValue()
-                                .equals(style.getColor().getRgb())) {
-                            colorIndex = format.getColorIndex();
-                            break;
-                        }
-                    }
-                    TextVisitors.currentVisit.append(options.formatCode)
-                            .append(Objects.requireNonNull(Formatting.byColorIndex(colorIndex)).getCode());
+                    String t = getColourCode(style);
+                    curCodes.add(t);
                 }
                 if (style.isBold()) {
-                    TextVisitors.currentVisit.append(options.formatCode).append(Formatting.BOLD.getCode());
+                    curCodes.add(options.formatCode + Formatting.BOLD.getCode());
                 }
                 if (style.isItalic()) {
-                    TextVisitors.currentVisit.append(options.formatCode).append(Formatting.ITALIC.getCode());
+                    curCodes.add(options.formatCode + Formatting.ITALIC.getCode());
                 }
                 if (style.isUnderlined()) {
-                    TextVisitors.currentVisit.append(options.formatCode).append(Formatting.UNDERLINE.getCode());
+                    curCodes.add(options.formatCode + Formatting.UNDERLINE.getCode());
                 }
                 if (style.isStrikethrough()) {
-                    TextVisitors.currentVisit.append(options.formatCode).append(Formatting.STRIKETHROUGH.getCode());
+                    curCodes.add(options.formatCode + Formatting.STRIKETHROUGH.getCode());
                 }
                 if (style.isObfuscated()) {
-                    TextVisitors.currentVisit.append(options.formatCode).append(Formatting.OBFUSCATED.getCode());
+                    curCodes.add(options.formatCode + Formatting.OBFUSCATED.getCode());
                 }
+                for (String code : curCodes)
+                    if (!firstOnNewLine || !prevCodes.contains(code))
+                        TextVisitors.currentVisit.append(code);
+                prevCodes = curCodes;
             } else {
                 afterBlockMarker = false;
             }
             TextVisitors.currentVisit.append(toAppend);
             if (first) first = false;
+            if (firstOnNewLine) firstOnNewLine = false;
+        }
+
+        private static @NotNull String getColourCode(Style style) {
+            int colorIndex = 0;
+            for (Formatting format : Formatting.values()) {
+                if (format.getColorValue() != null && format.getColorValue()
+                        .equals(style.getColor().getRgb())) {
+                    colorIndex = format.getColorIndex();
+                    break;
+                }
+            }
+            Formatting formatting = Formatting.byColorIndex(colorIndex);
+            assert formatting != null;
+            String t = options.formatCode + formatting.getCode();
+            return t;
         }
     }
 }
