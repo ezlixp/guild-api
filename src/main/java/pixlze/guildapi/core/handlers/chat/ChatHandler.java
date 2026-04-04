@@ -44,8 +44,9 @@ public final class ChatHandler extends Handler {
         assert McUtils.mc().world != null;
         long currentTicks = McUtils.mc().world.getTime();
 
-        List<Text> lines = TextUtils.splitLines(message);
-        handleLines(lines, message, currentTicks);
+        postChatLine(message);
+//        List<Text> lines = TextUtils.splitLines(message);
+//        handleLines(lines, message, currentTicks);
     }
 
     private synchronized void handleLines(List<Text> lines, Text message, long currentTicks) {
@@ -115,7 +116,8 @@ public final class ChatHandler extends Handler {
         }
         filteredCollected = new ArrayList<>();
         for (Text line : collectedLines) {
-            if (!EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(line)).find()) filteredCollected.add(line);
+            if (!EMPTY_LINE_PATTERN.matcher(TextUtils.parsePlain(line)).find())
+                filteredCollected.add(line);
         }
         collectedLines = filteredCollected;
 
