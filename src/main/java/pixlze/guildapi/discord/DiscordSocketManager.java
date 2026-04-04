@@ -45,7 +45,7 @@ public class DiscordSocketManager extends AbstractSocketManager {
     }
 
     private void onApiLoaded(Api api) {
-        if (api.getClass().equals(GuildApiClient.class))
+        if (api.getClass().equals(GuildApiClient.class) && !Managers.Net.join.isDisabled())
             initSocket();
         if (api.getClass().equals(WynnJoinApi.class) && !Managers.Net.guild.isDisabled()) {
             checkOffline();
