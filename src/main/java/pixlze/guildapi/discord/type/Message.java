@@ -57,7 +57,7 @@ public class Message {
             return Text.literal("§o" + highlight.apply(discord));
         }
         return Text.literal(highlight.apply(mcUsername) + "/§o" + highlight.apply(discord)).setStyle(Style.EMPTY.withHoverEvent
-                (new HoverEvent.ShowText(Text.literal(mcUsername + "'s discord username is " + discord))));
+                (new HoverEvent.ShowText(Text.literal(mcUsername + "'s discord name is " + discord))));
     }
 
     public String getContent() {
