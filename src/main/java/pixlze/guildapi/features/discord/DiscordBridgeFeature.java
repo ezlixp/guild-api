@@ -136,22 +136,23 @@ public class DiscordBridgeFeature extends Feature {
             GuildApi.LOGGER.warn("received wynn mirror with disabled feature.");
             return;
         }
-        if (!Managers.DiscordSocket.onWorld) {
-            Matcher t = GuildMessage.BASIC.getMatcher(message);
-            if (t != null) {
-                String pill = t.group("pill");
-                String leftover = message.substring(pill.length());
-                Text mirrored = Text.empty()
-                        .append(Text.literal(pill).setStyle(TextUtils.fontOf(Identifier.of("banner/pill"))))
-                        .append(Text.literal(leftover).setStyle(Style.EMPTY));
+        Matcher t = GuildMessage.BASIC.getMatcher(message);
+        if (t != null) {
+            String pill = t.group("pill");
+            String leftover = message.substring(pill.length());
+            Text mirrored = Text.empty()
+                    .append(Text.literal(pill).setStyle(TextUtils.fontOf(Identifier.of("banner/pill"))))
+                    .append(Text.literal(leftover).setStyle(Style.EMPTY));
+
+            if (!Managers.DiscordSocket.onWorld)
                 McUtils.sendLocalMessage(mirrored, Prepend.EMPTY.get(), false);
-                Handlers.Chat.postChatLine(mirrored);
-                Managers.Discord.newMessage(t.group("header"), t.group("content"), true, true);
-            } else {
+            Handlers.Chat.postChatLine(mirrored);
+            Managers.Discord.newMessage(t.group("header"), t.group("content"), true, true);
+        } else {
+            if (!Managers.DiscordSocket.onWorld)
                 McUtils.sendLocalMessage(Text.literal(message), Prepend.EMPTY.get(), false);
-                Handlers.Chat.postChatLine(Text.literal(message));
-                Managers.Discord.newMessage("⚠ Info", message, true, true);
-            }
+            Handlers.Chat.postChatLine(Text.literal(message));
+            Managers.Discord.newMessage("⚠ Info", message, true, true);
         }
     }
 
