@@ -26,7 +26,7 @@ public class InfoPanelWidget extends ClickableWidget {
 
     private Screen parent;
     private final int headerHeight = 13;
-    private int x, y, width, height, page, highlightColour;
+    private int x, y, width, height, page, highlightColour, firstHighlightColour;
     private double valthresh;
 
     private final String title;
@@ -71,6 +71,10 @@ public class InfoPanelWidget extends ClickableWidget {
 
     public void setHighlightColour(int highlightColour) {
         this.highlightColour = highlightColour;
+    }
+
+    public void setFirstHighlightColour(int firstHighlightColour) {
+        this.firstHighlightColour = firstHighlightColour;
     }
 
     public void update(String key, double delta) {
@@ -155,13 +159,16 @@ public class InfoPanelWidget extends ClickableWidget {
         if (customName == null) return;
         String name = TextUtils.parsePlain(customName).toLowerCase();
         boolean doHighlight = false;
+        boolean first = true;
         for (Entry entry : entries) {
             if (name.equals(entry.key.toLowerCase())) {
                 doHighlight = true;
+                break;
             }
+            first = false;
         }
         if (doHighlight) {
-            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, highlightColour);
+            context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, first ? firstHighlightColour:highlightColour);
         }
     }
 

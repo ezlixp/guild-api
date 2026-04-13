@@ -133,7 +133,8 @@ public class InfoPanelsFeature extends Feature {
         if (!aspectsEnabled.getValue()) return;
         if (refresh) {refreshAspects();}
         aspectsPanel = new InfoPanelWidget(10, 10, 100, 150, "Aspects", aspectsOnPress, aspectsList, ASPECTS_THRESHOLD);
-        aspectsPanel.setHighlightColour(0xAAFF0000);
+        aspectsPanel.setFirstHighlightColour(0xFFFF0000);
+        aspectsPanel.setHighlightColour(0x88FF0000);
         ((ScreenInvoker) screen).invokeAddDrawableChild(aspectsPanel);
     }
 
@@ -141,7 +142,8 @@ public class InfoPanelsFeature extends Feature {
         if (!tomesEnabled.getValue()) return;
         if (refresh) {refreshTomes();}
         tomesPanel = new InfoPanelWidget(screen.width - 110, 10, 100, 150, "Tomes", tomesOnPress, tomesList, TOMES_THRESHOLD);
-        tomesPanel.setHighlightColour(0xAA0000FF);
+        tomesPanel.setFirstHighlightColour(0xFF0000FF);
+        tomesPanel.setHighlightColour(0x880000FF);
         ((ScreenInvoker) screen).invokeAddDrawableChild(tomesPanel);
     }
 
