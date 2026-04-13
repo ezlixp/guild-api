@@ -102,19 +102,23 @@ public class DiscordBridgeFeature extends Feature {
             GuildApi.LOGGER.warn("received discord message with disabled feature.");
             return;
         }
-        String username = null, content, discord;
+        String username = null, content, discord, replyAuthor, replyContent;
         try {
             if (message.has("McUsername"))
-                username = message.get("McUsername").toString();
-            content = message.get("Content").toString();
-            discord = message.get("DiscordUsername").toString();
+                username = message.getString("McUsername");
+            content = message.getString("Content");
+            discord = message.getString("DiscordUsername");
+            replyAuthor = message.getString("ReplyAuthor");
+            replyContent = message.getString("ReplyContent");
+            if (replyAuthor.equals("null")) replyAuthor = null;
+            if (replyContent.equals("null")) replyContent = null;
             if (discord.equals("@none")) discord = "";
         } catch (Exception e) {
             GuildApi.LOGGER.info("discord message extract: {} {}", e, e.getMessage());
             return;
         }
 
-        Message m = new Message(username, discord, content, false, this::highlightMessage);
+        Message m = new Message(username, discord, content, replyAuthor, replyContent, false, this::highlightMessage);
         if (!useGui.getValue()) {
             McUtils.sendLocalMessage(m.get(), Prepend.GUILD.getWithStyle(ColourUtils.DARK_PURPLE), true);
         } else {

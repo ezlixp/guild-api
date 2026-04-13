@@ -5,6 +5,7 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import pixlze.guildapi.utils.ColourUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.FontUtils;
@@ -12,21 +13,27 @@ import pixlze.guildapi.utils.text.TextUtils;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 public class Message {
+    private final static Pattern ONE_LINE_PATTERN = Pattern.compile("");
     private final String mcUsername;
     private final String discord;
     private final String content;
+    private final String replyAuthor;
+    private final String replyContent;
     private final boolean isGuild;
     private final TextRenderer textRenderer;
     private final Function<String, String> highlight;
 
     // if just mcusername and empty discord, don't do any special formatting as that is the case used for headers that
     // aren't username (like triangl info)
-    public Message(String mcUsername, String discord, String content, boolean isGuild, Function<String, String> highlight) {
+    public Message(String mcUsername, String discord, String content, String replyAuthor, String replyContent, boolean isGuild, Function<String, String> highlight) {
         this.mcUsername = mcUsername == null ? "":mcUsername;
         this.discord = discord == null ? "":discord;
         this.content = content == null ? "":content;
+        this.replyAuthor = replyAuthor;
+        this.replyContent = replyContent;
         this.isGuild = isGuild;
         this.textRenderer = McUtils.mc().textRenderer;
         this.highlight = highlight;
@@ -41,12 +48,21 @@ public class Message {
     }
 
     public MutableText get() {
-        return Text.empty().append(FontUtils.BannerPillFont.parseStringWithFill("discord")
-                        .fillStyle(ColourUtils.LIGHT_PURPLE)).append(" ")
-                .append(getAuthor()
-                        .fillStyle(ColourUtils.LIGHT_PURPLE).append(": "))
-                .append(Text.literal(highlight.apply(content))
-                        .setStyle(ColourUtils.LIGHT_PURPLE));
+        MutableText pre = Text.empty()
+                .append(FontUtils.BannerPillFont.parseStringWithFill("discord").fillStyle(ColourUtils.LIGHT_PURPLE))
+                .append(" ")
+                .append(getAuthor().fillStyle(ColourUtils.LIGHT_PURPLE));
+        if (replyContent != null) {
+            pre.append(Text.literal(" replying to ").fillStyle(ColourUtils.LIGHT_PURPLE))
+                    .append(Text.literal("this message")
+                            .fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE).withUnderline(true)
+                                    .withHoverEvent(new HoverEvent.ShowText(Text.empty()
+                                            .append(Text.literal(replyAuthor + ": ")
+                                                    .fillStyle(Style.EMPTY.withBold(true)))
+                                            .append(Text.literal(replyContent))))));
+        }
+        return pre.append(": ").append(Text.literal(highlight.apply(content))
+                .setStyle(ColourUtils.LIGHT_PURPLE));
     }
 
     public MutableText getAuthor() {
@@ -56,8 +72,9 @@ public class Message {
         if (mcUsername.isBlank()) {
             return Text.literal("§o" + highlight.apply(discord));
         }
-        return Text.literal(highlight.apply(mcUsername) + "/§o" + highlight.apply(discord)).setStyle(Style.EMPTY.withHoverEvent
-                (new HoverEvent.ShowText(Text.literal(mcUsername + "'s discord name is " + discord))));
+        return Text.literal(highlight.apply(mcUsername) + "/§o" + highlight.apply(discord))
+                .setStyle(Style.EMPTY.withHoverEvent
+                        (new HoverEvent.ShowText(Text.literal(mcUsername + "'s discord name is " + discord))));
     }
 
     public String getContent() {
