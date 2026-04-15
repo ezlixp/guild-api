@@ -97,43 +97,47 @@ public class InfoPanelsFeature extends Feature {
 
     private void refreshAspects() {
         aspectsList.clear();
-        Managers.Net.guild.getList("guilds/raids/rewards/" + Managers.Net.guild.guildId, false, "aspects").whenComplete((res, exception) -> {
-            if (exception != null) {
-                McUtils.sendLocalMessage(Text.literal("§cSomething went wrong. Check logs for more details."), Prepend.DEFAULT.get(), false);
-                GuildApi.LOGGER.error("Info list aspects refresh error: {} {}", exception, exception.getMessage());
-                return;
-            }
-            for (JsonElement element : res) {
-                InfoPanelWidget.Entry t = new InfoPanelWidget.Entry(element.getAsJsonObject().get("mcUsername").getAsString(), element.getAsJsonObject().get("aspects").getAsDouble());
-                if (t.value >= ASPECTS_THRESHOLD)
-                    aspectsList.add(t);
-            }
-            aspectsPanel.changePage(0);
-        });
+        Managers.Net.guild.getList("guilds/raids/rewards/" + Managers.Net.guild.guildId, false, "aspects")
+                .whenComplete((res, exception) -> {
+                    if (exception != null) {
+                        McUtils.sendLocalMessage(Text.literal("§cSomething went wrong. Check logs for more details."), Prepend.DEFAULT.get(), false);
+                        GuildApi.LOGGER.error("Info list aspects refresh error: {} {}", exception, exception.getMessage());
+                        return;
+                    }
+                    for (JsonElement element : res) {
+                        InfoPanelWidget.Entry t = new InfoPanelWidget.Entry(element.getAsJsonObject().get("mcUsername")
+                                .getAsString(), element.getAsJsonObject().get("aspects").getAsDouble());
+                        if (t.value >= ASPECTS_THRESHOLD)
+                            aspectsList.add(t);
+                    }
+                    aspectsPanel.changePage(0);
+                });
     }
 
     private void refreshTomes() {
         tomesList.clear();
-        Managers.Net.guild.getList("guilds/tomes/" + Managers.Net.guild.guildId, false, null).whenComplete((res, exception) -> {
-            if (exception != null) {
-                McUtils.sendLocalMessage(Text.literal("§cSomething went wrong. Check logs for more details."), Prepend.DEFAULT.get(), false);
-                GuildApi.LOGGER.error("Info list tomes refresh error: {} {}", exception, exception.getMessage());
-                return;
-            }
-            for (JsonElement element : res) {
-                InfoPanelWidget.Entry t = new InfoPanelWidget.Entry(element.getAsJsonObject().get("mcUsername").getAsString(), 1);
-                if (t.value >= TOMES_THRESHOLD)
-                    tomesList.add(t);
-            }
-            tomesPanel.changePage(0);
-        });
+        Managers.Net.guild.getList("guilds/tomes/" + Managers.Net.guild.guildId, false, null)
+                .whenComplete((res, exception) -> {
+                    if (exception != null) {
+                        McUtils.sendLocalMessage(Text.literal("§cSomething went wrong. Check logs for more details."), Prepend.DEFAULT.get(), false);
+                        GuildApi.LOGGER.error("Info list tomes refresh error: {} {}", exception, exception.getMessage());
+                        return;
+                    }
+                    for (JsonElement element : res) {
+                        InfoPanelWidget.Entry t = new InfoPanelWidget.Entry(element.getAsJsonObject().get("mcUsername")
+                                .getAsString(), 1);
+                        if (t.value >= TOMES_THRESHOLD)
+                            tomesList.add(t);
+                    }
+                    tomesPanel.changePage(0);
+                });
     }
 
     private void putAspects(GenericContainerScreen screen, boolean refresh) {
         if (!aspectsEnabled.getValue()) return;
         if (refresh) {refreshAspects();}
         aspectsPanel = new InfoPanelWidget(10, 10, 100, 150, "Aspects", aspectsOnPress, aspectsList, ASPECTS_THRESHOLD);
-        aspectsPanel.setFirstHighlightColour(0xFFFF0000);
+        aspectsPanel.setFirstHighlightColour(0xFFFFAA00);
         aspectsPanel.setHighlightColour(0x88FF0000);
         ((ScreenInvoker) screen).invokeAddDrawableChild(aspectsPanel);
     }
@@ -142,7 +146,7 @@ public class InfoPanelsFeature extends Feature {
         if (!tomesEnabled.getValue()) return;
         if (refresh) {refreshTomes();}
         tomesPanel = new InfoPanelWidget(screen.width - 110, 10, 100, 150, "Tomes", tomesOnPress, tomesList, TOMES_THRESHOLD);
-        tomesPanel.setFirstHighlightColour(0xFF0000FF);
+        tomesPanel.setFirstHighlightColour(0xFFAA00FF);
         tomesPanel.setHighlightColour(0x880000FF);
         ((ScreenInvoker) screen).invokeAddDrawableChild(tomesPanel);
     }
@@ -154,7 +158,8 @@ public class InfoPanelsFeature extends Feature {
 
     private void onScreenChanged(Screen screen, boolean refresh) {
         if (screen == null || enabled.isDisabled()) return;
-        if (screen instanceof GenericContainerScreen containerScreen && MEMBERS_SCREEN_PATTERN.matcher(TextUtils.parsePlain(screen.getTitle())).matches()) {
+        if (screen instanceof GenericContainerScreen containerScreen && MEMBERS_SCREEN_PATTERN.matcher(TextUtils.parsePlain(screen.getTitle()))
+                .matches()) {
             currentScreen = screen;
             putList(containerScreen, refresh);
         } else {
