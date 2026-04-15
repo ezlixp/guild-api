@@ -32,6 +32,8 @@ public class Message {
         this.mcUsername = mcUsername == null ? "":mcUsername;
         this.discord = discord == null ? "":discord;
         this.content = content == null ? "":content;
+        if (replyAuthor != null) replyAuthor = replyAuthor.replaceAll("\\\\", "");
+        if (replyContent != null) replyContent = replyContent.replaceAll("\\\\", "");
         if (replyContent != null) {
             if (replyAuthor == null || replyAuthor.equals("Discord Only")) {
                 Matcher m = ONE_LINE_PATTERN.matcher(replyContent);
