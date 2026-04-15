@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Locale;
 
 public class DiscordMessageModel {
+    // TODO: make this a manager that is called in feature
     private final HashSet<String> blocked = new HashSet<>();
 
     public boolean isBlocked(String username) {

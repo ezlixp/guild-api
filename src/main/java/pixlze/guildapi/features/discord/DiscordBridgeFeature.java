@@ -31,7 +31,6 @@ import pixlze.guildapi.utils.type.Prepend;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -123,16 +122,18 @@ public class DiscordBridgeFeature extends Feature {
             McUtils.sendLocalMessage(m.get(), Prepend.GUILD.getWithStyle(ColourUtils.DARK_PURPLE), true);
         } else {
             TextRenderer textRenderer = McUtils.mc().textRenderer;
-            Objects.requireNonNull(textRenderer);
             List<OrderedText> lines = m.getContentLines((int) (McUtils.mc().getWindow()
-                    .getScaledWidth() * 0.25)).stream().map(MutableText::asOrderedText).collect(Collectors.toCollection(ArrayList::new));
-            int width = Math.max(50, lines.stream().mapToInt(textRenderer::getWidth).max()
-                    .orElse((int) (McUtils.mc().getWindow().getScaledWidth() * 0.25)));
+                            .getScaledWidth() * 0.25)).stream().map(MutableText::asOrderedText)
+                    .collect(Collectors.toCollection(ArrayList::new));
+            Text authorText = m.getAuthor().append(m.getReplyAuthor());
+            int width = Math.max(Math.max(50, lines.stream().mapToInt(textRenderer::getWidth).max()
+                    .orElse((int) (McUtils.mc().getWindow()
+                            .getScaledWidth() * 0.25))), textRenderer.getWidth(authorText));
             McUtils.mc().getToastManager()
-                    .add(SystemToastInvoker.create(SystemToast.Type.PERIODIC_NOTIFICATION, m.getAuthor(), lines, width + 30));
+                    .add(SystemToastInvoker.create(SystemToast.Type.PERIODIC_NOTIFICATION, authorText, lines, width + 30));
         }
 
-        Managers.Discord.newMessage(username, discord, content, false, true);
+        Managers.Discord.newMessage(username, discord, content, replyAuthor, replyContent, false, true);
     }
 
     private void onWynnMirror(String message) {
@@ -151,12 +152,12 @@ public class DiscordBridgeFeature extends Feature {
             if (!Managers.DiscordSocket.onWorld)
                 McUtils.sendLocalMessage(mirrored, Prepend.EMPTY.get(), false);
             Handlers.Chat.postChatLine(mirrored);
-            Managers.Discord.newMessage(t.group("header"), t.group("content"), true, true);
+            Managers.Discord.newMessage(t.group("header"), t.group("content"), null, null, true, true);
         } else {
             if (!Managers.DiscordSocket.onWorld)
                 McUtils.sendLocalMessage(Text.literal(message), Prepend.EMPTY.get(), false);
             Handlers.Chat.postChatLine(Text.literal(message));
-            Managers.Discord.newMessage("⚠ Info", message, true, true);
+            Managers.Discord.newMessage("⚠ Info", message, null, null, true, true);
         }
     }
 

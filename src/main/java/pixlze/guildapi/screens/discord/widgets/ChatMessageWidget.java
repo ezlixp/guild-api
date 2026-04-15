@@ -5,6 +5,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.AbstractTextWidget;
 import net.minecraft.client.gui.widget.ScrollableWidget;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import pixlze.guildapi.discord.type.Message;
 
 import java.util.List;
@@ -48,7 +49,9 @@ public class ChatMessageWidget extends AbstractTextWidget {
         int x = this.getX() + PADDING;
         int y = this.getY() + PADDING;
 
-        textConsumer.text(x, y, message.getAuthor().withColor(shadowColor).asOrderedText());
+        textConsumer.text(x, y, message.getAuthor().withColor(shadowColor)
+                .append(message.getReply(Style.EMPTY.withColor(0x9d45e6), Style.EMPTY.withColor(shadowColor)))
+                .asOrderedText());
         List<MutableText> contentLines = message.getContentLines(this.getWidth() - 8 - ScrollableWidget.SCROLLBAR_WIDTH);
         y += 2;
         for (MutableText line : contentLines) {

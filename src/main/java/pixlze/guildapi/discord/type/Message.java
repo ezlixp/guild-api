@@ -5,7 +5,6 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import pixlze.guildapi.utils.ColourUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.FontUtils;
@@ -13,10 +12,11 @@ import pixlze.guildapi.utils.text.TextUtils;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Message {
-    private final static Pattern ONE_LINE_PATTERN = Pattern.compile("");
+    private final static Pattern ONE_LINE_PATTERN = Pattern.compile("^\\*\\*(?<author>\\w+):\\*\\* (?<content>.*)$");
     private final String mcUsername;
     private final String discord;
     private final String content;
@@ -32,8 +32,24 @@ public class Message {
         this.mcUsername = mcUsername == null ? "":mcUsername;
         this.discord = discord == null ? "":discord;
         this.content = content == null ? "":content;
-        this.replyAuthor = replyAuthor;
-        this.replyContent = replyContent;
+        if (replyContent != null) {
+            if (replyAuthor == null || replyAuthor.equals("Discord Only")) {
+                Matcher m = ONE_LINE_PATTERN.matcher(replyContent);
+                if (m.find()) {
+                    this.replyAuthor = m.group("author");
+                    this.replyContent = m.group("content");
+                } else {
+                    this.replyAuthor = replyAuthor;
+                    this.replyContent = replyContent;
+                }
+            } else {
+                this.replyAuthor = replyAuthor;
+                this.replyContent = replyContent;
+            }
+        } else {
+            this.replyAuthor = replyAuthor;
+            this.replyContent = null;
+        }
         this.isGuild = isGuild;
         this.textRenderer = McUtils.mc().textRenderer;
         this.highlight = highlight;
@@ -53,13 +69,7 @@ public class Message {
                 .append(" ")
                 .append(getAuthor().fillStyle(ColourUtils.LIGHT_PURPLE));
         if (replyContent != null) {
-            pre.append(Text.literal(" replying to ").fillStyle(ColourUtils.LIGHT_PURPLE))
-                    .append(Text.literal("this message")
-                            .fillStyle(Style.EMPTY.withColor(Formatting.LIGHT_PURPLE).withUnderline(true)
-                                    .withHoverEvent(new HoverEvent.ShowText(Text.empty()
-                                            .append(Text.literal(replyAuthor + ": ")
-                                                    .fillStyle(Style.EMPTY.withBold(true)))
-                                            .append(Text.literal(replyContent))))));
+            pre.append(getReply(ColourUtils.LIGHT_PURPLE));
         }
         return pre.append(": ").append(Text.literal(highlight.apply(content))
                 .setStyle(ColourUtils.LIGHT_PURPLE));
@@ -75,6 +85,26 @@ public class Message {
         return Text.literal(highlight.apply(mcUsername) + "/§o" + highlight.apply(discord))
                 .setStyle(Style.EMPTY.withHoverEvent
                         (new HoverEvent.ShowText(Text.literal(mcUsername + "'s discord name is " + discord))));
+    }
+
+    public Text getReply(Style override) {
+        return getReply(override, override);
+    }
+
+    public Text getReply(Style override1, Style override2) {
+        if (replyContent == null) return Text.empty();
+        return Text.empty().append(Text.literal(" replying to ").fillStyle(override1))
+                .append(Text.literal("this message")
+                        .fillStyle(override2.withUnderline(true)
+                                .withHoverEvent(new HoverEvent.ShowText(Text.empty()
+                                        .append(Text.literal(replyAuthor + ": ")
+                                                .fillStyle(Style.EMPTY.withBold(true)))
+                                        .append(Text.literal(replyContent))))));
+    }
+
+    public Text getReplyAuthor() {
+        if (replyAuthor == null) return Text.empty();
+        return Text.literal(" replying to " + replyAuthor);
     }
 
     public String getContent() {

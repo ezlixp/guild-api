@@ -11,10 +11,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class DiscordMessageManager extends Manager {
-    public static final String GUILD_MESSAGE = "\uD83C\uDD56";
-    public static final String DISCORD_MESSAGE = "\uD83C\uDD53";
     private final List<Message> messages = new ArrayList<>();
-    // 🅖 first means guild 🅓 first means discord
     private final ArrayList<Integer> unconfirmedIndex = new ArrayList<>();
     private DiscordChatWidget curDiscordChat;
 
@@ -22,15 +19,15 @@ public class DiscordMessageManager extends Manager {
         super(List.of());
     }
 
-    public void newMessage(String header, String content, boolean isGuild, boolean confirmed) {
-        newMessage(header, "", content, isGuild, confirmed);
+    public void newMessage(String header, String content, String replyAuthor, String replyContent, boolean isGuild, boolean confirmed) {
+        newMessage(header, "", content, replyAuthor, replyContent, isGuild, confirmed);
     }
 
-    public synchronized void newMessage(String mcUsername, String discord, String content, boolean isGuild, boolean confirmed) {
+    public synchronized void newMessage(String mcUsername, String discord, String content, String replyAuthor, String replyContent, boolean isGuild, boolean confirmed) {
         content = stripIllegal(content);
         if (!confirmed) unconfirmedIndex.add(messages.size());
         Function<String, String> highlight = ((DiscordBridgeFeature) Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class))::highlightMessage;
-        Message message = new Message(mcUsername, discord, content, isGuild, highlight);
+        Message message = new Message(mcUsername, discord, content, replyAuthor, replyContent, isGuild, highlight);
         if (curDiscordChat != null) {
             if (confirmed && !unconfirmedIndex.isEmpty() && message.equals(messages.get(unconfirmedIndex.getFirst()))) {
                 // confirming message
@@ -43,7 +40,7 @@ public class DiscordMessageManager extends Manager {
                 addDiscordMessage(curDiscordChat, message, confirmed);
             }
         } else {
-            messages.add(new Message(mcUsername, discord, content, isGuild, highlight));
+            messages.add(new Message(mcUsername, discord, content, replyAuthor, replyContent, isGuild, highlight));
         }
     }
 
