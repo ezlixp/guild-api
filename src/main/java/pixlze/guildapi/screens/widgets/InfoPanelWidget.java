@@ -160,7 +160,8 @@ public class InfoPanelWidget extends ClickableWidget {
         String name = TextUtils.parsePlain(customName).toLowerCase();
         boolean doHighlight = false;
         boolean first = true;
-        for (Entry entry : entries) {
+        ArrayList<Entry> t = new ArrayList<>(entries);
+        for (Entry entry : t) {
             if (name.equals(entry.key.toLowerCase())) {
                 doHighlight = true;
                 break;
