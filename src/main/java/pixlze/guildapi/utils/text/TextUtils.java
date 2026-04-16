@@ -13,8 +13,8 @@ import pixlze.guildapi.utils.text.type.TextParseOptions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TextUtils {
@@ -141,6 +141,7 @@ public class TextUtils {
     }
 
     static class TextVisitors {
+        public static final Pattern NICK_PATTERN = Pattern.compile("^(?<nick>.*)'s real (user)?name is (?<mcUsername>.*)$");
         static StringBuilder currentVisit;
         public static final StringVisitable.StyledVisitor<String> PLAIN_VISITOR = (style, asString) -> {
             currentVisit.append(asString.replaceAll("§.", ""));
@@ -165,23 +166,17 @@ public class TextUtils {
             if (style.getHoverEvent() instanceof HoverEvent.ShowText(
                     Text value
             )) {
-                List<Text> siblings = value.getSiblings();
-                if (siblings != null) {
-                    if (siblings.size() > 2 && siblings.get(1).getString() != null && Objects.requireNonNull(
-                            siblings.get(1).getString()).contains("nickname is")) {
-                        handleStyles(style.withItalic(false), siblings.getFirst().getString());
-                    } else if (!siblings.isEmpty() && siblings.getFirst().getString() != null && (siblings.getFirst()
-                            .getString().contains("real username is") || siblings.getFirst().getString().contains("real name is"))) {
-                        if (siblings.size() > 1) {
-                            handleStyles(style.withItalic(false), siblings.get(1).getString());
-                        } else {
-                            handleStyles(style.withItalic(false), siblings.getFirst().getSiblings().getFirst()
-                                    .getString());
-                        }
-                    } else if (siblings.isEmpty()) {
-                        handleStyles(style, asString);
+                StringBuilder pre = new StringBuilder(currentVisit);
+                String hoverVal = TextUtils.parsePlain(value);
+                currentVisit = pre;
+                Matcher m = NICK_PATTERN.matcher(hoverVal);
+                if (m.find()) {
+                    if (asString.contains(m.group("nick"))) {
+                        handleStyles(style, asString.replaceAll(m.group("nick"), m.group("mcUsername")));
+                    } else {
+                        GuildApi.LOGGER.warn("ignoring text component: {} with hover {}", asString, hoverVal);
                     }
-                }
+                } else handleStyles(style, asString);
             } else {
                 handleStyles(style, asString);
             }
