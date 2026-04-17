@@ -1,3 +1,4 @@
 ### New Features
-- Added different colours for people first in tomelist and aspectlist
-- Added proper reply displaying for discord messages
+
+### Bug Fixes
+- Fixed a crash bug that happens rarely with the info panels

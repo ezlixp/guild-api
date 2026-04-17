@@ -44,12 +44,14 @@ public class GuildApiClient extends Api {
     private static final String REDIRECT_URI = "http://localhost:" + PORT + CALLBACK_PATH;
     private static final String CLIENT_ID = "1252463028025426031";
     private static final String UNLINKED_ERROR = "Could not validate account linking.";
-    private static final Text CLICKABLE_HERE_GREEN = Text.literal("here").setStyle(Style.EMPTY.withUnderline(true).withColor(ColourUtils.GREEN.getColor())
-            .withClickEvent(
-                    new ClickEvent.RunCommand("/gapi login")));
-    private static final Text CLICKABLE_HERE_RED = Text.literal("here").setStyle(Style.EMPTY.withUnderline(true).withColor(ColourUtils.RED.getColor())
-            .withClickEvent(
-                    new ClickEvent.RunCommand("/gapi login")));
+    private static final Text CLICKABLE_HERE_GREEN = Text.literal("here")
+            .setStyle(Style.EMPTY.withUnderline(true).withColor(ColourUtils.GREEN.getColor())
+                    .withClickEvent(
+                            new ClickEvent.RunCommand("/gapi login")));
+    private static final Text CLICKABLE_HERE_RED = Text.literal("here")
+            .setStyle(Style.EMPTY.withUnderline(true).withColor(ColourUtils.RED.getColor())
+                    .withClickEvent(
+                            new ClickEvent.RunCommand("/gapi login")));
 
     private static final Text GUILD_NOT_SET_UP = Text.literal("§eGuild api has not been set up for your guild. Please check the modrinth for further instructions.");
     private static final Text GUILD_NOT_SET_UP_NEW = GuildApi.BASE_INFO.copy().append("\n\n").append(GUILD_NOT_SET_UP);
@@ -65,7 +67,8 @@ public class GuildApiClient extends Api {
     private static final Text LINK_MESSAGE = Text.literal("§cYou have not linked a discord account. Type /link in your guild's discord bridging channel, then click ")
             .append(CLICKABLE_HERE_RED).
             append(Text.literal("§c to re-authenticate."));
-    private static final Text SUCCESS_MESSAGE = Text.literal("Success!").setStyle(Style.EMPTY.withColor(Formatting.GREEN));
+    private static final Text SUCCESS_MESSAGE = Text.literal("Success!")
+            .setStyle(Style.EMPTY.withColor(Formatting.GREEN));
 
     private static final String API_BASE_PATH = "api/v3/";
     private static GuildApiClient instance;
