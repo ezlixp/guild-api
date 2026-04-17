@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
+import pixlze.guildapi.utils.type.TextVisitors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,19 +73,15 @@ public class TextUtils {
 
 
     public static String parseStyled(StringVisitable text, TextParseOptions options) {
-        TextVisitors.first = true;
-        TextVisitors.options = options;
-        TextVisitors.currentVisit = new StringBuilder();
-        TextVisitors.prevCodes = null;
-        TextVisitors.firstOnNewLine = false;
-        text.visit(TextVisitors.STYLED_VISITOR, Style.EMPTY);
-        return TextVisitors.currentVisit.toString();
+        StringBuilder builder = new StringBuilder();
+        text.visit(new TextVisitor(options, builder, TextVisitors.STYLED), Style.EMPTY);
+        return builder.toString();
     }
 
     public static String parsePlain(StringVisitable text) {
-        TextVisitors.currentVisit = new StringBuilder();
-        text.visit(TextVisitors.PLAIN_VISITOR, Style.EMPTY);
-        return TextVisitors.currentVisit.toString();
+        StringBuilder builder = new StringBuilder();
+        text.visit(new TextVisitor(TextParseOptions.DEFAULT, builder, TextVisitors.PLAIN), Style.EMPTY);
+        return builder.toString();
     }
 
     public static Text toBlockMessage(Text text, Style prependStyle) {
@@ -140,35 +137,28 @@ public class TextUtils {
         return message.replaceAll("(?i)(" + McUtils.playerName() + ")", "§e$1§d");
     }
 
-    static class TextVisitors {
+    static class TextVisitor implements StringVisitable.StyledVisitor<String> {
         public static final Pattern NICK_PATTERN = Pattern.compile("^(?<nick>.*)'s real (user)?name is (?<mcUsername>.*)$");
-        static StringBuilder currentVisit;
-        public static final StringVisitable.StyledVisitor<String> PLAIN_VISITOR = (style, asString) -> {
-            currentVisit.append(asString.replaceAll("§.", ""));
-            return Optional.empty();
-        };
-        static boolean first = false;
-        static boolean afterBlockMarker;
-        static boolean firstOnNewLine;
-        static ArrayList<String> prevCodes;
-        static TextParseOptions options;
-        public static final StringVisitable.StyledVisitor<String> STYLED_VISITOR = (style, asString) -> {
-            if (options.extractUsernames && style.getHoverEvent() != null) {
-                handleStylesWithHover(style, asString);
-            } else {
-                handleStyles(style, asString);
-            }
-            return Optional.empty();
-        };
+        private boolean first = true;
+        private boolean afterBlockMarker = false;
+        private boolean firstOnNewLine = false;
+        private final TextParseOptions options;
+        private final StringBuilder currentVisit;
+        private final TextVisitors type;
+        private ArrayList<String> prevCodes;
 
-        private static void handleStylesWithHover(Style style, String asString) {
+        TextVisitor(TextParseOptions options, StringBuilder currentVisit, TextVisitors type) {
+            this.options = options;
+            this.currentVisit = currentVisit;
+            this.type = type;
+        }
+
+        private void handleStylesWithHover(Style style, String asString) {
             assert style.getHoverEvent() != null;
             if (style.getHoverEvent() instanceof HoverEvent.ShowText(
                     Text value
             )) {
-                StringBuilder pre = new StringBuilder(currentVisit);
                 String hoverVal = TextUtils.parsePlain(value);
-                currentVisit = pre;
                 Matcher m = NICK_PATTERN.matcher(hoverVal);
                 if (m.find()) {
                     if (asString.contains(m.group("nick"))) {
@@ -182,7 +172,7 @@ public class TextUtils {
             }
         }
 
-        private static void handleStyles(Style style, String asString) {
+        private void handleStyles(Style style, String asString) {
             if (BLOCK_MARKER_PATTERN.matcher(asString).find() && !first) {
                 afterBlockMarker = true;
                 return;
@@ -221,17 +211,17 @@ public class TextUtils {
                 }
                 for (String code : curCodes)
                     if (!firstOnNewLine || !prevCodes.contains(code))
-                        TextVisitors.currentVisit.append(code);
+                        currentVisit.append(code);
                 prevCodes = curCodes;
             } else {
                 afterBlockMarker = false;
             }
-            TextVisitors.currentVisit.append(toAppend);
+            currentVisit.append(toAppend);
             if (first) first = false;
             if (firstOnNewLine) firstOnNewLine = false;
         }
 
-        private static @NotNull String getColourCode(Style style) {
+        private @NotNull String getColourCode(Style style) {
             int colorIndex = 0;
             for (Formatting format : Formatting.values()) {
                 if (format.getColorValue() != null && format.getColorValue()
@@ -242,8 +232,21 @@ public class TextUtils {
             }
             Formatting formatting = Formatting.byColorIndex(colorIndex);
             assert formatting != null;
-            String t = options.formatCode + formatting.getCode();
-            return t;
+            return options.formatCode + formatting.getCode();
+        }
+
+        @Override
+        public Optional<String> accept(Style style, String asString) {
+            if (this.type == TextVisitors.PLAIN) {
+                currentVisit.append(asString.replaceAll("§.", ""));
+            } else if (this.type == TextVisitors.STYLED) {
+                if (options.extractUsernames && style.getHoverEvent() != null) {
+                    handleStylesWithHover(style, asString);
+                } else {
+                    handleStyles(style, asString);
+                }
+            }
+            return Optional.empty();
         }
     }
 }
