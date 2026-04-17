@@ -7,6 +7,7 @@ import pixlze.guildapi.core.handlers.connection.event.WynncraftConnectionEvents;
 import pixlze.guildapi.mc.event.PlayerInfoChangedEvents;
 import pixlze.guildapi.models.worldState.event.WorldStateEvents;
 import pixlze.guildapi.models.worldState.type.WorldState;
+import pixlze.guildapi.utils.text.TextUtils;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -49,9 +50,8 @@ public class WorldStateModel {
 
     private void onDisplayChanged(UUID uuid, Text text) {
         if (!uuid.equals(WORLD_NAME_UUID)) return;
-        if (WORLD_NAME.matcher(text.getString()).find()) {
-            setState(WorldState.WORLD);
-        }
+        GuildApi.LOGGER.info(TextUtils.parsePlain(text));
+        setState(WorldState.WORLD);
     }
 
     private void onTabListFooter(Text footer) {
