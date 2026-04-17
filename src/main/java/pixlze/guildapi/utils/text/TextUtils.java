@@ -172,7 +172,7 @@ public class TextUtils {
                 Matcher m = NICK_PATTERN.matcher(hoverVal);
                 if (m.find()) {
                     if (asString.contains(m.group("nick"))) {
-                        handleStyles(style, asString.replaceAll(m.group("nick"), m.group("mcUsername")));
+                        handleStyles(style.withItalic(false), asString.replaceAll(m.group("nick"), m.group("mcUsername")));
                     } else {
                         GuildApi.LOGGER.warn("ignoring text component: {} with hover {}", asString, hoverVal);
                     }
