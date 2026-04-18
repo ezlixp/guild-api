@@ -141,7 +141,7 @@ public class TextUtils {
     }
 
     static class TextVisitors {
-        public static final Pattern NICK_PATTERN = Pattern.compile("^(?<nick>.*)'s real (user)?name is (?<mcUsername>.*)$");
+        public static final Pattern NICK_PATTERN = Pattern.compile("^(?<nick>.*)(('s)|(s')) real (user)?name is (?<mcUsername>.*)$");
         static StringBuilder currentVisit;
         public static final StringVisitable.StyledVisitor<String> PLAIN_VISITOR = (style, asString) -> {
             currentVisit.append(asString.replaceAll("§.", ""));
