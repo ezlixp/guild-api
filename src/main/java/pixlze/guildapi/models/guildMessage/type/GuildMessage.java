@@ -16,7 +16,7 @@ public enum GuildMessage {
     EMERALD_GIVE("^§.(?<giver>\\S*?)(§.)? rewarded §.1024 ?Emeralds§. ?to ?§.(?<receiver>\\S*?)(§.)?$"),
 
     // Guild bank
-    GUILD_BANK("^§.(?<username>\\S+?)§. (?<action>\\w+) §.(?<item>.+?)§. (?:to|from) the Guild ?Bank ?\\(§.Everyone§.\\)"),
+    GUILD_BANK("^§.(?<username>\\S+?)§. (?<action>\\w+) ?§.(?<item>.+?)§. ?(?:to|from) ?the ?Guild ?Bank ?\\(§.Everyone§.\\)"),
 
     // Weekly objective
     WEEKLY_OBJECTIVE("^(?<username>\\S+?) has finished their ?weekly ?objective\\.$"),

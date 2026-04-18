@@ -12,7 +12,7 @@ public enum HighRankMessage {
     TERRITORY_RESOURCE_WARNING("^Territory §.(?<territory>.+?)§. is \\w+ more resources than it can store!$"),
     TERRITORY_RESOURCE_STABILISE("^Territory §.(?<territory>.+?)§. production has stabilised$"),
     // Guild bank
-    GUILD_BANK("^§.(?<username>\\S+?)§. (?<action>\\w+) §.(?<item>.+?)§. (?:to|from) ?the ?Guild ?Bank ?\\(§.High ?Ranked§.\\)$"),
+    GUILD_BANK("^§.(?<username>\\S+?)§. (?<action>\\w+) ?§.(?<item>.+?)§. ?(?:to|from) ?the ?Guild ?Bank ?\\(§.High ?Ranked§.\\)$"),
     // Guild tome found
     TOME_FOUND("^§.A Guild Tome§. has been found and added to the Guild Rewards$"),
 
