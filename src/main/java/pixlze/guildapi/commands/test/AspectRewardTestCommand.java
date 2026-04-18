@@ -19,7 +19,7 @@ public class AspectRewardTestCommand extends ClientCommand {
     protected LiteralArgumentBuilder<FabricClientCommandSource> getCommand(LiteralArgumentBuilder<FabricClientCommandSource> base) {
         return base.then(ClientCommandManager.argument("username", StringArgumentType.word()).executes((context) -> {
             String username = StringArgumentType.getString(context, "username");
-            Text aspectGivenMessage = Text.literal("§b\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE §etest§b rewarded §ean Aspect§b to §e" + username);
+            Text aspectGivenMessage = Text.literal("§b\uDAFF\uDFFC\uE006\uDAFF\uDFFF\uE002\uDAFF\uDFFE§b §etest§b rewarded §ean Aspect§b to §e" + username);
             WynnChatMessage.EVENT.invoker().interact(aspectGivenMessage);
             McUtils.sendLocalMessage(aspectGivenMessage, Text.empty(), false);
             return Command.SINGLE_SUCCESS;
