@@ -222,7 +222,8 @@ public class GuildApiClient extends Api {
             try {
                 NetUtils.applyDefaultCallback(res, exception, (resOK) -> {
                             JsonObject resBody = resOK.getAsJsonObject();
-                            tokenRequest.complete(new Pair<>(resBody.get("token").getAsString(), resBody.get("refreshToken").getAsString()));
+                            tokenRequest.complete(new Pair<>(resBody.get("token").getAsString(), resBody.get("refreshToken")
+                                    .getAsString()));
                         },
                         (error) -> {
                             if (error.equals(UNLINKED_ERROR)) {
@@ -231,7 +232,8 @@ public class GuildApiClient extends Api {
                                 McUtils.sendLocalMessage(
                                         Text.literal("§cSomething went wrong authenticating. Click ").append(
                                                 Text.literal("here").setStyle(
-                                                        Style.EMPTY.withUnderline(true).withColor(Formatting.RED).withClickEvent(new ClickEvent.RunCommand("/gapi login")))
+                                                        Style.EMPTY.withUnderline(true).withColor(Formatting.RED)
+                                                                .withClickEvent(new ClickEvent.RunCommand("/gapi login")))
                                         ).append(Text.literal("§c to try again.")),
                                         Prepend.DEFAULT.get(), false
                                 );
