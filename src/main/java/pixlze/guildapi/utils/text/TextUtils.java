@@ -142,6 +142,7 @@ public class TextUtils {
         private boolean first = true;
         private boolean afterBlockMarker = false;
         private boolean firstOnNewLine = false;
+        private boolean firstNickComponent = true;
         private final TextParseOptions options;
         private final StringBuilder currentVisit;
         private final TextVisitors type;
@@ -161,13 +162,37 @@ public class TextUtils {
                 String hoverVal = TextUtils.parsePlain(value);
                 Matcher m = NICK_PATTERN.matcher(hoverVal);
                 if (m.find()) {
-                    if (asString.contains(m.group("nick"))) {
-                        handleStyles(style.withItalic(false), asString.replaceAll(m.group("nick"), m.group("mcUsername")));
+                    if (firstNickComponent) {
+                        firstNickComponent = false;
+                        GuildApi.LOGGER.info("accepting nick for text component: {} with hover {}", asString, hoverVal);
+                        StringBuilder parsed = new StringBuilder();
+                        for (int i = 0; i < asString.length(); i++) {
+                            if (!Character.isLetterOrDigit(asString.charAt(i))) {
+                                parsed.append(asString.charAt(i));
+                            } else break;
+                        }
+                        parsed.append(m.group("mcUsername"));
+                        handleStyles(style.withItalic(false), parsed.toString());
                     } else {
-                        GuildApi.LOGGER.warn("ignoring text component: {} with hover {}", asString, hoverVal);
+                        StringBuilder parsed = new StringBuilder();
+                        for (int i = asString.length() - 1; i >= 0; i--) {
+                            if (!Character.isLetterOrDigit(asString.charAt(i))) {
+                                parsed.append(asString.charAt(i));
+                            } else break;
+                        }
+                        parsed.reverse();
+                        handleStyles(style.withItalic(false), parsed.toString());
+                        GuildApi.LOGGER.warn("ignoring text component: {} with hover {}, stripping to {}", asString, hoverVal, parsed);
                     }
-                } else handleStyles(style, asString);
+                    if (asString.contains(m.group("nick"))) {
+                        GuildApi.LOGGER.info(asString);
+                    }
+                } else {
+                    firstNickComponent = true;
+                    handleStyles(style, asString);
+                }
             } else {
+                firstNickComponent = true;
                 handleStyles(style, asString);
             }
         }
