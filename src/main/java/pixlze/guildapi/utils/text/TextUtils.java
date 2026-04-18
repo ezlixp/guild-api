@@ -176,7 +176,7 @@ public class TextUtils {
                     } else {
                         StringBuilder parsed = new StringBuilder();
                         for (int i = asString.length() - 1; i >= 0; i--) {
-                            if (!Character.isLetterOrDigit(asString.charAt(i))) {
+                            if (!Character.isLetterOrDigit(asString.charAt(i)) || (asString.charAt(i) == ' ' && !parsed.isEmpty())) {
                                 parsed.append(asString.charAt(i));
                             } else break;
                         }
