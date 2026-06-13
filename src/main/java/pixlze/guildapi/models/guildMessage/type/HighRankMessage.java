@@ -5,12 +5,13 @@ import java.util.regex.Pattern;
 
 public enum HighRankMessage {
     // Eco
-    TERRITORY_BONUS_MODIFY("^§.(?<username>\\S+?)§. set §.(?<bonus>\\S+?)§. to level §.(?<level>\\S+?)§. on §.(?<territory>\\S*)$"),
+    TERRITORY_BONUS_MODIFY("^§.(?<username>\\S+?)§. set §.(?<bonus>.+?)§. to level §.(?<level>\\d+?)§. on §.(?<territory>.*)$"),
     TERRITORY_BONUS_REMOVE("^§.(?<username>\\S+?)§. removed §.(?<changed>.+?)§. from §.(?<territory>.*)$"),
     TERRITORY_BONUS_MASS_MODIFY("^§.(?<username>\\S+?)§. changed §.(?<amount>\\d+) (?<changed>\\w+)§. on §3(?<territory>.*)$"),
     TERRITORY_LOADOUT_APPLY("^§.(?<username>\\S+?)§. applied the loadout §(?<loadout>.+?)§. on §.(?<territory>.*)$"),
     TERRITORY_RESOURCE_WARNING("^Territory §.(?<territory>.+?)§. is \\w+ more resources than it can store!$"),
     TERRITORY_RESOURCE_STABILISE("^Territory §.(?<territory>.+?)§. production has stabilised$"),
+    GLOBAL_TAX("^§.(?<username>\\S+?)§. changed the global tax to §.(?<percent>\\d+)%$"),
     // Guild bank
     GUILD_BANK("^§.(?<username>\\S+?)§. (?<action>\\w+) ?§.(?<item>.+?)§. ?(?:to|from) ?the ?Guild ?Bank ?\\(§.High ?Ranked§.\\)$"),
     // Guild tome found
