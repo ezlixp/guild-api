@@ -2,3 +2,4 @@
 
 ### Bug Fixes
 - Fixed a crash bug that happens rarely with the info panels
+- Fixed guild message parsing to work with the new guild ally raids
