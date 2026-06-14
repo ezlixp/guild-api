@@ -8,7 +8,7 @@ public enum GuildMessage {
     BASIC("^(?<pill>.*)§[38](?<header>.+?)(§[38])?:§[b8] (?<content>.*)$"),
 
     // Guild raid finished
-    RAID_FINISH("^§.(?<player1>\\S*?)§.(, ?§.(?<player2>\\S*?)§.)?(, ?§.(?<player3>\\S*?)§.)?(, ?and ?§.(?<player4>\\S*?)§.)? ?finished ?§.(?<raid>.*?)§. ?and ?claimed ?§.(?<aspects>\\d+)x ?Aspects.*$"),
+    RAID_FINISH("^§.(?<player1>\\S*?)§.(, ?§.(?<player2>\\S*?)§.)?(, ?§.(?<player3>\\S*?)§.)?(, ?and ?§.(?<player4>\\S*?)§.)? ?finished ?§.(?<raid>.*?)§. ?and ?claimed.*§.(?<aspects>\\d+)x ?Aspects.*$"),
 
     // Giving out resources
     ASPECT_GIVE("^§.(?<giver>\\S*?)(§.)? rewarded §.an ?Aspect§. ?to ?§.(?<receiver>\\S*?)(§.)?$"),
