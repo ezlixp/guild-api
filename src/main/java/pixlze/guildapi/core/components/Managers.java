@@ -9,6 +9,7 @@ import pixlze.guildapi.core.features.FeatureManager;
 import pixlze.guildapi.core.json.JsonManager;
 import pixlze.guildapi.core.mod.TickSchedulerManager;
 import pixlze.guildapi.core.notifications.NotificationManager;
+import pixlze.guildapi.core.waypoints.WaypointManager;
 import pixlze.guildapi.discord.DiscordMessageManager;
 import pixlze.guildapi.discord.DiscordSocketManager;
 import pixlze.guildapi.net.NetManager;
@@ -29,6 +30,8 @@ public final class Managers {
 
     public static final TickSchedulerManager Tick = new TickSchedulerManager();
 
+    public static final WaypointManager Waypoint = new WaypointManager();
+
     public static void init() {
         // These all need to go first bcs they have no interactions with others
         Json.init();
@@ -37,6 +40,7 @@ public final class Managers {
         Notification.init();
         Command.init();
         Tick.init();
+        Waypoint.init();
 
         DiscordSocket.init();
         Net.init();

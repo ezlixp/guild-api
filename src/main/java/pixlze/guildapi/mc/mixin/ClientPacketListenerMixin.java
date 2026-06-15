@@ -2,12 +2,12 @@ package pixlze.guildapi.mc.mixin;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlayerListHeaderS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.entity.Entity;
+import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.util.math.Vec3d;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -17,7 +17,11 @@ import pixlze.guildapi.mc.event.WynnChatMessage;
 import pixlze.guildapi.utils.type.Prepend;
 
 @Mixin(ClientPlayNetworkHandler.class)
-public class ClientPacketListenerMixin {
+public abstract class ClientPacketListenerMixin {
+    @Shadow
+    @Nullable
+    protected abstract Entity createEntity(EntitySpawnS2CPacket packet);
+
     @Inject(method = "onGameMessage", at = @At("HEAD"))
     private void onGameMessage(GameMessageS2CPacket packet, CallbackInfo ci) {
         if (!MinecraftClient.getInstance().isOnThread()) return;
@@ -26,6 +30,22 @@ public class ClientPacketListenerMixin {
             WynnChatMessage.EVENT.invoker().interact(packet.content());
         }
     }
+
+//    @Inject(method = "onEntitySpawn", at = @At("HEAD"))
+//    private void onEntitySpawn(EntitySpawnS2CPacket packet, CallbackInfo ci) {
+//        if (!MinecraftClient.getInstance().isOnThread()) return;
+//        Entity entity = this.createEntity(packet);
+//        if (entity != null) {
+//            entity.onSpawnPacket(packet);
+//        }
+//    }
+//
+//    @Inject(method = "onEntityAttributes", at = @At("HEAD"))
+//    private void onEntityAttributes(EntityAttributesS2CPacket packet, CallbackInfo ci) {
+//        if (!MinecraftClient.getInstance().isOnThread()) return;
+//
+//    }
+
 
     // for world
     @Inject(method = "onPlayerList", at = @At("HEAD"))
@@ -55,6 +75,8 @@ public class ClientPacketListenerMixin {
         if (!MinecraftClient.getInstance().isOnThread()) return;
         if (!packet.relatives().isEmpty()) return;
 
-        PlayerInfoChangedEvents.POSITION.invoker().positionChanged(new Vec3d(packet.change().position().x, packet.change().position().y, packet.change().position().z));
+        PlayerInfoChangedEvents.POSITION.invoker()
+                .positionChanged(new Vec3d(packet.change().position().x, packet.change().position().y, packet.change()
+                        .position().z));
     }
 }

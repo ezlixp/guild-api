@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public enum GuildMessage {
     // Basic guild chat message
-    BASIC("^(?<pill>.*)§[38](?<header>.+?)(§[38])?:§[b8] (?<content>.*)$"),
+    BASIC("^(?<pill>.*)§[38](?<header>.+?)(§[38])?:§[b8] ?(?<content>.*)$"),
 
     // Guild raid finished
     RAID_FINISH("^§.(?<player1>\\S*?)§.(, ?§.(?<player2>\\S*?)§.)?(, ?§.(?<player3>\\S*?)§.)?(, ?and ?§.(?<player4>\\S*?)§.)? ?finished ?§.(?<raid>.*?)§. ?and ?claimed.*§.(?<aspects>\\d+)x ?Aspects.*$"),
@@ -23,27 +23,27 @@ public enum GuildMessage {
     WEEKLY_OBJECTIVE_REMINDER("^Only (?<time>.+?) left to complete ?the ?Weekly ?Guild ?Objectives!$"),
 
     // Guild member management
-    MEMBER_INVITE("^(?<recruiter>\\S+?) has invited (?<recruit>\\S+?) ?to ?the ?guild$"),
-    MEMBER_UNINVITE("^(?<recruiter>\\S+?) has uninvited (?<recruit>\\S+?) ?from ?the ?guild$"),
-    MEMBER_JOIN("^(?<recruit>\\S+?) has joined the guild, say hello!$"),
-    MEMBER_LEAVE("^(?<username>\\S+?) has left the guild$"),
-    MEMBER_KICK("^(?<kicker>\\S+?) has kicked (?<kicked>\\S+?) from the guild$"),
+    MEMBER_INVITE("^(?<recruiter>\\S+?) has invited ?(?<recruit>\\S+?) ?to ?the ?guild$"),
+    MEMBER_UNINVITE("^(?<recruiter>\\S+?) has uninvited ?(?<recruit>\\S+?) ?from ?the ?guild$"),
+    MEMBER_JOIN("^(?<recruit>\\S+?) has joined the guild, ?say ?hello!$"),
+    MEMBER_LEAVE("^(?<username>\\S+?) has left ?the ?guild$"),
+    MEMBER_KICK("^(?<kicker>\\S+?) has kicked ?(?<kicked>\\S+?) ?from ?the ?guild$"),
     MEMBER_RANK("^(?<setter>\\S+?) has set (?<set>\\S+?) guild rank ?from ?§.(?<original>\\w+)§. ?to ?§.(?<new>\\w+)$"),
 
     // War
-    WAR_COUNTDOWN("^The war for (?<territory>.+?) will start in .*$"),
-    WAR_LOSE("^Your guild has lost the war for .*$"),
-    WAR_BEGIN("^The battle has begun!$"),
-    WAR_WIN("^You have taken control of .*$"),
-    WAR_DEFEND_WIN("^\\[\\w+\\] has lost the war!.*$"),
-    WAR_DEFEND_LOSE("^\\[\\w+\\] has taken control of .*$"),
+    WAR_COUNTDOWN("^The war for (?<territory>.+?) ?will ?start ?in ?.*$"),
+    WAR_LOSE("^Your guild has lost the ?war ?for ?.*$"),
+    WAR_BEGIN("^The battle ?has ?begun!$"),
+    WAR_WIN("^You have taken ?control ?of ?.*$"),
+    WAR_DEFEND_WIN("^\\[\\w+\\] has ?lost ?the ?war!.*$"),
+    WAR_DEFEND_LOSE("^\\[\\w+\\] has ?taken ?control ?of ?.*$"),
 
     // Guild season
-    GUILD_SEASON_END("^The current guild season will end in .*$"),
-    GUILD_SEASON_REWARD_REMINDER("^The last standing territories you control once it ends will grant you 2048² each!$"),
+    GUILD_SEASON_END("^The current guild season ?will ?end ?in ?.*$"),
+    GUILD_SEASON_REWARD_REMINDER("^The last standing ?territories ?you ?control ?once ?it ?ends ?will ?grant ?you ?2048² ?each!$"),
 
     // Misc
-    MEMBER_BOOST("^§.(?<username>\\S+?) has started boosting the guild$");
+    MEMBER_BOOST("^§.(?<username>\\S+?) has ?started ?boosting ?the ?guild$");
 
 
     public final Pattern regex;

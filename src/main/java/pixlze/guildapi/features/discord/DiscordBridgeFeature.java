@@ -56,6 +56,7 @@ public class DiscordBridgeFeature extends Feature {
 
     @Override
     public void init() {
+        // TODO: pass each event received into this::onEventReceieved that returns immediately if disabled instead of checking in each event
         ChatMessageReceived.EVENT.register(this::onWynnMessage);
         S2CSocketEvents.DISCORD_MESSAGE.register(this::onDiscordMessage);
         S2CSocketEvents.WYNN_MIRROR.register(this::onWynnMirror);

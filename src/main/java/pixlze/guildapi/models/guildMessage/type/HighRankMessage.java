@@ -5,25 +5,25 @@ import java.util.regex.Pattern;
 
 public enum HighRankMessage {
     // Eco
-    TERRITORY_BONUS_MODIFY("^§.(?<username>\\S+?)§. set §.(?<bonus>.+?)§. to level §.(?<level>\\d+?)§. on §.(?<territory>.*)$"),
-    TERRITORY_BONUS_REMOVE("^§.(?<username>\\S+?)§. removed §.(?<changed>.+?)§. from §.(?<territory>.*)$"),
-    TERRITORY_BONUS_MASS_MODIFY("^§.(?<username>\\S+?)§. changed §.(?<amount>\\d+) (?<changed>\\w+)§. on §3(?<territory>.*)$"),
-    TERRITORY_LOADOUT_APPLY("^§.(?<username>\\S+?)§. applied the loadout §(?<loadout>.+?)§. on §.(?<territory>.*)$"),
-    TERRITORY_RESOURCE_WARNING("^Territory §.(?<territory>.+?)§. is \\w+ more resources than it can store!$"),
-    TERRITORY_RESOURCE_STABILISE("^Territory §.(?<territory>.+?)§. production has stabilised$"),
+    TERRITORY_BONUS_MODIFY("^§.(?<username>\\S+?)§. set ?§.(?<bonus>.+?)§. ?to ?level ?§.(?<level>\\d+?)§. ?on ?§.(?<territory>.*)$"),
+    TERRITORY_BONUS_REMOVE("^§.(?<username>\\S+?)§. removed ?§.(?<changed>.+?)§. ?from ?§.(?<territory>.*)$"),
+    TERRITORY_BONUS_MASS_MODIFY("^§.(?<username>\\S+?)§. changed ?§.(?<amount>\\d+) ?(?<changed>\\w+)§. ?on ?§3(?<territory>.*)$"),
+    TERRITORY_LOADOUT_APPLY("^§.(?<username>\\S+?)§. applied the ?loadout ?§(?<loadout>.+?)§. ?on ?§.(?<territory>.*)$"),
+    TERRITORY_RESOURCE_WARNING("^Territory §.(?<territory>.+?)§. is \\w+ more ?resources ?than ?it ?can ?store!$"),
+    TERRITORY_RESOURCE_STABILISE("^Territory §.(?<territory>.+?)§. ?production ?has ?stabilised$"),
     GLOBAL_TAX("^§.(?<username>\\S+?)§. changed the global tax to §.(?<percent>\\d+)%$"),
     // Guild bank
     GUILD_BANK("^§.(?<username>\\S+?)§. (?<action>\\w+) ?§.(?<item>.+?)§. ?(?:to|from) ?the ?Guild ?Bank ?\\(§.High ?Ranked§.\\)$"),
     // Guild tome found
-    TOME_FOUND("^§.A Guild Tome§. has been found and added to the Guild Rewards$"),
+    TOME_FOUND("^§.A Guild Tome§. has been found and added to the ?Guild ?Rewards$"),
 
     // Unsure if these are accurate or if available to all (maybe captain+?)
-    ALLIANCE_REQUEST("^(?<username>\\S+?) from (?<guild>.+?) is requesting to be allied$"),
-    ALLIANCE_SEND("^(?<username>\\S+?) sent (?<guild>.+?) a request to be allied$"),
-    ALLIANCE_REJECT("^(?<username>\\S+?) rejected (?<guild>.+?) alliance request$"),
+    ALLIANCE_REQUEST("^(?<username>\\S+?) from (?<guild>.+?) is ?requesting ?to ?be ?allied$"),
+    ALLIANCE_SEND("^(?<username>\\S+?) sent (?<guild>.+?) a ?request ?to ?be ?allied$"),
+    ALLIANCE_REJECT("^(?<username>\\S+?) rejected ?(?<guild>.+?) ?alliance ?request$"),
 
-    ALLIANCE_FORM("^(?<guild1>.+?) formed an alliance with (?<guild2>.?)$"),
-    ALIANCE_REVOKE("^(?<username>\\S+?) revoked the alliance with (?<guild>.*?)$");
+    ALLIANCE_FORM("^(?<guild1>.+?) formed an alliance ?with ?(?<guild2>.?)$"),
+    ALIANCE_REVOKE("^(?<username>\\S+?) revoked the ?alliance ?with ?(?<guild>.*?)$");
     public final Pattern regex;
 
     HighRankMessage(String message) {
