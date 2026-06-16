@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public enum GuildMessage {
     // Basic guild chat message
-    BASIC("^(?<pill>.*)§[38](?<header>.+?)(§[38])?:§[b8] ?(?<content>.*)$"),
+    BASIC("^(?<pill>.*)§.(?<header>.+?)(§.)?:§. ?(?<content>.*)$"),
 
     // Guild raid finished
     RAID_FINISH("^§.(?<player1>\\S*?)§.(, ?§.(?<player2>\\S*?)§.)?(, ?§.(?<player3>\\S*?)§.)?(, ?and ?§.(?<player4>\\S*?)§.)? ?finished ?§.(?<raid>.*?)§. ?and ?claimed.*§.(?<aspects>\\d+)x ?Aspects.*$"),
@@ -37,6 +37,7 @@ public enum GuildMessage {
     WAR_WIN("^You have taken ?control ?of ?.*$"),
     WAR_DEFEND_WIN("^\\[\\w+\\] has ?lost ?the ?war!.*$"),
     WAR_DEFEND_LOSE("^\\[\\w+\\] has ?taken ?control ?of ?.*$"),
+    WAR_ABANDONED("^Nobody logged in for the war.$"),
 
     // Guild season
     GUILD_SEASON_END("^The current guild season ?will ?end ?in ?.*$"),

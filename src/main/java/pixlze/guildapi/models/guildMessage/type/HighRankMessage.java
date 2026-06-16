@@ -11,6 +11,7 @@ public enum HighRankMessage {
     TERRITORY_LOADOUT_APPLY("^§.(?<username>\\S+?)§. applied the ?loadout ?§(?<loadout>.+?)§. ?on ?§.(?<territory>.*)$"),
     TERRITORY_RESOURCE_WARNING("^Territory §.(?<territory>.+?)§. is \\w+ more ?resources ?than ?it ?can ?store!$"),
     TERRITORY_RESOURCE_STABILISE("^Territory §.(?<territory>.+?)§. ?production ?has ?stabilised$"),
+    TERRITORY_STYLE_CHANGE("^§.(?<username>\\S+?)§. changed the style of (?<territory>.+) to §..*$"),
     GLOBAL_TAX("^§.(?<username>\\S+?)§. changed the global tax to §.(?<percent>\\d+)%$"),
     // Guild bank
     GUILD_BANK("^§.(?<username>\\S+?)§. (?<action>\\w+) ?§.(?<item>.+?)§. ?(?:to|from) ?the ?Guild ?Bank ?\\(§.High ?Ranked§.\\)$"),
