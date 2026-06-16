@@ -72,13 +72,7 @@ public class DiscordBridgeFeature extends SocketFeature {
     }
 
     @Override
-    public void onEnabled() {
-        Managers.DiscordSocket.initSocket();
-    }
-
-    @Override
     public void onDisabled() {
-        Managers.DiscordSocket.disable();
         Managers.Discord.clearMessages();
     }
 
