@@ -47,10 +47,10 @@ public class DiscordSocketManager extends AbstractSocketManager {
 
     private void onApiLoaded(Api api) {
         if (api.getClass().equals(GuildApiClient.class) && !Managers.Net.join.isDisabled())
-            initSocket();
+            enable();
         if (api.getClass().equals(WynnJoinApi.class) && !Managers.Net.guild.isDisabled()) {
             checkOffline();
-            initSocket();
+            enable();
         }
     }
 
@@ -108,6 +108,7 @@ public class DiscordSocketManager extends AbstractSocketManager {
         }
     }
 
+    @Override
     public void initSocket() {
         // Need to check for if guild is disabled because this can be called directly from enabling the feature
         if (Managers.Feature.getFeatureState(Managers.Feature.getFeatureInstance(GuildServerFeature.class)) != FeatureState.ENABLED || Managers.Net.guild.isDisabled())

@@ -20,7 +20,7 @@ public class GuildServerFeature extends Feature {
 
     @Override
     public void onEnabled() {
-        Managers.DiscordSocket.initSocket();
+        Managers.DiscordSocket.enable();
         Managers.Config.setDisabledSocketFeatureConfigs(false);
     }
 

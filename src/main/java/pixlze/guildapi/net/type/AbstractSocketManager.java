@@ -59,6 +59,7 @@ public abstract class AbstractSocketManager extends Manager {
 
     public void enable() {
         if (!enabled) {
+            initSocket();
             if (tryConnect()) enabled = true;
         }
     }
@@ -145,6 +146,11 @@ public abstract class AbstractSocketManager extends Manager {
     /** Update the socket object to reflect changes to socket options. */
     protected abstract void updateSocket();
 
+    /**
+     * Should be implemented with logic to determine whether to call init socket with reload or not with reload.
+     */
+    protected abstract void initSocket();
+
     protected void initSocket(boolean reloadSocket) {
         if (reloadSocket) {
             firstConnect = true;
@@ -154,7 +160,6 @@ public abstract class AbstractSocketManager extends Manager {
             }
             registerDefaultListeners();
         }
-        enable();
     }
 
     public void saveListener(String name, Consumer<Object[]> listener) {
