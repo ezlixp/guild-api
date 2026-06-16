@@ -1,7 +1,9 @@
 package pixlze.guildapi.core.waypoints;
 
 import pixlze.guildapi.core.components.Manager;
-import pixlze.guildapi.core.handlers.connection.event.WynncraftConnectionEvents;
+import pixlze.guildapi.models.Models;
+import pixlze.guildapi.models.worldState.event.WorldStateEvents;
+import pixlze.guildapi.models.worldState.type.WorldState;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,11 +19,34 @@ public class WaypointManager extends Manager {
 
     @Override
     public void init() {
-        WynncraftConnectionEvents.JOIN.register(this::onWynnJoin);
+        WorldStateEvents.CHANGE.register(this::onWorldState);
     }
 
-    private void onWynnJoin() {
-        waypoints.put("hi", new Waypoint("39365bd4-5c78-41de-8901-c7dc5b7c64c4", "pixlze", -1177, 100, -2455));
+    private void onWorldState(WorldState newWorldState) {
+        if (newWorldState == WorldState.WORLD) {
+            for (Map.Entry<String, Waypoint> waypoint : waypoints.entrySet()) {
+                waypoint.getValue().show();
+            }
+        } else {
+            for (Map.Entry<String, Waypoint> waypoint : waypoints.entrySet()) {
+                waypoint.getValue().hide();
+            }
+        }
     }
 
+    public void addWaypoint(String name, double x, double y, double z) {
+        if (waypoints.containsKey(name)) {
+            waypoints.get(name).update(x, y, z);
+        } else {
+            waypoints.put(name, new Waypoint(name, x, y, z));
+            if (Models.WorldState.onWorld()) waypoints.get(name).show();
+        }
+    }
+
+    public void removeWaypoint(String name) {
+        if (waypoints.containsKey(name)) {
+            waypoints.get(name).hide();
+            waypoints.remove(name);
+        }
+    }
 }
