@@ -7,6 +7,7 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Feature;
 import pixlze.guildapi.core.components.Manager;
 import pixlze.guildapi.core.components.Managers;
+import pixlze.guildapi.features.type.SocketFeature;
 import pixlze.guildapi.utils.McUtils;
 
 import java.io.File;
@@ -47,13 +48,15 @@ public class ConfigManager extends Manager {
                     config.setDisabled(false);
                     try {
                         String syncUri = config.getSyncUri() + McUtils.playerUUID();
-                        com.google.gson.JsonElement resBody = Managers.Json.toJsonElement(Managers.Net.guild.get(syncUri, false).get().body());
+                        com.google.gson.JsonElement resBody = Managers.Json.toJsonElement(Managers.Net.guild.get(syncUri, false)
+                                .get().body());
                         Object toSet = Managers.Json.GSON.fromJson(resBody, config.getValue().getClass());
                         if (toSet.getClass() == config.getValue().getClass()) {
                             config.setPending(Managers.Json.GSON.fromJson(resBody, config.getTypeToken()));
                         }
                     } catch (Exception e) {
-                        GuildApi.LOGGER.error("unable to sync config {} {} reason {} {}", entry.getKey().getName(), config.getName(), e, e.getMessage());
+                        GuildApi.LOGGER.error("unable to sync config {} {} reason {} {}", entry.getKey()
+                                .getName(), config.getName(), e, e.getMessage());
                     }
                 }
             }
@@ -79,12 +82,12 @@ public class ConfigManager extends Manager {
                 if (config.getSyncOnline()) {
                     String syncUri = config.getSyncUri() + McUtils.playerUUID();
                     if (!Managers.Net.guild.isDisabled())
-                        Managers.Net.guild.post(syncUri, Managers.Json.toJsonObject("{" + config.getName() + ":" + config.getValue().toString() + "}"), false);
+                        Managers.Net.guild.post(syncUri, Managers.Json.toJsonObject("{" + config.getName() + ":" + config.getValue()
+                                .toString() + "}"), false);
                 } else {
                     if (config.getValue().getClass() == String.class)
                         curConfig.addProperty(config.getName(), config.getValue().toString());
-                    else
-                        curConfig.add(config.getName(), Managers.Json.toJsonElement(config.getValue().toString()));
+                    else curConfig.add(config.getName(), Managers.Json.toJsonElement(config.getValue().toString()));
                 }
             }
             configObject.add(entry.getKey().getClass().getSimpleName(), curConfig);
@@ -99,8 +102,7 @@ public class ConfigManager extends Manager {
         List<Config<?>> featureConfigs = new ArrayList<>();
         JsonObject featureConfigObject = new JsonObject();
         JsonElement temp = configObject.get(feature.getClass().getSimpleName());
-        if (temp != null)
-            featureConfigObject = temp.getAsJsonObject();
+        if (temp != null) featureConfigObject = temp.getAsJsonObject();
 
         for (Field field : feature.getClass().getFields()) {
             if (!field.isAnnotationPresent(Configurable.class) && !field.isAnnotationPresent(SyncConfigurable.class))
@@ -138,7 +140,8 @@ public class ConfigManager extends Manager {
 
                     if (!Managers.Net.guild.isDisabled()) {
                         String syncUri = config.getSyncUri() + McUtils.playerUUID();
-                        com.google.gson.JsonElement resBody = Managers.Json.toJsonElement(Managers.Net.guild.get(syncUri, false).get().body());
+                        com.google.gson.JsonElement resBody = Managers.Json.toJsonElement(Managers.Net.guild.get(syncUri, false)
+                                .get().body());
                         Object toSet = Managers.Json.GSON.fromJson(resBody, config.getValue().getClass());
                         if (toSet.getClass() == config.getValue().getClass()) {
                             config.setPending(Managers.Json.GSON.fromJson(resBody, config.getTypeToken()));
@@ -158,6 +161,12 @@ public class ConfigManager extends Manager {
             }
         }
         configs.put(feature, featureConfigs);
+    }
+
+    public void setDisabledSocketFeatureConfigs(boolean to) {
+        for (Map.Entry<Feature, List<Config<?>>> entry : configs.entrySet())
+            if (entry.getKey() instanceof SocketFeature)
+                for (Config<?> config : entry.getValue()) config.setDisabled(to);
     }
 
     public List<Config<?>> getFeatureConfigs(Feature feature) {

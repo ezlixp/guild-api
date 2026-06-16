@@ -9,7 +9,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.json.JSONObject;
 import pixlze.guildapi.GuildApi;
-import pixlze.guildapi.core.components.Feature;
 import pixlze.guildapi.core.components.Handlers;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.config.Config;
@@ -20,6 +19,7 @@ import pixlze.guildapi.core.handlers.chat.event.ChatMessageReceived;
 import pixlze.guildapi.core.handlers.discord.event.S2CSocketEvents;
 import pixlze.guildapi.discord.type.Message;
 import pixlze.guildapi.features.discord.type.OnlineStatus;
+import pixlze.guildapi.features.type.SocketFeature;
 import pixlze.guildapi.mc.mixin.accessors.SystemToastInvoker;
 import pixlze.guildapi.models.Models;
 import pixlze.guildapi.models.guildMessage.type.GuildMessage;
@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
-public class DiscordBridgeFeature extends Feature {
+public class DiscordBridgeFeature extends SocketFeature {
     public DiscordBridgeFeature() {
         super("Discord Bridging");
     }

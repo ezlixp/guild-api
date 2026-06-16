@@ -7,6 +7,7 @@ import net.minecraft.text.Text;
 import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.features.FeatureState;
+import pixlze.guildapi.features.GuildServerFeature;
 import pixlze.guildapi.features.discord.DiscordBridgeFeature;
 import pixlze.guildapi.features.discord.type.OnlineStatus;
 import pixlze.guildapi.models.Models;
@@ -109,7 +110,7 @@ public class DiscordSocketManager extends AbstractSocketManager {
 
     public void initSocket() {
         // Need to check for if guild is disabled because this can be called directly from enabling the feature
-        if (Managers.Feature.getFeatureState(Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)) != FeatureState.ENABLED || Managers.Net.guild.isDisabled())
+        if (Managers.Feature.getFeatureState(Managers.Feature.getFeatureInstance(GuildServerFeature.class)) != FeatureState.ENABLED || Managers.Net.guild.isDisabled())
             return;
         boolean reload = false;
         if (!Objects.equals(Managers.Net.guild.guildId, guildId)) {
@@ -122,8 +123,8 @@ public class DiscordSocketManager extends AbstractSocketManager {
 
     @Override
     protected boolean doConnect() {
-        if (Managers.Feature.getFeatureState(Managers.Feature.getFeatureInstance(DiscordBridgeFeature.class)) != FeatureState.ENABLED) {
-            McUtils.sendLocalMessage(Text.literal("§cDiscord bridging is disabled. Please turn it on in /guildapi config and try again."), Prepend.GUILD.getWithStyle(ColourUtils.RED), true);
+        if (Managers.Feature.getFeatureState(Managers.Feature.getFeatureInstance(GuildServerFeature.class)) != FeatureState.ENABLED) {
+            McUtils.sendLocalMessage(Text.literal("§cConnecting to the guild server is disabled. Please turn it on in /guildapi config and try again."), Prepend.GUILD.getWithStyle(ColourUtils.RED), true);
             return false;
         }
         if (socket == null) {
@@ -135,7 +136,7 @@ public class DiscordSocketManager extends AbstractSocketManager {
 
     @Override
     protected String disabledMessage() {
-        return "§cCannot connect to chat server at this time. Please enable discord bridging or re-authenticate with /gapi login and try again.";
+        return "§cCannot connect to chat server at this time. Try re-authenticating with /gapi login and try again.";
     }
 
     @Override

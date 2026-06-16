@@ -5,6 +5,7 @@ import pixlze.guildapi.core.components.Feature;
 import pixlze.guildapi.core.components.Manager;
 import pixlze.guildapi.features.AutoUpdateFeature;
 import pixlze.guildapi.features.GuildRaidFeature;
+import pixlze.guildapi.features.GuildServerFeature;
 import pixlze.guildapi.features.InfoPanelsFeature;
 import pixlze.guildapi.features.discord.DiscordBridgeFeature;
 
@@ -23,6 +24,7 @@ public class FeatureManager extends Manager {
     public void init() {
         if (GuildApi.isTesting())
             registerFeature(new GuildRaidFeature());
+        registerFeature(new GuildServerFeature());
         registerFeature(new DiscordBridgeFeature());
         registerFeature(new AutoUpdateFeature());
         registerFeature(new InfoPanelsFeature());
