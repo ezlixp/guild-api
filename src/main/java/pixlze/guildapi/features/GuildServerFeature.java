@@ -16,8 +16,17 @@ public class GuildServerFeature extends Feature {
 
     @Override
     public void onConfigUpdate(Config<?> config) {
-        if (config.getName().equals("enabled")) {
-            Managers.Config.setDisabledSocketFeatureConfigs((boolean) config.getValue());
-        }
+    }
+
+    @Override
+    public void onEnabled() {
+        Managers.DiscordSocket.initSocket();
+        Managers.Config.setDisabledSocketFeatureConfigs(false);
+    }
+
+    @Override
+    public void onDisabled() {
+        Managers.DiscordSocket.disable();
+        Managers.Config.setDisabledSocketFeatureConfigs(true);
     }
 }
