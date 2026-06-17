@@ -1,23 +1,39 @@
 package pixlze.guildapi.core.waypoints;
 
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
-import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.TextUtils;
 
 public class Waypoint {
-    private final DisplayEntity.TextDisplayEntity name = new DisplayEntity.TextDisplayEntity(EntityType.TEXT_DISPLAY, McUtils.mc().world);
-    private final DisplayEntity.TextDisplayEntity distance = new DisplayEntity.TextDisplayEntity(EntityType.TEXT_DISPLAY, McUtils.mc().world);
+    private DisplayEntity.TextDisplayEntity name;
+    private DisplayEntity.TextDisplayEntity distance;
     private int curdist;
-    private boolean hidden;
+    // active is if we are choosing to show it, enabled is if we are allowed to show it
+    private boolean active;
+    private boolean enabled;
+    private boolean added;
+    private final String username;
     private Vec3d realPos;
 
     public Waypoint(String username, double x, double y, double z) {
+        this.username = username;
+        this.realPos = new Vec3d(x, y, z);
+        this.createEntities();
+        active = false;
+        enabled = false;
+        added = false;
+        WorldRenderEvents.BEFORE_ENTITIES.register(worldRenderEvent -> {this.update();});
+    }
+
+    private void createEntities() {
+        name = new DisplayEntity.TextDisplayEntity(EntityType.TEXT_DISPLAY, McUtils.mc().world);
+        distance = new DisplayEntity.TextDisplayEntity(EntityType.TEXT_DISPLAY, McUtils.mc().world);
         name.setText(Text.literal(username).setStyle(TextUtils.fontOf(Identifier.of("default"))));
         name.setBillboardMode(DisplayEntity.BillboardMode.CENTER);
         name.setDisplayFlags((byte) (name.getDisplayFlags() | 2));
@@ -25,41 +41,44 @@ public class Waypoint {
         distance.setBillboardMode(DisplayEntity.BillboardMode.CENTER);
         distance.setDisplayFlags((byte) (distance.getDisplayFlags() | 2));
         distance.setBackground(0);
-        this.realPos = new Vec3d(x, y, z);
-        hidden = true;
     }
 
-    public void show() {
-        if (!hidden || McUtils.mc().world == null) return;
-        this.update();
-        McUtils.mc().world.addEntity(name);
-        McUtils.mc().world.addEntity(distance);
-        hidden = false;
+
+    /**
+     * Shows the waypoint if conditions are met.
+     */
+    public void tryShow() {
+        if (!added && active && enabled) {
+            this.update();
+            assert McUtils.mc().world != null;
+            McUtils.mc().world.addEntity(name);
+            McUtils.mc().world.addEntity(distance);
+            added = true;
+        }
     }
 
     public void hide() {
-        if (hidden || McUtils.mc().world == null) return;
-        McUtils.mc().world.removeEntity(name.getId(), Entity.RemovalReason.DISCARDED);
-        McUtils.mc().world.removeEntity(distance.getId(), Entity.RemovalReason.DISCARDED);
-        hidden = true;
+        if (added && McUtils.mc().world != null) {
+            McUtils.mc().world.removeEntity(name.getId(), Entity.RemovalReason.DISCARDED);
+            McUtils.mc().world.removeEntity(distance.getId(), Entity.RemovalReason.DISCARDED);
+            this.createEntities();
+            added = false;
+        }
     }
 
     public void update(double x, double y, double z) {
-        if (McUtils.mc().player == null) {
-            GuildApi.LOGGER.warn("Tried to update waypoint but player is null.");
+        if (McUtils.mc().player == null)
             return;
-        }
         this.realPos = new Vec3d(x, y, z);
         assert McUtils.mc().player != null;
         Vec3d playerPos = new Vec3d(McUtils.mc().player.getX(), McUtils.mc().player.getY(), McUtils.mc().player.getZ());
-        if (playerPos.distanceTo(this.realPos) < 100) {
-            name.setPosition(this.realPos);
-            distance.setPosition(this.realPos);
+        if (playerPos.distanceTo(this.realPos) < 10) {
+            name.setPosition(this.realPos.add(0, 1.4, 0));
+            distance.setPosition(this.realPos.add(0, 1.2, 0));
         } else {
-            Vec3d dir = this.realPos.subtract(playerPos);
-            dir.multiply(100); // show the waypoint 100 blocks away from the player
-            name.setPosition(dir.add(playerPos));
-            distance.setPosition(dir.add(playerPos));
+            Vec3d dir = this.realPos.subtract(playerPos).normalize().multiply(10);
+            name.setPosition(dir.add(playerPos).add(0, 1.4, 0));
+            distance.setPosition(dir.add(playerPos).add(0, 1.2, 0));
         }
         distance.setText(Text.literal(Math.round(playerPos.distanceTo(this.realPos)) + "m"));
     }
@@ -68,5 +87,12 @@ public class Waypoint {
         this.update(this.realPos.getX(), this.realPos.getY(), this.realPos.getZ());
     }
 
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
 }

@@ -45,7 +45,6 @@ public class SocketEventHandler extends Handler {
     private void onPlayerPosition(Object[] args) {
         if (args[0] instanceof JSONObject data) {
             try {
-                GuildApi.LOGGER.info("received position {}", data.get("username").toString());
                 String username = data.get("username").toString();
                 double x = data.getDouble("x");
                 double y = data.getDouble("y");
