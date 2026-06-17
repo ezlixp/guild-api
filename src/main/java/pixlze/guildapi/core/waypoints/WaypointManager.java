@@ -1,5 +1,7 @@
 package pixlze.guildapi.core.waypoints;
 
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import pixlze.guildapi.core.components.Manager;
 import pixlze.guildapi.models.Models;
 import pixlze.guildapi.models.worldState.event.WorldStateEvents;
@@ -21,6 +23,7 @@ public class WaypointManager extends Manager {
     @Override
     public void init() {
         WorldStateEvents.CHANGE.register(this::onWorldState);
+        WorldRenderEvents.BEFORE_ENTITIES.register(this::updateAllWaypoints);
     }
 
     private void onWorldState(WorldState newWorldState) {
@@ -76,4 +79,9 @@ public class WaypointManager extends Manager {
         return waypoints;
     }
 
+    private void updateAllWaypoints(WorldRenderContext context) {
+        for (Map.Entry<String, Waypoint> waypoint : waypoints.entrySet()) {
+            waypoint.getValue().update();
+        }
+    }
 }

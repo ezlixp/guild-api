@@ -1,6 +1,5 @@
 package pixlze.guildapi.core.waypoints;
 
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.decoration.DisplayEntity;
@@ -28,7 +27,6 @@ public class Waypoint {
         active = false;
         enabled = false;
         added = false;
-        WorldRenderEvents.BEFORE_ENTITIES.register(worldRenderEvent -> {this.update();});
     }
 
     private void createEntities() {
@@ -83,7 +81,7 @@ public class Waypoint {
         distance.setText(Text.literal(Math.round(playerPos.distanceTo(this.realPos)) + "m"));
     }
 
-    private void update() {
+    public void update() {
         this.update(this.realPos.getX(), this.realPos.getY(), this.realPos.getZ());
     }
 
