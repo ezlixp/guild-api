@@ -32,7 +32,9 @@ public class Waypoint {
     private void createEntities() {
         name = new DisplayEntity.TextDisplayEntity(EntityType.TEXT_DISPLAY, McUtils.mc().world);
         distance = new DisplayEntity.TextDisplayEntity(EntityType.TEXT_DISPLAY, McUtils.mc().world);
-        name.setText(Text.literal(username).setStyle(TextUtils.fontOf(Identifier.of("default"))));
+        name.setText(Text.empty().append(Text.literal("\uDAFF\uDFF8\uE014\uDAFF\uDFDE\uE008")
+                        .setStyle(TextUtils.fontOf(Identifier.of("marker")))).append(Text.literal("\n"))
+                .append(Text.literal(username).setStyle(TextUtils.fontOf(Identifier.of("offset/five/-8")))));
         name.setBillboardMode(DisplayEntity.BillboardMode.CENTER);
         name.setDisplayFlags((byte) (name.getDisplayFlags() | 2));
         name.setBackground(0);
@@ -71,14 +73,15 @@ public class Waypoint {
         assert McUtils.mc().player != null;
         Vec3d playerPos = new Vec3d(McUtils.mc().player.getX(), McUtils.mc().player.getY(), McUtils.mc().player.getZ());
         if (playerPos.distanceTo(this.realPos) < 10) {
-            name.setPosition(this.realPos.add(0, 1.4, 0));
-            distance.setPosition(this.realPos.add(0, 1.2, 0));
+            name.setPosition(this.realPos.add(0, 2.4, 0));
+            distance.setPosition(this.realPos.add(0, 2.2, 0));
         } else {
-            Vec3d dir = this.realPos.subtract(playerPos).normalize().multiply(10);
-            name.setPosition(dir.add(playerPos).add(0, 1.4, 0));
-            distance.setPosition(dir.add(playerPos).add(0, 1.2, 0));
+            Vec3d dir = this.realPos.subtract(playerPos).normalize().multiply(7);
+            name.setPosition(dir.add(playerPos).add(0, 2.4, 0));
+            distance.setPosition(dir.add(playerPos).add(0, 2.2, 0));
         }
-        distance.setText(Text.literal(Math.round(playerPos.distanceTo(this.realPos)) + "m"));
+        distance.setText(Text.literal(Math.round(playerPos.distanceTo(this.realPos)) + "m")
+                .setStyle(TextUtils.fontOf(Identifier.of("offset/five/-8"))));
     }
 
     public void update() {
