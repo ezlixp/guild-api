@@ -176,15 +176,15 @@ public class TextUtils {
                     handleStyles(style, asString);
                 }
             } else {
-                firstNickComponent = true;
-                handleStyles(style, asString);
+                // don't reset the nick component boolean if all we did was skip the block marker
+                if (handleStyles(style, asString)) firstNickComponent = true;
             }
         }
 
-        private void handleStyles(Style style, String asString) {
+        private boolean handleStyles(Style style, String asString) {
             if (BLOCK_MARKER_PATTERN.matcher(asString).find() && !first) {
                 afterBlockMarker = true;
-                return;
+                return false;
             }
             // This block is before styles are added so style codes are not added that would be styling empty strings
             if (afterBlockMarker)
@@ -194,7 +194,7 @@ public class TextUtils {
             if (toAppend.isEmpty()) {
                 afterBlockMarker = false;
                 firstOnNewLine = true;
-                return;
+                return false;
             }
 
             if (!afterBlockMarker) {
@@ -219,6 +219,9 @@ public class TextUtils {
                     curCodes.add(options.formatCode + Formatting.OBFUSCATED.getCode());
                 }
                 for (String code : curCodes)
+                    // if what we are currently handling is the first on the new line, we only add new style codes since wynncraft chat is optimized to now put more styles than it needs to
+                    // this means that consecutive style codes in the final string will never be the same
+                    // so we take accept the code if it isn't the first on the new line, and if it is we check if it is unique
                     if (!firstOnNewLine || !prevCodes.contains(code))
                         currentVisit.append(code);
                 prevCodes = curCodes;
@@ -228,6 +231,7 @@ public class TextUtils {
             currentVisit.append(toAppend);
             if (first) first = false;
             if (firstOnNewLine) firstOnNewLine = false;
+            return true;
         }
 
         private @NotNull String getColourCode(Style style) {
