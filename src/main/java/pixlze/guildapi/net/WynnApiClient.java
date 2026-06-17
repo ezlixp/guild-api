@@ -68,6 +68,7 @@ public class WynnApiClient extends Api {
     public void initWynnPlayerInfo(boolean print) {
         try {
             URI uri = URI.create("https://api.wynncraft.com/v3/player/" + McUtils.playerName());
+//            URI uri = URI.create("https://api.wynncraft.com/v3/player/pixlze");
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(uri)
                     .build();
