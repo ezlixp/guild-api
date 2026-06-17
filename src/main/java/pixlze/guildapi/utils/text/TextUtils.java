@@ -164,25 +164,9 @@ public class TextUtils {
                 if (m.find()) {
                     if (firstNickComponent) {
                         firstNickComponent = false;
-                        GuildApi.LOGGER.info("accepting nick for text component: {} with hover {}", asString, hoverVal);
-                        StringBuilder parsed = new StringBuilder();
-                        for (int i = 0; i < asString.length(); i++) {
-                            if (!Character.isLetterOrDigit(asString.charAt(i))) {
-                                parsed.append(asString.charAt(i));
-                            } else break;
-                        }
-                        parsed.append(m.group("mcUsername"));
-                        handleStyles(style.withItalic(false), parsed.toString());
+                        handleStyles(style.withItalic(false), m.group("mcUsername"));
                     } else {
-                        StringBuilder parsed = new StringBuilder();
-                        for (int i = asString.length() - 1; i >= 0; i--) {
-                            if (!Character.isLetterOrDigit(asString.charAt(i)) || (asString.charAt(i) == ' ' && !parsed.isEmpty())) {
-                                parsed.append(asString.charAt(i));
-                            } else break;
-                        }
-                        parsed.reverse();
-                        handleStyles(style.withItalic(false), parsed.toString());
-                        GuildApi.LOGGER.warn("ignoring text component: {} with hover {}, stripping to {}", asString, hoverVal, parsed);
+                        GuildApi.LOGGER.warn("ignoring text component: {} with hover {}", asString, hoverVal);
                     }
                     if (asString.contains(m.group("nick"))) {
                         GuildApi.LOGGER.info(asString);
