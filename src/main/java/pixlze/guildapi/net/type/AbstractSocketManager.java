@@ -39,7 +39,8 @@ public abstract class AbstractSocketManager extends Manager {
 
     public void emit(String event, Object data) {
         if (socket != null && socket.connected()) {
-            GuildApi.LOGGER.info("emitting, {}", data);
+            if (!event.equals("playerPosition"))
+                GuildApi.LOGGER.info("emitting, {}", data);
             socket.emit(event, data);
         } else {
             GuildApi.LOGGER.warn("skipped event because of missing or inactive socket");
