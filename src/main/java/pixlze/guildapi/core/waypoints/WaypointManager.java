@@ -24,11 +24,7 @@ public class WaypointManager extends Manager {
     }
 
     private void onWorldState(WorldState newWorldState) {
-        if (newWorldState == WorldState.WORLD) {
-            setAllEnabled(true);
-        } else {
-            setAllEnabled(false);
-        }
+        setAllEnabled(newWorldState == WorldState.WORLD);
     }
 
     public void setAllEnabled(boolean enabled) {
@@ -74,6 +70,10 @@ public class WaypointManager extends Manager {
     public void clearWaypoints() {
         setAllEnabled(false);
         waypoints.clear();
+    }
+
+    public Map<String, Waypoint> getWaypoints() {
+        return waypoints;
     }
 
 }

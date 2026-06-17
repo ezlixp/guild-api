@@ -95,4 +95,11 @@ public class Waypoint {
         this.active = active;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public String getUsername() {
+        return username;
+    }
 }

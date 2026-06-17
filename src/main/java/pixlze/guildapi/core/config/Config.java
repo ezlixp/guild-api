@@ -1,6 +1,7 @@
 package pixlze.guildapi.core.config;
 
 import com.google.common.reflect.TypeToken;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -8,6 +9,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.ClassUtils;
+import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.core.components.Feature;
 import pixlze.guildapi.utils.McUtils;
 
@@ -25,11 +27,19 @@ public class Config<T> {
     private boolean disabled = false;
     private String syncUri;
     private int cycleLength;
+    private Class<? extends AbstractConfigEditScreen<T>> editScreenClass;
 
     public Config(T value) {
         this.value = value;
         this.type = new TypeToken<T>(getClass()) {
         }.getType();
+    }
+
+    public Config(T value, Class<? extends AbstractConfigEditScreen<T>> editScreenClass) {
+        this.value = value;
+        this.type = new TypeToken<T>(getClass()) {
+        }.getType();
+        this.editScreenClass = editScreenClass;
     }
 
     public void setTranslationKey(String key) {
@@ -115,40 +125,55 @@ public class Config<T> {
     @SuppressWarnings("unchecked")
     public ClickableWidget getActionWidget() {
         ClickableWidget out;
-        if (getType().equals(Boolean.class)) {
-            setPending(this.value);
-
-            out = ButtonWidget.builder(Text.of((boolean) this.pending ? "Yes":"No"), (button) -> {
-                this.setPending((T) (this.pending.equals(Boolean.TRUE) ? Boolean.FALSE:Boolean.TRUE));
-                button.setMessage(Text.of((boolean) this.pending ? "Yes":"No"));
-            }).tooltip(Tooltip.of(Text.translatable(i18nKey + ".description"))).dimensions(0, 0, 100, 25 - 4).build();
-        } else if (Number.class.isAssignableFrom(getType()) && cycleLength > 0) {
-            if (this.value.getClass() == Double.class)
-                this.value = (T) Integer.valueOf(((Double) this.value).intValue());
-
-            setPending(this.value);
-
-            out = ButtonWidget.builder(Text.translatable(i18nKey + ".display." + this.pending), (button) -> {
-                this.setPending((T) Integer.valueOf((((int) this.pending + 1) % this.cycleLength)));
-                button.setMessage(Text.translatable(i18nKey + ".display." + this.pending));
-                button.setTooltip(Tooltip.of(Text.translatable(i18nKey + ".description." + this.pending)));
-            }).tooltip(Tooltip.of(Text.translatable(i18nKey + ".description." + this.pending))).dimensions(0, 0, 100, 25 - 4).build();
+        if (editScreenClass != null) {
+            out = ButtonWidget.builder(Text.of("Edit"), (button) -> {
+                        try {
+                            McUtils.mc().setScreen(editScreenClass.getDeclaredConstructor(Screen.class, Config.class)
+                                    .newInstance(McUtils.mc().currentScreen, this));
+                        } catch (Exception e) {
+                            GuildApi.LOGGER.error("could not open edit screen");
+                        }
+                    }).tooltip(Tooltip.of(Text.translatable(i18nKey + ".description"))).dimensions(0, 0, 100, 25 - 4)
+                    .build();
         } else {
-            TextFieldWidget temp = new TextFieldWidget(McUtils.mc().textRenderer, 100, 25 - 4, Text.of("enter here"));
-            temp.setEditable(true);
-            temp.write(this.value.toString());
-            temp.setTooltip(Tooltip.of(Text.translatable(i18nKey + ".description")));
-            temp.setChangedListener((to) -> {
-                tryParseStringValue(to).ifPresent(this::setPending);
-            });
-            temp.setMaxLength(100);
-            out = temp;
+            if (getType().equals(Boolean.class)) {
+                setPending(this.value);
+
+                out = ButtonWidget.builder(Text.of((boolean) this.pending ? "Yes":"No"), (button) -> {
+                            this.setPending((T) (this.pending.equals(Boolean.TRUE) ? Boolean.FALSE:Boolean.TRUE));
+                            button.setMessage(Text.of((boolean) this.pending ? "Yes":"No"));
+                        }).tooltip(Tooltip.of(Text.translatable(i18nKey + ".description"))).dimensions(0, 0, 100, 25 - 4)
+                        .build();
+            } else if (Number.class.isAssignableFrom(getType()) && cycleLength > 0) {
+                if (this.value.getClass() == Double.class)
+                    this.value = (T) Integer.valueOf(((Double) this.value).intValue());
+
+                setPending(this.value);
+
+                out = ButtonWidget.builder(Text.translatable(i18nKey + ".display." + this.pending), (button) -> {
+                            this.setPending((T) Integer.valueOf((((int) this.pending + 1) % this.cycleLength)));
+                            button.setMessage(Text.translatable(i18nKey + ".display." + this.pending));
+                            button.setTooltip(Tooltip.of(Text.translatable(i18nKey + ".description." + this.pending)));
+                        }).tooltip(Tooltip.of(Text.translatable(i18nKey + ".description." + this.pending)))
+                        .dimensions(0, 0, 100, 25 - 4).build();
+            } else {
+                TextFieldWidget temp = new TextFieldWidget(McUtils.mc().textRenderer, 100, 25 - 4, Text.of("enter here"));
+                temp.setEditable(true);
+                temp.write(this.value.toString());
+                temp.setTooltip(Tooltip.of(Text.translatable(i18nKey + ".description")));
+                temp.setChangedListener((to) -> {
+                    tryParseStringValue(to).ifPresent(this::setPending);
+                });
+                temp.setMaxLength(100);
+                out = temp;
+            }
         }
         if (isDisabled()) {
             // active disables all interaction with it by stopping the mouse click event
             out.active = false;
             out.setTooltip(Tooltip.of(Text.literal("Please connect to the guild server to activate this option.")));
         }
+
         return out;
     }
 

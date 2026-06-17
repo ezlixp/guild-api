@@ -15,6 +15,7 @@ import pixlze.guildapi.features.type.SocketFeature;
 import pixlze.guildapi.models.Models;
 import pixlze.guildapi.models.worldState.event.WorldStateEvents;
 import pixlze.guildapi.models.worldState.type.WorldState;
+import pixlze.guildapi.screens.findhub.WaypointToggleScreen;
 import pixlze.guildapi.utils.McUtils;
 
 import java.util.HashSet;
@@ -28,8 +29,7 @@ public class FindHubFeature extends SocketFeature {
     public final Config<Boolean> viewOthers = new Config<>(true);
 
     @Configurable
-    public final Config<String> viewSpecific = new Config<>("");
-    private HashSet<String> allowedNames = new HashSet<>();
+    public final Config<HashSet<String>> viewBan = new Config<>(new HashSet<>(), WaypointToggleScreen.class);
 
     public FindHubFeature() {
         super("Guild Location Sharing");
@@ -49,12 +49,7 @@ public class FindHubFeature extends SocketFeature {
             boolean value = (boolean) config.getValue();
             if (value) Managers.Waypoint.setAllActive(this::seeWaypoint);
             else Managers.Waypoint.setAllActive((username) -> false);
-        } else if (config.getName().equals("viewSpecific")) {
-            String value = (String) config.getValue();
-            String[] names = value.split(",");
-            HashSet<String> set = new HashSet<>();
-            for (String name : names) {set.add(name.trim().toLowerCase(Locale.ROOT));}
-            allowedNames = set;
+        } else if (config.getName().equals("viewBan")) {
             Managers.Waypoint.setAllActive((username) -> viewOthers.getValue() && seeWaypoint(username));
         }
     }
@@ -96,7 +91,7 @@ public class FindHubFeature extends SocketFeature {
     }
 
     private boolean seeWaypoint(String username) {
-        return allowedNames.isEmpty() || allowedNames.contains(username.toLowerCase(Locale.ROOT));
+        return !viewBan.getValue().contains(username.toLowerCase(Locale.ROOT));
     }
 
     // all json errors should've been handled before posting as longa s we take the correct fields from socket event handler
