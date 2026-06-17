@@ -3,7 +3,6 @@ package pixlze.guildapi.core.waypoints;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 import pixlze.guildapi.core.components.Manager;
-import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.models.Models;
 import pixlze.guildapi.models.worldState.event.WorldStateEvents;
 import pixlze.guildapi.models.worldState.type.WorldState;
@@ -29,9 +28,6 @@ public class WaypointManager extends Manager {
 
     private void onWorldState(WorldState newWorldState) {
         setAllEnabled(newWorldState == WorldState.WORLD);
-        if (newWorldState == WorldState.WORLD) {
-            Managers.Waypoint.addWaypoint("pixlze", 0, 100, 0, true);
-        }
     }
 
     public void setAllEnabled(boolean enabled) {
