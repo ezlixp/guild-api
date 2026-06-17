@@ -1,5 +1,5 @@
 ### New Features
-
+- Added location sharing for guild members (check it out in /gapi config)
 ### Bug Fixes
 - Fixed a crash bug that happens rarely with the info panels
 - Fixed guild message parsing to work with the new guild ally raids
