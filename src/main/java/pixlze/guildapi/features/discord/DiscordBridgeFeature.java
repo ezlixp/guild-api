@@ -76,7 +76,7 @@ public class DiscordBridgeFeature extends SocketFeature {
         Managers.Discord.clearMessages();
     }
 
-    private void onWynnMessage(Text message) {
+    private synchronized void onWynnMessage(Text message) {
         if (Managers.Feature.getFeatureState(this) == FeatureState.DISABLED)
             return;
         String m = TextUtils.parseStyled(message, TextParseOptions.DEFAULT.withExtractUsernames(true));

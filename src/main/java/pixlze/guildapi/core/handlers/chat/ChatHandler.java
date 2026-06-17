@@ -21,7 +21,7 @@ public final class ChatHandler extends Handler {
         postChatLine(message);
     }
 
-    public void postChatLine(Text line) {
+    public synchronized void postChatLine(Text line) {
         ChatMessageReceived.EVENT.invoker().interact(line);
     }
 }
