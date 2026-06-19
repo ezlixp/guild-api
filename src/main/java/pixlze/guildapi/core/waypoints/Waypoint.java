@@ -90,10 +90,16 @@ public class Waypoint {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+        if (enabled)
+            tryShow();
+        else hide();
     }
 
     public void setActive(boolean active) {
         this.active = active;
+        if (active)
+            tryShow();
+        else hide();
     }
 
     public boolean isActive() {

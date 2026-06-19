@@ -62,8 +62,6 @@ public class WaypointsToggleWidget extends ElementListWidget<WaypointsToggleWidg
             name = new TextWidget(100, 25 - 4, Text.literal(tracked.getUsername()), McUtils.mc().textRenderer);
             toggle = ButtonWidget.builder(Text.of(tracked.isActive() ? "On":"Off"), (button) -> {
                         this.setActive(!tracked.isActive());
-                        if (tracked.isActive()) tracked.tryShow();
-                        else tracked.hide();
                     }).dimensions(0, 0, 100, 25 - 4)
                     .build();
         }

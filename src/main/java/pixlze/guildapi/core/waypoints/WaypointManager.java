@@ -33,21 +33,12 @@ public class WaypointManager extends Manager {
     public void setAllEnabled(boolean enabled) {
         for (Map.Entry<String, Waypoint> waypoint : waypoints.entrySet()) {
             waypoint.getValue().setEnabled(enabled);
-            if (enabled)
-                waypoint.getValue().tryShow();
-            else waypoint.getValue().hide();
         }
     }
 
     public void setAllActive(Function<String, Boolean> condition) {
         for (Map.Entry<String, Waypoint> waypoint : waypoints.entrySet()) {
-            if (condition.apply(waypoint.getKey())) {
-                waypoint.getValue().setActive(true);
-                waypoint.getValue().tryShow();
-            } else {
-                waypoint.getValue().setActive(false);
-                waypoint.getValue().hide();
-            }
+            waypoint.getValue().setActive(condition.apply(waypoint.getKey()));
         }
 
     }
@@ -59,7 +50,6 @@ public class WaypointManager extends Manager {
             waypoints.put(name, new Waypoint(name, x, y, z));
             waypoints.get(name).setEnabled(Models.WorldState.onWorld());
             waypoints.get(name).setActive(active);
-            waypoints.get(name).tryShow();
         }
     }
 
