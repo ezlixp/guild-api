@@ -34,25 +34,6 @@ public class MultilineNickTestCommand extends ClientCommand {
                                                             .setStyle(TextUtils.fontOf(Identifier.of("chat/prefix")))
                                             ).append(" "))).append("w w w w w"))
                     )
-            ).append(Text.literal("\uDAFF\uDFFC\uE001\uDB00\uDC06")
-                    .setStyle(Style.EMPTY.withFont(FontUtils.PrefixFont.get())))
-            .append(" ")
-            .append(Text.empty().setStyle(ColourUtils.DARK_AQUA)
-                    .append(Text.literal("w w w w w w w w w w")
-                            .setStyle(TextUtils.realNameStyle("w w w w w w w w w w", "dawnlia")))
-                    .append(" rewarded ")
-                    .append(Text.literal("1024 Emeralds").setStyle(ColourUtils.YELLOW))
-                    .append(" to ")
-                    .append(Text.empty().setStyle(ColourUtils.DARK_AQUA)
-                            .append(Text.literal("w w w w w")
-                                    .setStyle(TextUtils.realNameStyle("w w w w w w w w w w", "dawnlia"))
-                                    .append(Text.literal("\n").append(Text.empty()
-                                            .setStyle(ColourUtils.AQUA.withBold(false)
-                                                    .withUnderline(false)).append(
-                                                    Text.literal("\uDAFF\uDFFC\uE001\uDB00\uDC06")
-                                                            .setStyle(TextUtils.fontOf(Identifier.of("chat/prefix")))
-                                            ).append(" "))).append("w w w w w"))
-                    )
             );
 
     public MultilineNickTestCommand() {
