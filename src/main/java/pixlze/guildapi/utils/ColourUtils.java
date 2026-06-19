@@ -4,6 +4,8 @@ import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
 
 public class ColourUtils {
+    public static Style WHITE = getColourStyle(Formatting.WHITE);
+    public static Style GRAY = getColourStyle(Formatting.GRAY);
     public static Style GREEN = getColourStyle(Formatting.GREEN);
     public static Style RED = getColourStyle(Formatting.RED);
     public static Style YELLOW = getColourStyle(Formatting.YELLOW);

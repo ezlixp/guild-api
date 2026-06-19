@@ -16,6 +16,7 @@ public class TestClientCommandManager extends Manager {
         registerCommand(new AspectRewardTestCommand());
         registerCommand(new DiscordMessageTestCommand());
         registerCommand(new GuildRaidTestCommand());
+        registerCommand(new MultilineNickTestCommand());
         registerCommand(new SetPlayerTestCommand());
         registerCommand(new SendLocalMessageTestCommand());
         registerCommand(new TomeRewardTestCommand());

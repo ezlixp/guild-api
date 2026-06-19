@@ -8,6 +8,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import pixlze.guildapi.GuildApi;
+import pixlze.guildapi.utils.ColourUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
 import pixlze.guildapi.utils.type.TextVisitors;
@@ -127,6 +128,13 @@ public class TextUtils {
         return Style.EMPTY.withFont(new StyleSpriteSource.Font(of));
     }
 
+    public static Style realNameStyle(String nick, String real) {
+        return Style.EMPTY.withItalic(true)
+                .withHoverEvent(new HoverEvent.ShowText(Text.literal(nick.strip() + "'s").setStyle(ColourUtils.WHITE)
+                        .append(Text.literal(" real name is ").setStyle(ColourUtils.GRAY)
+                                .append(Text.literal(real.strip()).setStyle(ColourUtils.WHITE)))));
+    }
+
     /**
      * @param message the message to highlight
      * @return the message with yellow formatting codes around the users in game name
@@ -165,18 +173,11 @@ public class TextUtils {
                     if (firstNickComponent) {
                         firstNickComponent = false;
                         handleStyles(style.withItalic(false), m.group("mcUsername"));
-                    } else {
-                        GuildApi.LOGGER.warn("ignoring text component: {} with hover {}", asString, hoverVal);
-                    }
-                    if (asString.contains(m.group("nick"))) {
-                        GuildApi.LOGGER.info(asString);
                     }
                 } else {
-                    firstNickComponent = true;
-                    handleStyles(style, asString);
+                    if (handleStyles(style, asString)) firstNickComponent = true;
                 }
             } else {
-                // don't reset the nick component boolean if all we did was skip the block marker
                 if (handleStyles(style, asString)) firstNickComponent = true;
             }
         }
@@ -256,7 +257,7 @@ public class TextUtils {
                 if (options.extractUsernames && style.getHoverEvent() != null) {
                     handleStylesWithHover(style, asString);
                 } else {
-                    handleStyles(style, asString);
+                    if (handleStyles(style, asString)) firstNickComponent = true;
                 }
             }
             return Optional.empty();
