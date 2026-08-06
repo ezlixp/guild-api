@@ -26,7 +26,7 @@ public class FindHubFeature extends SocketFeature {
     private long lastSentTime;
 
     @Configurable
-    public final Config<Boolean> viewOthers = new Config<>(true);
+    public final Config<Boolean> viewOthers = new Config<>(false);
 
     @Configurable
     public final Config<HashSet<String>> viewBan = new Config<>(new HashSet<>(), WaypointToggleScreen.class);
