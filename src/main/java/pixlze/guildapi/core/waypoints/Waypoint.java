@@ -2,7 +2,6 @@ package pixlze.guildapi.core.waypoints;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.MovementType;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -39,6 +38,7 @@ public class Waypoint {
         name.setBillboardMode(DisplayEntity.BillboardMode.CENTER);
         name.setDisplayFlags((byte) (name.getDisplayFlags() | 2));
         name.setBackground(0);
+        name.setInterpolationDuration(20);
         distance.setBillboardMode(DisplayEntity.BillboardMode.CENTER);
         distance.setDisplayFlags((byte) (distance.getDisplayFlags() | 2));
         distance.setBackground(0);
@@ -74,20 +74,15 @@ public class Waypoint {
         assert McUtils.mc().player != null;
         Vec3d playerPos = new Vec3d(McUtils.mc().player.getX(), McUtils.mc().player.getY(), McUtils.mc().player.getZ());
         if (playerPos.distanceTo(this.realPos) < 10) {
-            moveSmooth(name, this.realPos.add(0, 2.4, 0));
-            moveSmooth(distance, this.realPos.add(0, 2.2, 0));
+            name.setPosition(this.realPos.add(0, 2.4, 0));
+            distance.setPosition(this.realPos.add(0, 2.2, 0));
         } else {
             Vec3d dir = this.realPos.subtract(playerPos).normalize().multiply(7);
-            moveSmooth(name, dir.add(playerPos).add(0, 2.4, 0));
-            moveSmooth(distance, dir.add(playerPos).add(0, 2.2, 0));
+            name.setPosition(dir.add(playerPos).add(0, 2.4, 0));
+            distance.setPosition(dir.add(playerPos).add(0, 2.2, 0));
         }
         distance.setText(Text.literal(Math.round(playerPos.distanceTo(this.realPos)) + "m")
                 .setStyle(TextUtils.fontOf(Identifier.of("offset/five/-8"))));
-    }
-
-    private void moveSmooth(DisplayEntity.TextDisplayEntity entity, Vec3d to) {
-        Vec3d dir = to.subtract(entity.getEntityPos());
-        entity.move(MovementType.SELF, dir);
     }
 
     public void update() {
