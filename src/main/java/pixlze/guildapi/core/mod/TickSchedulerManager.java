@@ -1,7 +1,7 @@
 package pixlze.guildapi.core.mod;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientWorld;
 import pixlze.guildapi.core.components.Manager;
 
 import java.util.Iterator;
@@ -19,7 +19,7 @@ public class TickSchedulerManager extends Manager {
 
     @Override
     public void init() {
-        ClientTickEvents.START_CLIENT_TICK.register(this::onTick);
+        ClientTickEvents.START_WORLD_TICK.register(this::onTick);
     }
 
 
@@ -31,7 +31,7 @@ public class TickSchedulerManager extends Manager {
         tasks.put(runnable, 0);
     }
 
-    public void onTick(MinecraftClient client) {
+    public void onTick(ClientWorld world) {
         Iterator<Map.Entry<Runnable, Integer>> it = tasks.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<Runnable, Integer> entry = it.next();
