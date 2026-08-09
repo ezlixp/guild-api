@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public enum GuildMessage {
     // Basic guild chat message
-    BASIC("^(?<pill>.*)§.(?<header>.+?)(§.)?:§. ?(?<content>.*)$"),
+    BASIC("^(?<pill>.+)§.(?<header>.+?)(§.)?:§. ?(?<content>.*)$"),
 
     // Guild raid finished
     RAID_FINISH("^§.(?<player1>\\S*?)§.(, ?§.(?<player2>\\S*?)§.)?(, ?§.(?<player3>\\S*?)§.)?(, ?and ?§.(?<player4>\\S*?)§.)? ?finished ?§.(?<raid>.*?)§. ?and ?claimed.*§.(?<aspects>\\d+)x ?Aspects.*$"),
