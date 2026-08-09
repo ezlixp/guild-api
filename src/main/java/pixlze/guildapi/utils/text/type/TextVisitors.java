@@ -1,4 +1,4 @@
-package pixlze.guildapi.utils.type;
+package pixlze.guildapi.utils.text.type;
 
 public enum TextVisitors {
     PLAIN,

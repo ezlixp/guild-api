@@ -11,7 +11,7 @@ import pixlze.guildapi.GuildApi;
 import pixlze.guildapi.utils.ColourUtils;
 import pixlze.guildapi.utils.McUtils;
 import pixlze.guildapi.utils.text.type.TextParseOptions;
-import pixlze.guildapi.utils.type.TextVisitors;
+import pixlze.guildapi.utils.text.type.TextVisitors;
 
 import java.util.ArrayList;
 import java.util.List;
