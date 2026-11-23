@@ -6,6 +6,7 @@ import pixlze.guildapi.core.components.Handler;
 import pixlze.guildapi.core.components.Managers;
 import pixlze.guildapi.core.handlers.discord.event.S2CSocketEvents;
 import pixlze.guildapi.models.Models;
+import pixlze.guildapi.utils.McUtils;
 
 public class SocketEventHandler extends Handler {
 
@@ -24,7 +25,7 @@ public class SocketEventHandler extends Handler {
                 if (data.get("Content").toString()
                         .isBlank() || Models.DiscordMessage.isBlocked(data.get("DiscordUsername")
                         .toString().split(" ")[0])) return;
-                S2CSocketEvents.DISCORD_MESSAGE.invoker().interact(data);
+                McUtils.mc().execute(() -> S2CSocketEvents.DISCORD_MESSAGE.invoker().interact(data));
             } catch (Exception e) {
                 GuildApi.LOGGER.info("discord message error: {} {}", e, e.getMessage());
             }
@@ -36,7 +37,7 @@ public class SocketEventHandler extends Handler {
     private void onWynnMirror(Object[] args) {
         if (args[0] instanceof String data) {
             GuildApi.LOGGER.info("received mirror {}", data);
-            S2CSocketEvents.WYNN_MIRROR.invoker().interact(data);
+            McUtils.mc().execute(() -> S2CSocketEvents.WYNN_MIRROR.invoker().interact(data));
         } else {
             GuildApi.LOGGER.info("malformed wynn mirror message: {}", args);
         }
@@ -50,7 +51,7 @@ public class SocketEventHandler extends Handler {
                 double y = data.getDouble("y");
                 double z = data.getDouble("z");
                 if (username.isBlank()) return;
-                S2CSocketEvents.PLAYER_POSITION.invoker().interact(data);
+                McUtils.mc().execute(() -> S2CSocketEvents.PLAYER_POSITION.invoker().interact(data));
             } catch (Exception e) {
                 GuildApi.LOGGER.info("player position error: {} {}", e, e.getMessage());
             }
@@ -62,7 +63,7 @@ public class SocketEventHandler extends Handler {
     private void onPlayerHide(Object[] args) {
         if (args[0] instanceof String data) {
             GuildApi.LOGGER.info("received player hide {}", data);
-            S2CSocketEvents.PLAYER_HIDE.invoker().interact(data);
+            McUtils.mc().execute(() -> S2CSocketEvents.PLAYER_HIDE.invoker().interact(data));
         } else {
             GuildApi.LOGGER.info("malformed player hide message: {}", args);
         }
