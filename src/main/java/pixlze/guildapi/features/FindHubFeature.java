@@ -96,7 +96,8 @@ public class FindHubFeature extends SocketFeature {
 
     // all json errors should've been handled before posting as longa s we take the correct fields from socket event handler
     private void onPlayerPosition(JSONObject data) {
-        if (!Models.WorldState.onWorld() || Managers.Feature.getFeatureState(this) != FeatureState.ENABLED) return;
+        if (!Models.WorldState.onWorld() || Managers.Feature.getFeatureState(this) != FeatureState.ENABLED || McUtils.mc().world == null || McUtils.mc().player == null)
+            return;
         try {
             String username = data.getString("username");
             double x = data.getDouble("x");
